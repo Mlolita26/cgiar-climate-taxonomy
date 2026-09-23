@@ -1,0 +1,13 @@
+<h1><<h(TITLE)>></h1>
+<p class="def"><<nrow(concepts)>> concepts for describing climate adaptation and mitigation in agricultural research: definitions with their sources, <<sum(lengths(concepts$synonyms))>> synonyms, <<nrow(relations)>> typed relations, and the conditions under which a term counts as adaptation or mitigation. Version <<VERSION>>, <<TODAY>>.</p>
+<div class="grid">
+<section><h2>Get the vocabulary</h2><p><a href="dist/climate-taxonomy.ttl">Turtle (SKOS)</a><br><a href="dist/climate-taxonomy.jsonld">JSON-LD</a><br><a href="dist/climate-taxonomy.csv">CSV</a><br><a href="dist/meliaf-relations.ttl">Relation properties (OWL)</a></p></section>
+<section><h2>Cite</h2><p>Nowak, A. and Muller, L. (<<str_sub(TODAY, 1, 4)>>). <<h(TITLE)>>, version <<VERSION>>. CGIAR MELIAF. <<cite_doi>></p></section>
+<section><h2>Licence</h2><p>Proposed: <a href="<<LICENCE>>">CC BY 4.0</a>, pending confirmation by the custodian. <a href="https://github.com/Mlolita26/cgiar-climate-taxonomy/blob/main/LICENSE.md">Details</a>.</p></section>
+<section><h2>Propose a term</h2><p>Anyone in CGIAR can propose to add, change or retire a term: <a href="https://github.com/Mlolita26/cgiar-climate-taxonomy/issues/new?template=term-request.yml">open a term request</a>. <a href="https://github.com/Mlolita26/cgiar-climate-taxonomy/blob/main/GOVERNANCE.md">How proposals are decided</a>.</p></section>
+</div>
+<h2>Is it FAIR? Self-assessment</h2>
+<table><tr><th></th><th>Test</th><th>Status</th></tr><<fair_table>></table>
+<p class="src">Tests from Cox et al. (2021), Ten simple rules for making a vocabulary FAIR, Table 1.</p>
+<h2>Browse by facet</h2>
+<<browse>>

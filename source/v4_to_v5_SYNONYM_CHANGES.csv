@@ -1,0 +1,401 @@
+﻿change,synonym,from ID (v4),from term (v4),to ID (v5),to term (v5),why
+ADDED,access to food,,,OTC_137,Food access,added by the 3 Sep cleanup
+ADDED,Adaptation investment,,,INT_240,Adaptation finance,added by the 3 Sep cleanup
+ADDED,adaptation M&E,,,INT_142,Adaptation monitoring and evaluation,added by the 3 Sep cleanup
+ADDED,adaptation ME,,,INT_142,Adaptation monitoring and evaluation,added by the 3 Sep cleanup
+ADDED,adaptation MEL,,,INT_142,Adaptation monitoring and evaluation,added by the 3 Sep cleanup
+ADDED,Agricultural advisory service,,,STK_021,Extension service,added by the 3 Sep cleanup
+ADDED,agricultural practice,,,INT_319,Farming practice,"redundant (label already matches after normalisation): ['farming practices'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Farming practice' does not already match. Zero recall cost, verified against the matcher code."
+ADDED,Agrifood emissions,,,OTC_105,Greenhouse gas emissions,added by the 3 Sep cleanup
+ADDED,agro-climate bulletin,,,OUT_135,Agro-climatic bulletin,added by the 3 Sep cleanup
+ADDED,Agro-climatic advisory platform,,,OUT_066,Climate advisory tool,added by the 3 Sep cleanup
+ADDED,Agro-forestry,,,INT_060,Agroforestry,redundant (label already matches inside the phrase): ['Agroforestry system']
+ADDED,agroclimatic advisory,,,INT_232,Agro-climate advisory,redundant (label already matches inside the phrase): ['agro-climate advisory service']
+ADDED,agroclimatic advisory service,,,INT_232,Agro-climate advisory,redundant (label already matches inside the phrase): ['agro-climate advisory service']
+ADDED,agroclimatic bulletin,,,OUT_135,Agro-climatic bulletin,added by the 3 Sep cleanup
+ADDED,agroecological,,,INT_274,Agroecology,added by the 3 Sep cleanup
+ADDED,Agroecological diversification,,,INT_274,Agroecology,added by the 3 Sep cleanup
+ADDED,Agroecological transition,,,INT_274,Agroecology,added by the 3 Sep cleanup
+ADDED,animal health,,,INT_054,Animal health management,added by the 3 Sep cleanup
+ADDED,animal nutrition,,,INT_295,Livestock nutrition,added by the 3 Sep cleanup
+ADDED,Anticipatory risk management,,,INT_229,Climate risk management,"removed: ['risk management'] - the concept is 'Climate risk management' and this synonym drops 'climate', which is the word that puts it in scope. The short form does not mean the same thing, so it matches text that is not about climate at all. Owner is Adaptation-specific (no hazard gate), so the conditional hazard check does NOT bound the damage - this is the highest-severity synonym class. Dema"
+ADDED,Aquaculture practice,,,INT_210,Aquaculture management,added by the 3 Sep cleanup
+ADDED,Aquatic food system,,,SYS_029,Aquatic system,added by the 3 Sep cleanup
+ADDED,availability of feed,,,OTC_138,Feed availability,added by the 3 Sep cleanup
+ADDED,availability of forage,,,OTC_138,Feed availability,added by the 3 Sep cleanup
+ADDED,beekeeping,,,SYS_111,Apiculture,added by the 3 Sep cleanup
+ADDED,behavior change,,,OTC_132,Behavioural change,added by the 3 Sep cleanup
+ADDED,behavioral change,,,OTC_132,Behavioural change,added by the 3 Sep cleanup
+ADDED,biofortified,,,INT_035,Biofortification,redundant (label already matches inside the phrase): ['nutritional biofortification']
+ADDED,biotic hazard,,,CRK_136,Biological hazard,added by the 3 Sep cleanup
+ADDED,Blue food system,,,SYS_055,Food system,redundant (label already matches inside the phrase): ['agri-food system']
+ADDED,BSF system,,,SYS_114,Black soldier fly system,added by the 3 Sep cleanup
+ADDED,carbon accounting,,,OUT_110,Carbon accounting methodology,"redundant (label already matches after normalisation): ['carbon accounting methodology'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Carbon accounting methodology' does not already match. Zero recall cost, verified against the matcher code."
+ADDED,Carbon emission,,,OTC_105,Greenhouse gas emissions,added by the 3 Sep cleanup
+ADDED,carbon market methodology,,,OUT_110,Carbon accounting methodology,"redundant (label already matches after normalisation): ['carbon accounting methodology'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Carbon accounting methodology' does not already match. Zero recall cost, verified against the matcher code."
+ADDED,carbon revenue,,,INT_326,Carbon finance,"Andreea asked for it standalone and the substance agrees: carbon finance is revenue from selling credits, narrower than mitigation finance, so R14 fails one way."
+ADDED,carbon sequestration,,,OTC_106,Carbon sequestered,added by the 3 Sep cleanup
+ADDED,carbon uptake,,,OTC_106,Carbon sequestered,added by the 3 Sep cleanup
+ADDED,chilling injury,,,CRK_110,Chilling stress,"the old label kept as a synonym so nothing stops matching (R11: a word is never deleted, only moved). Bare ""chilling"" deliberately NOT added - in agri-food text it usually means post-harvest cooling, and SYS_083 Post-harvest handling is live in this corpus"
+ADDED,Climate advisory service,,,INT_091,Climate service,"redundant (label already matches after normalisation): ['climate services'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Climate service' does not already match. Zero recall cost, verified against the matcher code."
+ADDED,Climate advisory system,,,INT_098,Climate advisory,added by the 3 Sep cleanup
+ADDED,Climate extreme,,,CRK_09,Climate shock,"CRK_09 is defined as a climate hazard with an acute temporal profile such as a flood or storm, which is what an extreme weather event is; it already carries 'extreme climate event'. 5 tagged units."
+ADDED,Climate finance information system,,,INT_113,Climate finance,added by the 3 Sep cleanup
+ADDED,climate forecasting,,,INT_096,Climate forecast,added by the 3 Sep cleanup
+ADDED,climate monitoring network,,,OUT_070,Climate observation network,added by the 3 Sep cleanup
+ADDED,climate risk financing,,,INT_113,Climate finance,added by the 3 Sep cleanup
+ADDED,climate service bundling,,,OUT_018,Bundled climate service,added by the 3 Sep cleanup
+ADDED,climate-mobility,,,INT_194,Migration,redundant (label already matches inside the phrase): ['migration intervention']
+ADDED,Climate-related shock,,,CRK_09,Climate shock,"CRK_09 is defined as a climate hazard with an acute temporal profile such as a flood or storm, which is what an extreme weather event is; it already carries 'extreme climate event'. 5 tagged units."
+ADDED,Climate-smart dairy system,,,SYS_018,Livestock system,"over-broad single word: bare ""livestock"" appears in every livestock document, and the file holds Livestock management, Livestock nutrition and Pastoral system separately"
+ADDED,climate-smart farming,,,INT_269,Climate-smart agriculture,"redundant (label already matches after normalisation): ['climate smart agriculture'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Climate-smart agriculture' does not already match. Zero recall cost, verified against the matcher code."
+ADDED,Climate-smart land management,,,INT_276,Sustainable land management,added by the 3 Sep cleanup
+ADDED,climate-smart livestock,,,INT_269,Climate-smart agriculture,"redundant (label already matches after normalisation): ['climate smart agriculture'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Climate-smart agriculture' does not already match. Zero recall cost, verified against the matcher code."
+ADDED,Climate-smart livestock system,,,SYS_018,Livestock system,"over-broad single word: bare ""livestock"" appears in every livestock document, and the file holds Livestock management, Livestock nutrition and Pastoral system separately"
+ADDED,climate-smart practice,,,INT_269,Climate-smart agriculture,"redundant (label already matches after normalisation): ['climate smart agriculture'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Climate-smart agriculture' does not already match. Zero recall cost, verified against the matcher code."
+ADDED,co-creation,,,CCC_48,Co-design,added by the 3 Sep cleanup
+ADDED,codesign,,,CCC_48,Co-design,added by the 3 Sep cleanup
+ADDED,commercialisation,,,INT_313,Commercialization,added by the 3 Sep cleanup
+ADDED,commercialization model,,,OUT_019,Business model,removed redundant hyphen/case variant (R1 matching is hyphen- and case-insensitive)
+ADDED,common bean,,,SYS_095,Bean,redundant (label already matches inside the phrase): ['dry bean']
+ADDED,Community-led adaptation,,,INT_273,Locally-led adaptation,added by the 3 Sep cleanup
+ADDED,compost,,,INT_032,Organic amendment,added by the 3 Sep cleanup
+ADDED,composting,,,INT_032,Organic amendment,added by the 3 Sep cleanup
+ADDED,conflict sensitivity,,,INT_304,Conflict-sensitive climate action,added by the 3 Sep cleanup
+ADDED,conservation farming,,,INT_023,Conservation agriculture,added by the 3 Sep cleanup
+ADDED,credit line,,,OUT_131,Loan,added by the 3 Sep cleanup
+ADDED,data portal,,,OUT_040,Data platform,"audit T2.9: v4 word lost with no new home | added: ['open data portal'] | redundant (label already matches after normalisation): ['data platform'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Data platform' does not already match. Zero recall cost, verified against the matcher code."
+ADDED,demonstration plot,,,INT_314,Demonstration farm,added by the 3 Sep cleanup
+ADDED,Diesel emissions,,,OTC_105,Greenhouse gas emissions,added by the 3 Sep cleanup
+ADDED,Disease-resistant variety,,,TRT_06,Disease resistance,added by the 3 Sep cleanup
+ADDED,Early warning,,,INT_100,Early warning system,"acronym split: [('early warning system (EWS) operation', 'EWS')]"
+ADDED,eco-system service,,,OTC_009,Ecosystem function,added by the 3 Sep cleanup
+ADDED,economic empowerment,,,OTC_033,Agency,added by the 3 Sep cleanup
+ADDED,ecosystem damage,,,CCC_37,Environmental damage,"added so the concept is reachable by the tagger | words moved in: ['environmental degradation', 'ecosystem damage', 'environmental harm']"
+ADDED,ecosystem management,,,INT_059,Landscape management,removed redundant hyphen/case variant (R1 matching is hyphen- and case-insensitive) | redundant (label already matches inside the phrase): ['integrated landscape management']
+ADDED,edaphic hazard,,,CRK_144,Soil hazard,added by the 3 Sep cleanup
+ADDED,El Niño,,,CDI_11,El Nino,audit T2.10 TOO-BROAD: ENSO is the whole oscillation | removed: ['ENSO']
+ADDED,emission mitigation,,,OTC_105,Greenhouse gas emissions,added by the 3 Sep cleanup
+ADDED,Emissions database,,,OUT_111,Greenhouse gas inventory,added by the 3 Sep cleanup
+ADDED,Emissions inventory,,,OUT_111,Greenhouse gas inventory,added by the 3 Sep cleanup
+ADDED,ENSO,,,CDI_19,El Nino-Southern Oscillation,"redundant (label already matches after normalisation): ['El Nino Southern Oscillation'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'El Nino-Southern Oscillation' does not already match. Zero recall cost, verified against the matcher code."
+ADDED,environmental degradation,,,CCC_37,Environmental damage,"added so the concept is reachable by the tagger | words moved in: ['environmental degradation', 'ecosystem damage', 'environmental harm']"
+ADDED,environmental harm,,,CCC_37,Environmental damage,"added so the concept is reachable by the tagger | words moved in: ['environmental degradation', 'ecosystem damage', 'environmental harm']"
+ADDED,Environmental modeling,,,OUT_012,Model,redundant (label already matches inside the phrase): ['simulation model']
+ADDED,EWS,,,INT_100,Early warning system,"acronym split: [('early warning system (EWS) operation', 'EWS')]"
+ADDED,exposure to climate,,,CRK_163,Climate exposure,added by the 3 Sep cleanup
+ADDED,extreme weather event,,,CRK_09,Climate shock,"CRK_09 is defined as a climate hazard with an acute temporal profile such as a flood or storm, which is what an extreme weather event is; it already carries 'extreme climate event'. 5 tagged units."
+ADDED,Faba bean,,,SYS_095,Bean,redundant (label already matches inside the phrase): ['dry bean']
+ADDED,FBO,,,STK_045,Faith-based organization,"acronym split: [('faith-based organization (FBO)', 'FBO')]"
+ADDED,feed security,,,OTC_138,Feed availability,added by the 3 Sep cleanup
+ADDED,feeding strategy,,,INT_233,Improved feed,added by the 3 Sep cleanup
+ADDED,Fertilization,,,INT_030,Nutrient management,added by the 3 Sep cleanup
+ADDED,fertilizer management,,,INT_030,Nutrient management,added by the 3 Sep cleanup
+ADDED,finance for biodiversity,,,INT_126,Biodiversity finance,added by the 3 Sep cleanup
+ADDED,finance for nature,,,INT_126,Biodiversity finance,added by the 3 Sep cleanup
+ADDED,financial access,,,OTC_130,Financial inclusion,added by the 3 Sep cleanup
+ADDED,financing model,,,OUT_019,Business model,removed redundant hyphen/case variant (R1 matching is hyphen- and case-insensitive)
+ADDED,Fish,,,SYS_029,Aquatic system,added by the 3 Sep cleanup
+ADDED,flooding,,,CRK_122,Flood,added by the 3 Sep cleanup
+ADDED,floodplain ecosystem,,,SYS_106,Floodplain,added by the 3 Sep cleanup
+ADDED,food insecure,,,OTC_006,Food security,"R4/R21: the directional form of the existing neutral construct OTC_006 Food security, so it enters as a synonym rather than a twin concept. 7 results used the phrase"
+ADDED,food insecurity,,,OTC_006,Food security,"R4/R21: the directional form of the existing neutral construct OTC_006 Food security, so it enters as a synonym rather than a twin concept. 7 results used the phrase"
+ADDED,food savety,,,INT_193,Food safety management,added by the 3 Sep cleanup
+ADDED,food-water system transition,,,CCC_25,Water-energy-food nexus,added by the 3 Sep cleanup
+ADDED,forage availability,,,OTC_138,Feed availability,added by the 3 Sep cleanup
+ADDED,Forage cultivation,,,INT_051,Improved forage cultivation,added by the 3 Sep cleanup
+ADDED,Forage seed production,,,INT_018,Seed multiplication,added by the 3 Sep cleanup
+ADDED,forecast-based financing,,,INT_110,Forecast-based finance,added by the 3 Sep cleanup
+ADDED,Forecasting,,,INT_096,Climate forecast,added by the 3 Sep cleanup
+ADDED,Forecasting system,,,OUT_096,Forecast,added by the 3 Sep cleanup
+ADDED,Forest landscape,,,SYS_040,Forest,redundant (label already matches inside the phrase): ['forest system']
+ADDED,GAP,,,INT_321,Good agricultural practice,"redundant (label already matches after normalisation): ['good agricultural practices'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Good agricultural practice' does not already match. Zero recall cost, verified against the matcher code."
+ADDED,gender equality,,,OTC_139,Gender equity,audit T3.22: 12 results used the phrase; row had none | added: ['gender equality']
+ADDED,Genebank,,,INT_010,Ex-situ conservation,added by the 3 Sep cleanup
+ADDED,Global warming,,,CDI_08,Climate change,redundant (label already matches inside the phrase): ['anthropogenic climate change']
+ADDED,government agency,,,STK_017,Public institution,added by the 3 Sep cleanup
+ADDED,Government minister,,,STK_017,Public institution,added by the 3 Sep cleanup
+ADDED,Grassland management,,,INT_228,Rangeland management,redundant (label already matches inside the phrase): ['Participatory rangeland management']
+ADDED,greenhouse gas accounting,,,OUT_110,Carbon accounting methodology,"redundant (label already matches after normalisation): ['carbon accounting methodology'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Carbon accounting methodology' does not already match. Zero recall cost, verified against the matcher code."
+ADDED,greenhouse gas calculator,,,OUT_110,Carbon accounting methodology,"redundant (label already matches after normalisation): ['carbon accounting methodology'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Carbon accounting methodology' does not already match. Zero recall cost, verified against the matcher code."
+ADDED,Greenhouse gas intensity,,,OTC_108,Emission intensity,added by the 3 Sep cleanup
+ADDED,groundwater recharge,,,INT_047,Aquifer management,INT_047's definition already covers recharge ('regulates the extraction and recharge of groundwater'); managed aquifer recharge is that activity. 6 tagged units. Andreea excluded the bare word 'Groundwater' - this specific phrase is not that word.
+ADDED,Homestead agroforestry,,,INT_060,Agroforestry,redundant (label already matches inside the phrase): ['Agroforestry system']
+ADDED,human mobility,,,INT_194,Migration,redundant (label already matches inside the phrase): ['migration intervention']
+ADDED,IMTA,,,SYS_036,Integrated multi-trophic aquaculture,"acronym split: [('integrated multi-trophic aquaculture (IMTA)', 'IMTA')]"
+ADDED,inclusive,,,OTC_116,Inclusion,"word moved from retired CCC_46: R4 twin of OTC_116 Inclusion, which had no synonyms; adjectival label (R35) | words moved in: ['inclusive']"
+ADDED,inclusive finance,,,OTC_130,Financial inclusion,added by the 3 Sep cleanup
+ADDED,Index-based drought insurance,,,INT_122,Index insurance,moved to the new concept INT_328 (R11/R17: a word has one owner)
+ADDED,Index-based livestock insurance,,,INT_122,Index insurance,moved to the new concept INT_328 (R11/R17: a word has one owner)
+ADDED,insect farming,,,SYS_114,Black soldier fly system,added by the 3 Sep cleanup
+ADDED,Integrated farming system,,,SYS_075,Mixed system,added by the 3 Sep cleanup
+ADDED,Integrated resource management,,,INT_235,Natural resource management,added by the 3 Sep cleanup
+ADDED,integration of climate and health,,,INT_189,Climate-health integration,added by the 3 Sep cleanup
+ADDED,IPM,,,INT_029,Integrated pest management,"audit T2.10 TOO-BROAD: the genus of IPM | removed: ['Pest management'] | acronym split: [('integrated pest management (IPM)', 'IPM')]"
+ADDED,job creation,,,OTC_133,Employment,added by the 3 Sep cleanup
+ADDED,La Niña,,,CDI_12,La Nina,added by the 3 Sep cleanup
+ADDED,Land conservation,,,INT_289,Ecosystem conservation,added by the 3 Sep cleanup
+ADDED,land management,,,INT_059,Landscape management,removed redundant hyphen/case variant (R1 matching is hyphen- and case-insensitive) | redundant (label already matches inside the phrase): ['integrated landscape management']
+ADDED,landscape restoration,,,INT_066,Ecosystem restoration,added by the 3 Sep cleanup
+ADDED,LDN,,,OTC_117,Land Degradation Neutrality,"acronym split: [('land degradation neutrality (LDN)', 'LDN')]"
+ADDED,livestock heat stress,,,INT_055,Animal heat stress management,added by the 3 Sep cleanup
+ADDED,livestock heatstress management,,,INT_055,Animal heat stress management,added by the 3 Sep cleanup
+ADDED,livestock mobility,,,INT_194,Migration,redundant (label already matches inside the phrase): ['migration intervention']
+ADDED,Livestock production,,,SYS_018,Livestock system,"over-broad single word: bare ""livestock"" appears in every livestock document, and the file holds Livestock management, Livestock nutrition and Pastoral system separately"
+ADDED,Livestock production system,,,SYS_018,Livestock system,"over-broad single word: bare ""livestock"" appears in every livestock document, and the file holds Livestock management, Livestock nutrition and Pastoral system separately"
+ADDED,Locally led climate adaptation,,,INT_273,Locally-led adaptation,added by the 3 Sep cleanup
+ADDED,long-term trial,,,INT_317,Long-term experiment,added by the 3 Sep cleanup
+ADDED,Low-carbon food system,,,INT_279,Low-emission development,added by the 3 Sep cleanup
+ADDED,M&E tool,,,OUT_132,Monitoring tool,added by the 3 Sep cleanup
+ADDED,Manure nutrient management,,,INT_030,Nutrient management,added by the 3 Sep cleanup
+ADDED,market intelligence,,,OUT_068,Market information,added by the 3 Sep cleanup
+ADDED,Met Agency,,,STK_024,National meteorological service,added by the 3 Sep cleanup
+ADDED,meta-analysis,,,INT_182,Evidence synthesis,added by the 3 Sep cleanup
+ADDED,Meteorological agency,,,STK_024,National meteorological service,added by the 3 Sep cleanup
+ADDED,meteorological data,,,INT_324,Weather data,"Was a synonym of INT_298 Climate data, which it is not: WMO separates weather (hours to days) from climate (multi-decadal statistics). Andreea's list excludes the word as a synonym, which is satisfied by removing it from INT_298; the concept is a separate question her list does not address."
+ADDED,Mixed farming system,,,SYS_075,Mixed system,added by the 3 Sep cleanup
+ADDED,mobility corridor,,,INT_194,Migration,redundant (label already matches inside the phrase): ['migration intervention']
+ADDED,monitoring-and-evaluation tool,,,OUT_132,Monitoring tool,added by the 3 Sep cleanup
+ADDED,mulch,,,INT_037,Mulching,added by the 3 Sep cleanup
+ADDED,NAP,,,OUT_043,National adaptation plan,"acronym split: [('national adaptation plan (NAP)', 'NAP')]"
+ADDED,Nitrogen emissions,,,OTC_105,Greenhouse gas emissions,added by the 3 Sep cleanup
+ADDED,No-till,,,INT_024,Tillage management,"audit T3.22: commonest surface form, 9 results | added: ['zero tillage']"
+ADDED,nutri-smart agriculture,,,INT_269,Climate-smart agriculture,"redundant (label already matches after normalisation): ['climate smart agriculture'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Climate-smart agriculture' does not already match. Zero recall cost, verified against the matcher code."
+ADDED,OA,,,CRK_134,Ocean acidification,"acronym split: [('ocean acidification (OA)', 'OA')]"
+ADDED,oceanic hazard,,,CRK_159,Marine hazard,added by the 3 Sep cleanup
+ADDED,pastoral mobility,,,INT_194,Migration,redundant (label already matches inside the phrase): ['migration intervention']
+ADDED,peace building,,,CCC_47,Peacebuilding,added by the 3 Sep cleanup
+ADDED,PES,,,INT_123,Payment for ecosystem services,"acronym split: [('payment for ecosystem services (PES)', 'PES')]"
+ADDED,piloting,,,INT_318,Pilot,redundant (label already matches inside the phrase): ['pilot project']
+ADDED,Post-harvest storage management,,,SYS_083,Post-harvest handling,added by the 3 Sep cleanup
+ADDED,precipitation,,,CDI_18,Rainfall,Lolita's decision: the one term to add. Family pattern and source copied from CDI_13/14/15 (WMO/GCOS Essential Climate Variables)
+ADDED,price information,,,OUT_068,Market information,added by the 3 Sep cleanup
+ADDED,rains,,,CDI_18,Rainfall,Lolita's decision: the one term to add. Family pattern and source copied from CDI_13/14/15 (WMO/GCOS Essential Climate Variables)
+ADDED,rangeland rehabilitation,,,INT_072,Rangeland restoration,added by the 3 Sep cleanup
+ADDED,regenerative,,,INT_275,Regenerative agriculture,word moved from retired CCC_41: R4 twin of INT_275 Regenerative agriculture; adjectival label (R35) | words moved in: ['regenerative']
+ADDED,rehabilitation of rangeland,,,INT_072,Rangeland restoration,added by the 3 Sep cleanup
+ADDED,research institute,,,STK_074,Research institution,added by the 3 Sep cleanup
+ADDED,resilience capacity index,,,OUT_061,Adaptive-capacity index,added by the 3 Sep cleanup
+ADDED,restoration of grassland,,,INT_072,Rangeland restoration,added by the 3 Sep cleanup
+ADDED,restoration of rangeland,,,INT_072,Rangeland restoration,added by the 3 Sep cleanup
+ADDED,risk scoring tool,,,OUT_064,Climate risk scoring tool,added by the 3 Sep cleanup
+ADDED,ROI,,,OTC_136,Return on investment,added by the 3 Sep cleanup
+ADDED,Seed banking,,,OUT_123,Seed bank,added by the 3 Sep cleanup
+ADDED,seed delivery,,,INT_325,Seed distribution,"Was a synonym of INT_111 Emergency seed distribution, where it is broader than the concept: routine distribution is not anticipatory action. Fills a real gap between INT_016 (to breeders), INT_268 (farmer-to-farmer) and INT_111 (emergency only)."
+ADDED,seed provision,,,INT_325,Seed distribution,"Was a synonym of INT_111 Emergency seed distribution, where it is broader than the concept: routine distribution is not anticipatory action. Fills a real gap between INT_016 (to breeders), INT_268 (farmer-to-farmer) and INT_111 (emergency only)."
+ADDED,seed value chain,,,SYS_118,Seed supply chain,A distinct chain with its own actors. Approved (row 8).
+ADDED,sensitivity to climate,,,CRK_165,Climate sensitivity,audit T2.10 TOO-BROAD: general-purpose noun | removed: ['sensitivity'] | redundant (label already matches inside the phrase): ['climate sensitivity of the system']
+ADDED,SFM,,,INT_327,Sustainable forest management,"A named practice with its own criteria and indicators, not a wording of generic forest management. Approved from the promotion table (row 2)."
+ADDED,silvopastoral,,,SYS_116,Silvopastoral system,14 results; the trees-plus-livestock case of SYS_076
+ADDED,silvopastoral production system,,,SYS_116,Silvopastoral system,14 results; the trees-plus-livestock case of SYS_076
+ADDED,silvopasture,,,SYS_116,Silvopastoral system,14 results; the trees-plus-livestock case of SYS_076
+ADDED,SOC,,,OTC_107,Soil organic carbon,"acronym split: [('soil organic carbon (SOC)', 'SOC')]"
+ADDED,Soil conservation,,,INT_212,Soil management,added by the 3 Sep cleanup
+ADDED,soil fertility,,,INT_030,Nutrient management,added by the 3 Sep cleanup
+ADDED,South-South exchange,,,INT_155,South-South knowledge exchange,added by the 3 Sep cleanup
+ADDED,South-South learning,,,INT_155,South-South knowledge exchange,added by the 3 Sep cleanup
+ADDED,stable yield,,,OTC_121,Yield stability,"audit T2.10 TOO-BROAD: generic statistic / different construct | removed: ['coefficient of variation', 'production stability']"
+ADDED,Stagnant flooding,,,CRK_122,Flood,added by the 3 Sep cleanup
+ADDED,Stakeholder platform,,,OUT_051,Multi-stakeholder platform,added by the 3 Sep cleanup
+ADDED,Stress tolerance index,,,TRT_09,Abiotic stress tolerance,added by the 3 Sep cleanup
+ADDED,sustainable agricultural management practice,,,INT_320,Sustainable agricultural practice,added by the 3 Sep cleanup
+ADDED,sustainable diet,,,INT_192,Healthy diet,redundant (label already matches inside the phrase): ['healthy diet promotion']
+ADDED,sustainable farming practice,,,INT_320,Sustainable agricultural practice,added by the 3 Sep cleanup
+ADDED,sustainable practice,,,INT_320,Sustainable agricultural practice,added by the 3 Sep cleanup
+ADDED,sustainable production practice,,,INT_320,Sustainable agricultural practice,added by the 3 Sep cleanup
+ADDED,ToT,,,INT_309,Training of trainers,"redundant (label already matches after normalisation): ['training-of-trainers'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Training of trainers' does not already match. Zero recall cost, verified against the matcher code."
+ADDED,transformation of food system,,,CCC_36,Food system transformation,added by the 3 Sep cleanup
+ADDED,treatment wetland,,,SYS_117,Constructed wetland,"Engineered, not natural. SYS_045 is explicitly defined as a NATURAL ecosystem, so the phrase contradicted its own owner's definition. Approved (row 5)."
+ADDED,value addition,,,SYS_058,Food processing,added by the 3 Sep cleanup
+ADDED,value chain node,,,SYS_113,Supply chain,redundant (label already matches inside the phrase): ['local supply chain'] | moved to the new concept SYS_118 (R11/R17: a word has one owner)
+ADDED,variable yield,,,OTC_121,Yield stability,"audit T2.10 TOO-BROAD: generic statistic / different construct | removed: ['coefficient of variation', 'production stability']"
+ADDED,Water resource management,,,INT_038,Water management,"redundant (label already matches inside the phrase): ['agricultural water management', 'Rice water management']"
+ADDED,water shortage,,,CRK_169,Water scarcity,redundant (label already matches inside the phrase): ['physical water scarcity']
+ADDED,water-scarce,,,CRK_169,Water scarcity,redundant (label already matches inside the phrase): ['physical water scarcity']
+ADDED,weather index-based insurance,,,INT_328,Weather-index insurance,A kind of index insurance - the index is a weather variable - so a child rather than a wording of it. Approved from the promotion table (row 3).
+ADDED,weather observation,,,INT_324,Weather data,"Was a synonym of INT_298 Climate data, which it is not: WMO separates weather (hours to days) from climate (multi-decadal statistics). Andreea's list excludes the word as a synonym, which is satisfied by removing it from INT_298; the concept is a separate question her list does not address."
+ADDED,weather record,,,INT_324,Weather data,"Was a synonym of INT_298 Climate data, which it is not: WMO separates weather (hours to days) from climate (multi-decadal statistics). Andreea's list excludes the word as a synonym, which is satisfied by removing it from INT_298; the concept is a separate question her list does not address."
+ADDED,women empowerment,,,OTC_033,Agency,added by the 3 Sep cleanup
+ADDED,yield variability,,,OTC_121,Yield stability,"audit T2.10 TOO-BROAD: generic statistic / different construct | removed: ['coefficient of variation', 'production stability']"
+ADDED,zero tillage,,,INT_024,Tillage management,"audit T3.22: commonest surface form, 9 results | added: ['zero tillage']"
+MOVED,climate prediction,OUT_089,Climate forecast,INT_096,Climate forecast,moved by the 3 Sep cleanup to the concept that owns the word
+MOVED,CoP,OUT_038,Community of practice,INT_160,Community of practice,"redundant (label already matches after normalisation): ['community-of-practice'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Community of practice' does not already match. Zero recall cost, verified against the matcher code."
+MOVED,fragility,CRK_05,Sensitivity,CRK_165,Climate sensitivity,audit T2.10 TOO-BROAD: general-purpose noun | removed: ['sensitivity'] | redundant (label already matches inside the phrase): ['climate sensitivity of the system']
+MOVED,grazing land,SYS_087,Savanna,SYS_112,Rangeland,moved by the 3 Sep cleanup to the concept that owns the word
+MOVED,high-temperature stress,CRK_107,Heatwave,CRK_106,Heat stress,"audit T2.10 TOO-BROAD: heat stress needs a tolerance threshold | removed: ['Heat', 'High temperature']"
+MOVED,NDC,OUT_044,Nationally Determined Contribution component,OUT_104,Nationally Determined Contribution,moved by the 3 Sep cleanup to the concept that owns the word
+MOVED,nutrition intervention,INT_189,Health and nutrition,INT_296,Human nutrition,"over-broad single word: owner is a human-nutrition intervention; bare ""nutrition"" also matches INT_295 Livestock nutrition and nutritional-status outcomes"
+MOVED,planned relocation,INT_196,Planned relocation support,INT_194,Migration,redundant (label already matches inside the phrase): ['migration intervention']
+MOVED,salinity,CRK_150,Land degradation,CRK_146,Soil salinization,moved by the 3 Sep cleanup to the concept that owns the word
+MOVED,value chain,SYS_055,Food system,SYS_113,Supply chain,redundant (label already matches inside the phrase): ['local supply chain'] | moved to the new concept SYS_118 (R11/R17: a word has one owner)
+MOVED,varietal development,INT_001,Genetic resource management,INT_002,Breeding,"redundant (label already matches inside the phrase): ['cross-breeding', 'Accelerated breeding', 'plant breeding']"
+MOVED,vector expansion,CRK_137,Pest pressure,CRK_138,Pest range expansion,moved by the 3 Sep cleanup to the concept that owns the word
+MOVED,yield resilience,OTC_004,Yield,OTC_121,Yield stability,"audit T2.10 TOO-BROAD: generic statistic / different construct | removed: ['coefficient of variation', 'production stability']"
+REMOVED,adaptation action,INT_214,Adaptation practice,,,removed by the 3 Sep cleanup
+REMOVED,adaptation assessment,INT_211,Adaptation tracking,,,removed by the 3 Sep cleanup
+REMOVED,"adaptation M&E, adaptation ME, adaptation MEL",INT_142,Adaptation monitoring and evaluation,,,removed by the 3 Sep cleanup
+REMOVED,agri-food system,SYS_055,Food system,,,redundant (label already matches inside the phrase): ['agri-food system']
+REMOVED,agri-food trade,SYS_084,Food trade,,,redundant (label already matches inside the phrase): ['agri-food trade']
+REMOVED,agricultural carbon market,INT_254,Carbon market,,,redundant (label already matches inside the phrase): ['agricultural carbon market']
+REMOVED,agricultural insurance,INT_120,Climate insurance,,,removed by the 3 Sep cleanup
+REMOVED,agricultural productivity,OTC_102,Productivity,,,redundant (label already matches inside the phrase): ['agricultural productivity']
+REMOVED,agricultural water management,INT_038,Water management,,,"redundant (label already matches inside the phrase): ['agricultural water management', 'Rice water management']"
+REMOVED,agro-met bulletin,OUT_029,Bulletin,,,"redundant (label already matches inside the phrase): ['Climate information bulletin', 'seasonal bulletin', 'agro-met bulletin']"
+REMOVED,agronomic management,INT_022,Agronomic management,,,"audit T2.10: a qualifier, not a concept | removed: ['Agronomic'] | redundant (label already matches after normalisation): ['agronomic management'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Agronomic management' does not already match. Zero recall cost, verified against the matcher code."
+REMOVED,animal breed,OUT_056,Breed,,,redundant (label already matches inside the phrase): ['animal breed']
+REMOVED,anthropogenic climate change,CDI_08,Climate change,,,redundant (label already matches inside the phrase): ['anthropogenic climate change']
+REMOVED,bean,SYS_095,Common bean,,,redundant (label already matches inside the phrase): ['dry bean']
+REMOVED,behavioural change,OTC_071,Social norms change,,,removed by the 3 Sep cleanup
+REMOVED,biological hazard,CRK_136,Biotic hazard,,,removed by the 3 Sep cleanup
+REMOVED,biological nitrogen fixation,CDI_07,Nitrogen fixation,,,redundant (label already matches inside the phrase): ['biological nitrogen fixation']
+REMOVED,carbon accounting methodology,OUT_110,Carbon market methodology,,,"redundant (label already matches after normalisation): ['carbon accounting methodology'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Carbon accounting methodology' does not already match. Zero recall cost, verified against the matcher code."
+REMOVED,carbon additionality,CCC_09,Additionality,,,redundant (label already matches inside the phrase): ['carbon additionality']
+REMOVED,chilling stress,CRK_110,Chilling injury,,,"the old label kept as a synonym so nothing stops matching (R11: a word is never deleted, only moved). Bare ""chilling"" deliberately NOT added - in agri-food text it usually means post-harvest cooling, and SYS_083 Post-harvest handling is live in this corpus"
+REMOVED,civil society organization,STK_039,Civil society,,,redundant (label already matches inside the phrase): ['civil society organization']
+REMOVED,climate adaptation policy,OUT_095,Adaptation policy,,,redundant (label already matches inside the phrase): ['climate adaptation policy']
+REMOVED,climate and health programming,INT_190,Climate-health programming,,,removed by the 3 Sep cleanup
+REMOVED,climate data collection,INT_092,Climate data generation,,,removed by the 3 Sep cleanup
+REMOVED,Climate dataset,OUT_021,Dataset,,,redundant (label already matches inside the phrase): ['Climate dataset']
+REMOVED,climate exposure,CRK_01,Climate risk,,,"redundant (label already matches after normalisation): ['climate risks'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Climate risk' does not already match. Zero recall cost, verified against the matcher code."
+REMOVED,climate governance,OTC_046,Governance,,,redundant (label already matches inside the phrase): ['climate governance']
+REMOVED,Climate information bulletin,OUT_029,Bulletin,,,"redundant (label already matches inside the phrase): ['Climate information bulletin', 'seasonal bulletin', 'agro-met bulletin']"
+REMOVED,climate information system,INT_264,Climate information management,,,audit T2.9: v4 word lost with no new home | added: ['climate data system']
+REMOVED,climate mobility programming,INT_195,Climate-mobility programming,,,removed by the 3 Sep cleanup
+REMOVED,climate resilience,OTC_114,Climate resilience,,,"redundant (label already matches after normalisation): ['climate resilience'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Climate resilience' does not already match. Zero recall cost, verified against the matcher code."
+REMOVED,climate risk transfer,INT_113,Climate finance,,,removed by the 3 Sep cleanup
+REMOVED,climate risks,CRK_01,Climate risk,,,"redundant (label already matches after normalisation): ['climate risks'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Climate risk' does not already match. Zero recall cost, verified against the matcher code."
+REMOVED,climate security risk,CRK_166,Climate security,,,redundant (label already matches inside the phrase): ['climate security risk']
+REMOVED,climate sensitivity of the system,CRK_165,Sensitivity to climate hazard,,,audit T2.10 TOO-BROAD: general-purpose noun | removed: ['sensitivity'] | redundant (label already matches inside the phrase): ['climate sensitivity of the system']
+REMOVED,climate service,OUT_065,Climate information product,,,removed by the 3 Sep cleanup
+REMOVED,climate service product,OUT_065,Climate information product,,,removed by the 3 Sep cleanup
+REMOVED,climate vulnerability,CRK_164,Climate vulnerability,,,"redundant (label already matches after normalisation): ['climate vulnerability'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Climate vulnerability' does not already match. Zero recall cost, verified against the matcher code."
+REMOVED,climate-adapted variety,OUT_002,Variety,,,"redundant (label already matches inside the phrase): ['stress-tolerant variety', 'climate-adapted variety', 'Seed variety']"
+REMOVED,community seed exchange,INT_268,Seed exchange,,,"redundant (label already matches inside the phrase): ['farmer seed exchange', 'farmer-to-farmer seed exchange', 'community seed exchange']"
+REMOVED,community-based adaptation,INT_273,Locally-led adaptation,,,removed by the 3 Sep cleanup
+REMOVED,community-of-practice facilitation,INT_160,Community of practice facilitation,,,"redundant (label already matches after normalisation): ['community-of-practice'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Community of practice' does not already match. Zero recall cost, verified against the matcher code."
+REMOVED,concept note,OUT_050,Investment concept,,,redundant (label already matches inside the phrase): ['investment concept note']
+REMOVED,conceptual framework,OUT_083,Framework,,,redundant (label already matches inside the phrase): ['conceptual framework']
+REMOVED,consumer food environment,SYS_074,Food environment,,,redundant (label already matches inside the phrase): ['consumer food environment']
+REMOVED,consumer food waste,OTC_098,Food waste,,,"redundant (label already matches inside the phrase): ['consumer food waste', 'agri-food waste']"
+REMOVED,CoP facilitation,INT_160,Community of practice facilitation,,,"redundant (label already matches after normalisation): ['community-of-practice'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Community of practice' does not already match. Zero recall cost, verified against the matcher code."
+REMOVED,cross-breeding,INT_002,Breeding,,,"redundant (label already matches inside the phrase): ['cross-breeding', 'Accelerated breeding', 'plant breeding']"
+REMOVED,curriculum design,INT_151,Curriculum development,,,redundant (label already matches inside the phrase): ['curriculum design']
+REMOVED,de-risking instrument,OUT_071,Climate de-risking instrument,,,"removed: ['de-risking instrument'] - the concept is 'Climate de-risking instrument' and this synonym drops 'climate', which is the word that puts it in scope. The short form does not mean the same thing, so it matches text that is not about climate at all. Owner is Adaptation-specific (no hazard gate), so the conditional hazard check does NOT bound the damage - this is the highest-severity synonym"
+REMOVED,decentralized renewable energy,INT_248,Renewable energy,,,"redundant (label already matches inside the phrase): ['decentralized renewable energy', 'renewable energy in agriculture']"
+REMOVED,displaced populations,STK_055,Displaced population,,,"redundant (label already matches after normalisation): ['displaced populations'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Displaced population' does not already match. Zero recall cost, verified against the matcher code."
+REMOVED,drainage water management,INT_044,Drainage,,,redundant (label already matches inside the phrase): ['drainage water management']
+REMOVED,dry bean,SYS_095,Common bean,,,redundant (label already matches inside the phrase): ['dry bean']
+REMOVED,dry direct seeding,INT_266,Direct seeding,,,"redundant (label already matches inside the phrase): ['mechanized direct seeding', 'mechanised direct seeding', 'dry direct seeding']"
+REMOVED,early warning system (EWS) operation,INT_100,Early warning system operation,,,"acronym split: [('early warning system (EWS) operation', 'EWS')]"
+REMOVED,Ecosystem,SYS_039,Natural ecosystem,,,"PARKED: over-broad single word: bare ""ecosystem"" matches ecosystem services, ecosystem restoration and ecosystem-based adaptation, all distinct concepts here"
+REMOVED,effectiveness,OTC_093,Adaptation effectiveness,,,PARKED: R4 twin of OTC_093 Adaptation effectiveness; bare 'effectiveness' too broad to attach
+REMOVED,erosion,CRK_150,Land degradation,,,removed by the 3 Sep cleanup
+REMOVED,evidence synthesis,INT_181,Research and synthesis,,,redundant (label already matches inside the phrase): ['research and evidence synthesis']
+REMOVED,exposed asset,CRK_03,Exposure,,,removed by the 3 Sep cleanup
+REMOVED,exposed livelihood,CRK_03,Exposure,,,removed by the 3 Sep cleanup
+REMOVED,exposed value chain,CRK_03,Exposure,,,removed by the 3 Sep cleanup
+REMOVED,faith-based organization (FBO),STK_045,Faith-based organization,,,"acronym split: [('faith-based organization (FBO)', 'FBO')]"
+REMOVED,farmed fish species,SYS_103,Farmed fish,,,redundant (label already matches inside the phrase): ['farmed fish species']
+REMOVED,farmer cooperative,STK_044,Cooperative,,,redundant (label already matches inside the phrase): ['farmer cooperative']
+REMOVED,farmer field schools,OUT_102,Farmer field school,,,"redundant (label already matches after normalisation): ['farmer field schools'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Farmer field school' does not already match. Zero recall cost, verified against the matcher code."
+REMOVED,farmer seed exchange,INT_268,Seed exchange,,,"redundant (label already matches inside the phrase): ['farmer seed exchange', 'farmer-to-farmer seed exchange', 'community seed exchange']"
+REMOVED,farmer-to-farmer seed exchange,INT_268,Seed exchange,,,"redundant (label already matches inside the phrase): ['farmer seed exchange', 'farmer-to-farmer seed exchange', 'community seed exchange']"
+REMOVED,fellowship programme,INT_153,Fellowship,,,redundant (label already matches inside the phrase): ['fellowship programme']
+REMOVED,fire weather,CRK_158,Fire-weather,,,"redundant (label already matches after normalisation): ['fire weather'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Fire-weather' does not already match. Zero recall cost, verified against the matcher code."
+REMOVED,food loss and waste reduction,INT_089,Food loss and waste,,,redundant (label already matches inside the phrase): ['food loss and waste reduction']
+REMOVED,forage management,INT_049,Feed and forage management,,,"audit T2.10 R7: an input as a synonym of a practice | removed: ['Forage'] | redundant (label already matches inside the phrase): ['feed and forage management'] | redundant (label already matches after normalisation): ['forage management'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Forage "
+REMOVED,forest system,SYS_040,Forest,,,redundant (label already matches inside the phrase): ['forest system']
+REMOVED,fruit crop,SYS_013,Fruit,,,redundant (label already matches inside the phrase): ['fruit crop']
+REMOVED,gender-transformative adaptation,CCC_31,Gender-responsive adaptation,,,removed by the 3 Sep cleanup
+REMOVED,Green Climate Fund,STK_049,Climate fund,,,redundant (label already matches inside the phrase): ['Green Climate Fund']
+REMOVED,greenhouse gas emissions,CDI_01,Greenhouse gas,,,removed by the 3 Sep cleanup
+REMOVED,healthy diet promotion,INT_192,Sustainable healthy diet promotion,,,redundant (label already matches inside the phrase): ['healthy diet promotion']
+REMOVED,heat stress,CRK_107,Heatwave,,,removed by the 3 Sep cleanup
+REMOVED,highland area,SYS_082,Highland,,,redundant (label already matches inside the phrase): ['highland area']
+REMOVED,horticultural crop,SYS_011,Horticultural crop,,,"redundant (label already matches after normalisation): ['horticultural crop'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Horticultural crop' does not already match. Zero recall cost, verified against the matcher code."
+REMOVED,human wellbeing,OTC_096,Wellbeing,,,redundant (label already matches inside the phrase): ['human wellbeing']
+REMOVED,improved variety,OUT_002,Variety,,,"redundant (label already matches inside the phrase): ['stress-tolerant variety', 'climate-adapted variety', 'Seed variety']"
+REMOVED,indigenous communities,STK_012,Indigenous Peoples,,,removed by the 3 Sep cleanup
+REMOVED,indigenous knowledge integration,INT_161,Knowledge integration,,,"redundant (label already matches inside the phrase): ['local knowledge integration', 'indigenous knowledge integration']"
+REMOVED,Indigenous Peoples engagement,STK_065,Indigenous Peoples,,,redundant (label already matches inside the phrase): ['Indigenous Peoples engagement']
+REMOVED,institutional coordination,OTC_044,Coordination,,,word moved from retired CCC_45: R32 fail; folds into OTC_044 Coordination | words moved in: ['collaboration'] | both-directions test fails: coordination is alignment of action; collaboration is joint working. The M&E literature distinguishes them deliberately. Flagged by Lolita. | redundant (label already matches inside the phrase): ['institutional coordination']
+REMOVED,insurance scheme,OUT_006,Insurance product,,,removed by the 3 Sep cleanup
+REMOVED,integrated landscape management,INT_059,Landscape management,,,removed redundant hyphen/case variant (R1 matching is hyphen- and case-insensitive) | redundant (label already matches inside the phrase): ['integrated landscape management']
+REMOVED,integrated multi-trophic aquaculture (IMTA),SYS_036,Integrated multi-trophic aquaculture,,,"acronym split: [('integrated multi-trophic aquaculture (IMTA)', 'IMTA')]"
+REMOVED,integrated pest management (IPM),INT_029,Integrated pest management,,,"audit T2.10 TOO-BROAD: the genus of IPM | removed: ['Pest management'] | acronym split: [('integrated pest management (IPM)', 'IPM')]"
+REMOVED,investment concept note,OUT_050,Investment concept,,,redundant (label already matches inside the phrase): ['investment concept note']
+REMOVED,investment proposal,OUT_063,Concept note,,,removed by the 3 Sep cleanup
+REMOVED,IP and licensing,INT_201,Intellectual property and licensing,,,removed by the 3 Sep cleanup
+REMOVED,irrigation water management,INT_039,Irrigation,,,redundant (label already matches inside the phrase): ['irrigation water management']
+REMOVED,land degradation neutrality (LDN),OTC_117,Land Degradation Neutrality,,,"acronym split: [('land degradation neutrality (LDN)', 'LDN')]"
+REMOVED,local government,STK_019,Subnational government,,,removed by the 3 Sep cleanup
+REMOVED,local knowledge integration,INT_161,Knowledge integration,,,"redundant (label already matches inside the phrase): ['local knowledge integration', 'indigenous knowledge integration']"
+REMOVED,managed retreat,INT_196,Planned relocation support,,,removed by the 3 Sep cleanup
+REMOVED,marine hazard,CRK_159,Oceanic hazard,,,removed by the 3 Sep cleanup
+REMOVED,market information platform,OUT_054,Market intelligence platform,,,removed by the 3 Sep cleanup
+REMOVED,mechanised direct seeding,INT_266,Direct seeding,,,"redundant (label already matches inside the phrase): ['mechanized direct seeding', 'mechanised direct seeding', 'dry direct seeding']"
+REMOVED,mechanized direct seeding,INT_266,Direct seeding,,,"redundant (label already matches inside the phrase): ['mechanized direct seeding', 'mechanised direct seeding', 'dry direct seeding']"
+REMOVED,migration intervention,INT_194,Migration,,,redundant (label already matches inside the phrase): ['migration intervention']
+REMOVED,mountain system,SYS_051,Mountain,,,redundant (label already matches inside the phrase): ['mountain system']
+REMOVED,NARES,INT_157,National research and extension system strengthening,,,removed by the 3 Sep cleanup
+REMOVED,national adaptation plan (NAP),OUT_043,National adaptation plan,,,"acronym split: [('national adaptation plan (NAP)', 'NAP')]"
+REMOVED,national statistics office,STK_027,Statistics office,,,redundant (label already matches inside the phrase): ['national statistics office']
+REMOVED,nitrogen-use efficiency,OTC_112,Nitrogen use efficiency,,,"redundant (label already matches after normalisation): ['nitrogen-use efficiency'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Nitrogen use efficiency' does not already match. Zero recall cost, verified against the matcher code."
+REMOVED,nutrition,INT_189,Health and nutrition,,,"PARKED: over-broad single word: owner is a human-nutrition intervention; bare ""nutrition"" also matches INT_295 Livestock nutrition and nutritional-status outcomes"
+REMOVED,nutritional biofortification,INT_035,Biofortification,,,redundant (label already matches inside the phrase): ['nutritional biofortification']
+REMOVED,ocean acidification (OA),CRK_134,Ocean acidification,,,"acronym split: [('ocean acidification (OA)', 'OA')]"
+REMOVED,offset,OUT_109,Carbon offset,,,"removed: ['offset'] - the concept is 'Carbon offset' and this synonym drops 'carbon', which is the word that puts it in scope. The short form does not mean the same thing, so it matches text that is not about carbon at all. Owner is Mitigation-specific (no hazard gate), so the conditional hazard check does NOT bound the damage - this is the highest-severity synonym class. Demand note: bare 'offset"
+REMOVED,oilseed crop,SYS_014,Oilseed,,,redundant (label already matches inside the phrase): ['oilseed crop']
+REMOVED,olive tree,SYS_101,Olive,,,redundant (label already matches inside the phrase): ['olive tree']
+REMOVED,orange-fleshed sweet potato,SYS_094,Sweet potato,,,redundant (label already matches inside the phrase): ['orange-fleshed sweet potato']
+REMOVED,pastoral livelihood,SYS_067,Livelihood system,,,audit T2.10 TOO-BROAD: near-universal in this literature | removed: ['livelihood']
+REMOVED,payment for ecosystem services (PES),INT_123,Payment for ecosystem services,,,"acronym split: [('payment for ecosystem services (PES)', 'PES')]"
+REMOVED,plant breeding,INT_001,Genetic resource management,,,audit T2.10 R7: a thing as a synonym of an activity | removed: ['Genetic resources']
+REMOVED,plant genetic resources policy,INT_021,Genetic resource policy,,,redundant (label already matches inside the phrase): ['plant genetic resources policy']
+REMOVED,plant variety protection,INT_201,Intellectual property and licensing,,,removed by the 3 Sep cleanup
+REMOVED,poultry flock,SYS_023,Poultry,,,redundant (label already matches inside the phrase): ['poultry flock']
+REMOVED,pre-breeding research,INT_007,Pre-breeding,,,"The label 'Pre-breeding' already matches inside the phrase, so the entry buys no recall, and the two name the same activity (R14 + redundancy)."
+REMOVED,predisposition to harm,CRK_04,Vulnerability,,,removed by the 3 Sep cleanup
+REMOVED,production stability,OTC_004,Yield,,,removed by the 3 Sep cleanup
+REMOVED,Rangeland,SYS_087,Savanna,,,removed by the 3 Sep cleanup
+REMOVED,recirculating aquaculture system,SYS_035,Recirculating aquaculture,,,redundant (label already matches inside the phrase): ['recirculating aquaculture system']
+REMOVED,renewable energy in agriculture,INT_248,Renewable energy,,,"redundant (label already matches inside the phrase): ['decentralized renewable energy', 'renewable energy in agriculture']"
+REMOVED,research and evidence synthesis,INT_181,Research and synthesis,,,redundant (label already matches inside the phrase): ['research and evidence synthesis']
+REMOVED,risk management,INT_229,Climate risk management,,,"removed: ['risk management'] - the concept is 'Climate risk management' and this synonym drops 'climate', which is the word that puts it in scope. The short form does not mean the same thing, so it matches text that is not about climate at all. Owner is Adaptation-specific (no hazard gate), so the conditional hazard check does NOT bound the damage - this is the highest-severity synonym class. Dema"
+REMOVED,risk reduction,OTC_101,Climate risk reduction,,,"removed: ['risk reduction'] - the concept is 'Climate risk reduction' and this synonym drops 'climate', which is the word that puts it in scope. The short form does not mean the same thing, so it matches text that is not about climate at all. Owner is Adaptation-specific (no hazard gate), so the conditional hazard check does NOT bound the damage - this is the highest-severity synonym class. Demand"
+REMOVED,risk transfer,INT_231,Climate risk transfer,,,"removed: ['risk transfer'] - the concept is 'Climate risk transfer' and this synonym drops 'climate', which is the word that puts it in scope. The short form does not mean the same thing, so it matches text that is not about climate at all. Owner is Adaptation-specific (no hazard gate), so the conditional hazard check does NOT bound the damage - this is the highest-severity synonym class. Trade ac"
+REMOVED,river delta,SYS_081,Delta,,,redundant (label already matches inside the phrase): ['river delta']
+REMOVED,scaling up,ADP_06,Scaling,,,removed by the 3 Sep cleanup
+REMOVED,scholarship programme,INT_223,Scholarship,,,redundant (label already matches inside the phrase): ['scholarship programme']
+REMOVED,sea level rise,CRK_127,Sea-level rise,,,"redundant (label already matches after normalisation): ['sea level rise'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Sea-level rise' does not already match. Zero recall cost, verified against the matcher code."
+REMOVED,seasonal bulletin,OUT_029,Bulletin,,,"redundant (label already matches inside the phrase): ['Climate information bulletin', 'seasonal bulletin', 'agro-met bulletin']"
+REMOVED,seed company,STK_030,Input supplier,,,removed by the 3 Sep cleanup
+REMOVED,severe storm,CRK_113,Storm,,,redundant (label already matches inside the phrase): ['severe storm']
+REMOVED,simulation model,OUT_012,Model,,,redundant (label already matches inside the phrase): ['simulation model']
+REMOVED,social equity,OTC_115,Equity,,,removed by the 3 Sep cleanup
+REMOVED,social inclusion,OTC_116,Inclusion,,,"word moved from retired CCC_46: R4 twin of OTC_116 Inclusion, which had no synonyms; adjectival label (R35) | words moved in: ['inclusive']"
+REMOVED,soil hazard,CRK_144,Edaphic hazard,,,removed by the 3 Sep cleanup
+REMOVED,soil organic carbon (SOC),OTC_107,Soil organic carbon,,,"acronym split: [('soil organic carbon (SOC)', 'SOC')]"
+REMOVED,staff secondment,INT_224,Secondment,,,redundant (label already matches inside the phrase): ['staff secondment']
+REMOVED,standard protocol,OUT_014,Protocol,,,redundant (label already matches inside the phrase): ['standard protocol']
+REMOVED,strategic partnership,OUT_052,Partnership,,,redundant (label already matches inside the phrase): ['strategic partnership']
+REMOVED,strategy,OUT_047,Strategy document,,,"PARKED: over-broad single word: bare ""strategy"" is ubiquitous in programme text and rarely denotes a strategy document"
+REMOVED,stress-tolerant variety,OUT_002,Variety,,,"redundant (label already matches inside the phrase): ['stress-tolerant variety', 'climate-adapted variety', 'Seed variety']"
+REMOVED,supply chain,SYS_055,Food system,,,redundant (label already matches inside the phrase): ['agri-food system']
+REMOVED,susceptibility,CRK_04,Vulnerability,,,removed by the 3 Sep cleanup
+REMOVED,sustainable energy management,INT_247,Energy management,,,redundant (label already matches inside the phrase): ['sustainable energy management']
+REMOVED,sustainable forest management,INT_064,Forest management,,,moved to the new concept INT_327 (R11/R17: a word has one owner)
+REMOVED,technical report,OUT_026,Report,,,redundant (label already matches inside the phrase): ['technical report']
+REMOVED,temperature extremes,CRK_162,Temperature extreme,,,"redundant (label already matches after normalisation): ['temperature extremes'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Temperature extreme' does not already match. Zero recall cost, verified against the matcher code."
+REMOVED,thematic map,OUT_087,Map,,,redundant (label already matches inside the phrase): ['thematic map']
+REMOVED,traditional communities,STK_012,Indigenous Peoples,,,removed by the 3 Sep cleanup
+REMOVED,Training,OUT_036,Training material,,,removed by the 3 Sep cleanup
+REMOVED,training delivery,INT_149,Capacity sharing,,,removed by the 3 Sep cleanup
+REMOVED,training provision,INT_150,Training delivery,,,"redundant (label already matches inside the phrase): ['training provision', 'training delivery']"
+REMOVED,true cost accounting,INT_186,True-cost accounting,,,"redundant (label already matches after normalisation): ['true cost accounting'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'True-cost accounting' does not already match. Zero recall cost, verified against the matcher code."
+REMOVED,vegetable crop,SYS_012,Vegetable,,,"redundant (label already matches inside the phrase): ['vegetable crop', 'Vegetable production']"
+REMOVED,voluntary standard,OUT_082,Standard,,,redundant (label already matches inside the phrase): ['voluntary standard']
+REMOVED,vulnerability index,OUT_064,Risk scoring tool,,,removed by the 3 Sep cleanup
+REMOVED,water-use efficiency,OTC_113,Water use efficiency,,,"redundant (label already matches after normalisation): ['water-use efficiency'] - the tagger's norm_match() collapses case, hyphens and punctuation and sing_variants() collapses plurals, so this entry cannot match anything the label 'Water use efficiency' does not already match. Zero recall cost, verified against the matcher code."
+REMOVED,weather-index insurance,INT_122,Index insurance,,,moved to the new concept INT_328 (R11/R17: a word has one owner)
+REMOVED,women in agriculture,STK_010,Women,,,redundant (label already matches inside the phrase): ['women in agriculture']

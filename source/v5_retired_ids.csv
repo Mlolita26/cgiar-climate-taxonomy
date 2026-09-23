@@ -1,0 +1,24 @@
+﻿ID,Term,Facet,successor,reason
+CRK_03,Exposure,Climate risk,CRK_163,removed by Andreea in v5 draft
+CRK_04,Vulnerability,Climate risk,CRK_164,removed by Andreea in v5 draft
+CRK_05,Sensitivity,Climate risk,CRK_165,removed by Andreea in v5 draft
+INT_201,Intellectual property and licensing,Intervention,dropped,removed by Andreea in v5 draft
+INT_157,National research and extension system strengthening,Intervention,dropped,removed by Andreea in v5 draft
+INT_190,Climate-health programming,Intervention,dropped,removed by Andreea in v5 draft
+INT_195,Climate-mobility programming,Intervention,dropped,removed by Andreea in v5 draft
+INT_196,Planned relocation support,Intervention,dropped,removed by Andreea in v5 draft
+INT_092,Climate data generation,Intervention,dropped,removed by Andreea in v5 draft
+OUT_006,Insurance product,Output,INT_306 Insurance,removed by Andreea in v5 draft
+OUT_054,Market intelligence platform,Output,dropped,removed by Andreea in v5 draft
+OUT_065,Climate information product,Output,dropped (children promoted to L1),removed by Andreea in v5 draft
+OUT_042,Plan,Output,dropped (children promoted to L1),removed by Andreea in v5 draft
+ADP_06,Scaling,Adoption pathway,dropped,removed by Andreea in v5 draft
+STK_012,Indigenous Peoples,Stakeholder,STK_065,same-facet duplicate merged
+CCC_39,Nature-positive,Cross-cutting concept,INT_271,retired in remediation: R32: a named approach that can fill the intervention element; Lolita chose INT_271 as owner
+CCC_40,Site-specific,Cross-cutting concept,INT_236,retired in remediation: R32 fail; 'site-specific management' is the standard term for precision agriculture
+CCC_41,Regenerative,Cross-cutting concept,INT_275,retired in remediation: R4 twin of INT_275 Regenerative agriculture; adjectival label (R35)
+CCC_46,Inclusive,Cross-cutting concept,OTC_116,"retired in remediation: R4 twin of OTC_116 Inclusion, which had no synonyms; adjectival label (R35)"
+CCC_45,Collaboration,Cross-cutting concept,OTC_044,retired in remediation: R32 fail; folds into OTC_044 Coordination
+CCC_42,Adequacy,Cross-cutting concept,OTC_095 (word parked),retired in remediation: R4 twin of OTC_095 Climate policy adequacy; bare 'adequacy' too broad to attach safely
+CCC_43,Efficiency,Cross-cutting concept,OTC_111/112/113 (word parked),retired in remediation: R4 twin of the efficiency family; bare 'efficiency' too broad to attach safely
+CCC_44,Effectiveness,Cross-cutting concept,OTC_093 (word parked),retired in remediation: R4 twin of OTC_093 Adaptation effectiveness; bare 'effectiveness' too broad to attach

@@ -1,0 +1,28 @@
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix ct:      <https://mlolita26.github.io/cgiar-climate-taxonomy/terms/> .
+@prefix meliaf:  <https://mlolita26.github.io/cgiar-climate-taxonomy/relations/> .
+<https://mlolita26.github.io/cgiar-climate-taxonomy/relations/> a owl:Ontology ;
+    dcterms:title "MELIAF relation and rule properties for the climate taxonomy"@en ;
+    owl:versionInfo "5.0.0-draft" ;
+    rdfs:comment "Small extension of SKOS: the typed relations between concepts that the adaptation and mitigation decision rules use, and the per-concept rule attributes. Everything else in the vocabulary is plain SKOS."@en .
+meliaf:addresses a owl:ObjectProperty ; rdfs:label "addresses"@en ; rdfs:comment "An intervention or trait acts to reduce the harm of a climate hazard (the object)."@en .
+meliaf:appliesTo a owl:ObjectProperty ; rdfs:label "appliesTo"@en ; rdfs:comment "An intervention applies to a system; a cross-cutting concept applies to an intervention, outcome or impact."@en .
+meliaf:produces a owl:ObjectProperty ; rdfs:label "produces"@en ; rdfs:comment "An intervention produces an output or outcome."@en .
+meliaf:measuredBy a owl:ObjectProperty ; rdfs:label "measuredBy"@en ; rdfs:comment "An outcome is measured by an index or measure."@en .
+meliaf:reduces a owl:ObjectProperty ; rdfs:label "reduces"@en ; rdfs:comment "Lowers a climate-risk dimension (exposure, vulnerability, sensitivity)."@en .
+meliaf:builds a owl:ObjectProperty ; rdfs:label "builds"@en ; rdfs:comment "Strengthens a capacity, capability or asset."@en .
+meliaf:partOf a owl:ObjectProperty ; rdfs:label "partOf"@en ; rdfs:comment "Partitive relation: the subject is part of the object."@en .
+meliaf:composedOf a owl:ObjectProperty ; rdfs:label "composedOf"@en ; rdfs:comment "Partitive relation: the subject is composed of the object."@en .
+meliaf:reducesEmissions a owl:ObjectProperty ; rdfs:label "reducesEmissions"@en ; rdfs:comment "Mitigation: the subject reduces greenhouse-gas emissions of the object."@en .
+meliaf:sequesters a owl:ObjectProperty ; rdfs:label "sequesters"@en ; rdfs:comment "Mitigation: the subject sequesters carbon in the object."@en .
+meliaf:emits a owl:ObjectProperty ; rdfs:label "emits"@en ; rdfs:comment "Mitigation: the subject (a system) emits the object (a greenhouse gas). Identifies a source; does not by itself make a term count as mitigation."@en .
+meliaf:adaptationTag a owl:DatatypeProperty ; rdfs:label "adaptation tag"@en ; rdfs:comment "Adaptation-specific: the concept counts as adaptation on its own. Adaptation-conditional: it counts only through a qualifying relation to an adaptation-specific concept (see the concept scope note). n/a: not an adaptation term."@en .
+meliaf:mitigationTag a owl:DatatypeProperty ; rdfs:label "mitigation tag"@en ; rdfs:comment "Same as the adaptation tag, for the mitigation rule."@en .
+meliaf:pathwayStage a owl:DatatypeProperty ; rdfs:label "pathway stage"@en ; rdfs:comment "Position in the results chain: Rationale, Intervention, Stakeholder, Output, Outcome, Impact, Cross-cutting, Uptake stage."@en .
+meliaf:climateScope a owl:DatatypeProperty ; rdfs:label "climate scope"@en ; rdfs:comment "Adaptation, Mitigation, or Adaptation + Mitigation."@en .
+meliaf:isHazard a owl:DatatypeProperty ; rdfs:label "is hazard"@en ; rdfs:comment "True for the climate hazards that let conditional terms qualify."@en .
+meliaf:provenance a owl:DatatypeProperty ; rdfs:label "provenance"@en ; rdfs:comment "Where the concept came from: Lexicon consensus, Domain expert, PRMS pilot, Restructure (v5). A concept may carry several."@en .

@@ -1,0 +1,11 @@
+principle,test,status
+F,The vocabulary has a persistent unique web identifier,"Pending: GitHub Pages address now, permanent namespace after the build-shop"
+F,Each term has a persistent unique web identifier,"Yes: stable ids since version 4, one web address per term"
+F,One can search for a term and get its identifier,Yes: browse below; search via the JSON-LD and CSV
+F,The vocabulary is available from a repository the community recognises,"Pending: registration (AgroPortal, Zenodo DOI) after the build-shop"
+A,A term identifier returns a human- or machine-readable representation,Yes: each term page embeds JSON-LD; whole vocabulary in Turtle and JSON-LD
+I,At least one representation conforms to a community standard (SKOS),"Yes: SKOS, with a small documented extension for typed relations"
+I,The vocabulary includes mapping relations to other vocabularies,Pending: mappings to the MELIAF taxonomy and AGROVOC are the next step
+R,The licence is clear and accessible,"Proposed: CC BY 4.0, pending the custodian's confirmation"
+R,Provenance and maintenance information is provided at vocabulary and term level,"Yes: provenance per term, custodian, version, change log, governance"
+R,Definitions are sufficient to understand each term,Yes: every concept has a sourced definition

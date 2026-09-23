@@ -1,0 +1,57 @@
+name: Term request
+description: Propose to add, change, merge or retire a term in the climate adaptation taxonomy
+title: "[Term] "
+labels: ["term-request"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What do you propose?
+      options:
+        - Add a new term
+        - Add a synonym to an existing term
+        - Change a definition or position
+        - Merge two terms
+        - Retire a term
+    validations:
+      required: true
+  - type: input
+    id: term
+    attributes:
+      label: Term
+      description: The preferred label, sentence case, one concept.
+      placeholder: e.g. Heat stress tolerance
+    validations:
+      required: true
+  - type: textarea
+    id: definition
+    attributes:
+      label: Definition
+      description: One or two sentences, opening with the parent concept (genus-differentia).
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Definition source
+      description: The authority the definition draws on (IPCC, AGROVOC, FAO, WMO, UNFCCC, or a cited publication).
+  - type: input
+    id: facet_parent
+    attributes:
+      label: Facet and parent term
+      placeholder: e.g. Breeding trait, under Stress tolerance
+  - type: input
+    id: synonyms
+    attributes:
+      label: Synonyms
+      description: Other words people use for the same concept, separated by semicolons.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence of use
+      description: Where does this term appear in CGIAR work? Quote or link one or two examples (PRMS results, plans, reports).
+  - type: input
+    id: existing
+    attributes:
+      label: If changing, merging or retiring, which existing ID(s)?
+      placeholder: e.g. INT_040

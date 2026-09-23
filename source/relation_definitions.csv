@@ -1,0 +1,12 @@
+prop,comment
+addresses,An intervention or trait acts to reduce the harm of a climate hazard (the object).
+appliesTo,"An intervention applies to a system; a cross-cutting concept applies to an intervention, outcome or impact."
+produces,An intervention produces an output or outcome.
+measuredBy,An outcome is measured by an index or measure.
+reduces,"Lowers a climate-risk dimension (exposure, vulnerability, sensitivity)."
+builds,"Strengthens a capacity, capability or asset."
+partOf,Partitive relation: the subject is part of the object.
+composedOf,Partitive relation: the subject is composed of the object.
+reducesEmissions,Mitigation: the subject reduces greenhouse-gas emissions of the object.
+sequesters,Mitigation: the subject sequesters carbon in the object.
+emits,"Mitigation: the subject (a system) emits the object (a greenhouse gas). Identifies a source; does not by itself make a term count as mitigation."

@@ -1,0 +1,23 @@
+﻿column,required,format,meaning
+ID,Yes,Controlled prefix + number,"Stable unique identifier, prefixed by facet (CRK, CDI, SYS, INT, OUT, OTC, IMP, ADP, TRT, STK, CCC). Retired IDs are never reused."
+Facet,Yes,Controlled (11 values),The single fundamental aspect the term belongs to. Values and definitions in master_v5_controlled_values.csv.
+Level,Yes,Controlled (L1 to L6),Depth of the term within its facet hierarchy. Computed from Parent ID - never edit by hand.
+Parent ID,Conditional,ID reference,The broader term one level up (a true is-a parent). Blank for a top-level (L1) term.
+Term,Yes,Text,"The atomic concept name, sentence case, one concept per entry. Leading spaces encode hierarchy depth (derived - never edit by hand)."
+Definition,Yes,"Text, max 380 characters","Genus-differentia definition: opens with the parent's term (or the facet notion at L1), 1-2 sentences, neutral wording, general definition only - contextual climate material lives in CGIAR example."
+Definition source,Yes,Text,"The named authority the definition draws on, hierarchy IPCC > AGROVOC > FAO/WMO/UNFCCC; glossary-cited definitions keep the source's defining sentence essentially verbatim."
+Pathway stage,Yes,Controlled (8 values),The term's position in the results-chain view.
+Climate scope,Yes,Controlled (3 values),"Whether the term serves adaptation, mitigation, or both."
+Adaptation tag,Yes,Controlled (3 values),"How the term relates to adaptation: specific (always counts), conditional (counts only under the stated condition), or n/a."
+Adaptation condition,Yes,Controlled sentinel or template sentence,The condition under which the term counts as adaptation.
+Mitigation tag,Yes,Controlled (3 values),How the term relates to mitigation.
+Mitigation condition,Yes,Controlled sentinel or template sentence,The condition under which the term counts as mitigation.
+Domain,Yes,Controlled (17 values),"The topical subject area, kept out of the hierarchy; every term has exactly one."
+Impact area,Yes,Controlled (6 values),"The single CGIAR Impact Area the term serves, or Cross-cutting."
+Related IDs,Optional,"Typed ID links, semicolon-separated","Associative (non-hierarchical) links to other terms, each with a relation label, e.g. 'part-of: INT_319; produces: OUT_062'."
+Source,Yes,Open provenance vocabulary,The origin taxonomy or combination the term came from (e.g. 'New (v5)').
+Source IDs,Optional,Provenance ID reference,"The original identifiers from the source files, left untouched."
+Original label,Optional,Text,"The verbatim pre-revision label, where the term was renamed."
+CGIAR example,Optional,Text,"A concrete CGIAR example illustrating the term, and/or the contextual climate interpretation ('Climate context: ...') moved out of the definition under the two-part structure."
+Synonyms,Optional,"Text, semicolon-separated",Alternative labels for the same concept - same meaning in both directions; one word belongs to one term.
+Reference URL(s),Optional,URL,A supporting link for the example or definition.
