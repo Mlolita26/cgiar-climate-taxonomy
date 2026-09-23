@@ -13,7 +13,7 @@ STATUS    <- "draft"
 LICENCE   <- "https://creativecommons.org/licenses/by/4.0/"          # proposed, pending confirmation
 CUSTODIAN <- "CGIAR MELIAF Climate Adaptation Activator (Andreea Nowak, Lolita Muller), Alliance of Bioversity International and CIAT"
 TITLE     <- "CGIAR Climate Adaptation and Mitigation Taxonomy"
-DOI       <- ""                                                        # Zenodo Sandbox test DOI, filled after deposit
+DOI       <- "10.5072/zenodo.607948"                                   # Zenodo SANDBOX test DOI (10.5072 = test prefix); a real 10.5281 DOI comes with v5.0.0
 TODAY     <- format(Sys.Date())
 SCHEME    <- paste0(BASE_IRI, "scheme")
 term_iri  <- function(id) paste0(BASE_IRI, "terms/", id)
@@ -275,7 +275,7 @@ browse <- pmap_chr(facets, \(facet, facet_def, slug) {
 })
 fair_table <- paste0("<tr><td class=p>", fair_rows$principle, "</td><td>", h(fair_rows$test), "</td><td class=",
                      if_else(str_starts(fair_rows$status, "Yes"), "ok", "pend"), ">", h(fair_rows$status), "</td></tr>", collapse = "")
-cite_doi   <- if (nzchar(DOI)) glue('<a href="https://doi.org/{DOI}">doi:{DOI}</a>') else "DOI to follow."
+cite_doi   <- if (!nzchar(DOI)) "DOI to follow." else if (str_starts(DOI, "10.5072")) glue('Test DOI (Zenodo Sandbox, not resolvable outside it): <a href="https://sandbox.zenodo.org/records/{str_extract(DOI, "[0-9]+$")}">{DOI}</a>. A permanent DOI comes with the first non-draft release.') else glue('<a href="https://doi.org/{DOI}">doi:{DOI}</a>')
 browse     <- paste(browse, collapse = "")
 write_file(page(TITLE, glue(read_file("templates/index.html"), .open = "<<", .close = ">>")), "docs/index.html")
 invisible(file.create("docs/.nojekyll"))
