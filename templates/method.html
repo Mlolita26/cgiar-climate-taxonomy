@@ -34,8 +34,30 @@
 <tr><td><code>qa/check_skos.R</code></td><td>The checks</td></tr>
 </table>
 
+<h2>What the documents say</h2>
+<dl>
+<dt>LICENSE.md</dt><dd>Proposes CC BY 4.0: anyone may copy, share and build on the vocabulary, including commercially, as long as they credit the source and say if they changed it. Marked as proposed until the custodian confirms. Explains why attribution rather than public domain: many definitions cite IPCC, AGROVOC, FAO, WMO or UNFCCC and that credit should stay visible. States that Lexicon icons are not part of the vocabulary and not covered.</dd>
+<dt>GOVERNANCE.md</dt><dd>Names the custodian (the Climate Adaptation Activator team). Says anyone in CGIAR may propose to add, change, merge or retire a term, through a term request form. Describes the five screening questions (is it already here, is it one concept, does it have a sourced definition, is it used, where does it sit). Sets the rules that never change: identifiers are never reused, retired terms are deprecated not deleted, a definition may improve without the identifier moving. Explains numbered releases.</dd>
+<dt>CITATION.cff</dt><dd>A small machine readable file that GitHub reads to show a "Cite this repository" button: title, version, date, authors, licence, and the test DOI.</dd>
+<dt>CHANGELOG.md</dt><dd>Generated from the version 4 to version 5 comparison files: how many terms were added, retired, renamed or redefined, and the lists of added, retired and renamed terms.</dd>
+<dt>source/SOURCES.md</dt><dd>For each copied file: where it came from, when, and its checksum, so a copy can always be traced and refreshed.</dd>
+</dl>
+
 <h2>What is provisional</h2>
 <p>The web address (a permanent namespace comes next), the licence (CC BY 4.0, proposed), the DOI (a test one), and registration in a vocabulary repository. None of these change a term identifier.</p>
+
+<h2>Next steps, not done yet</h2>
+<ol>
+<li><b>Confirm the licence and the custodian</b> with the taxonomy lead. Everything else below can then stop being marked provisional.</li>
+<li><b>Register a permanent namespace</b> at w3id.org (one pull request to their repository). Then change one line in the script and rebuild; all term identifiers stay the same and the old addresses redirect.</li>
+<li><b>Make a real release</b> (version 5.0.0, not draft) and deposit it in the real Zenodo, which gives a permanent DOI for the vocabulary and one per version.</li>
+<li><b>Register in AgroPortal</b> (agroportal.lirmm.fr), the vocabulary repository for agriculture. This is where people in this field look for vocabularies. It gives search, browsing, version history, and a place to record mappings to AGROVOC. The Turtle file is what gets submitted.</li>
+<li><b>Add mappings to other vocabularies</b>: which of our terms equal or are close to terms in AGROVOC, and later in the MELIAF taxonomy. In SKOS these are exactMatch, closeMatch and broadMatch links. This is the one FAIR test still open that is not about registration.</li>
+<li><b>Serve machine formats at the term address itself.</b> Today a term address returns a web page with the data embedded. Better practice is that the same address returns Turtle or JSON-LD when a program asks for it. The w3id redirect rules can do this.</li>
+<li><b>Record the vocabulary in CGIAR systems</b>: a CGSpace record pointing to the DOI, and CLARISA so that PRMS and other tools can reference it.</li>
+<li><b>Complete examples of use.</b> <<sum(nzchar(concepts$example))>> of <<nrow(concepts)>> terms have a real CGIAR example sentence. The tagging results can supply the rest.</li>
+<li><b>Move the hosting</b> to wherever the MELIAF build-shop decides, once that is known. With the permanent namespace in place nothing that cites a term breaks.</li>
+</ol>
 
 <h2>Using the same method for another vocabulary</h2>
 <p>Replace the JSON file in <code>source/</code>, adjust the list of fields at the top of <code>build_fair.R</code>, and run it. The matching, the pages, the checks and the publishing steps stay the same. This is the method the MELIAF build-shop can reuse for the next domain vocabulary.</p>
