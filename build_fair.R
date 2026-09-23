@@ -269,9 +269,16 @@ pwalk(retired, function(ID, Term, Facet, successor, reason) {
 })
 
 fair_rows <- read_csv("source/fair_checklist.csv", show_col_types = FALSE)   # Cox et al. 2021, Table 1, with our status
+# browse: each facet as a tree, top concepts first, children indented under their parent
+tree <- function(ids) {
+  if (!length(ids)) return("")
+  ids <- ids[order(concepts$term[match(ids, concepts$id)])]
+  items <- map_chr(ids, \(i) glue('<li><a href="terms/{i}.html">{h(concepts$term[concepts$id == i])}</a>{tree(children$kids[match(i, children$parent_id)][[1]])}</li>'))
+  paste0("<ul>", paste(items, collapse = ""), "</ul>")
+}
 browse <- pmap_chr(facets, \(facet, facet_def, slug) {
-  ids <- concepts |> filter(facet == !!facet) |> arrange(level, term)
-  glue('<details id="facet-{slug}"><summary>{h(facet)} <span class="n">{nrow(ids)}</span></summary><p class="src">{h(facet_def)}</p><p class="terms">{paste(glue("<a href=\\"terms/{ids$id}.html\\">{h(ids$term)}</a>"), collapse = " · ")}</p></details>')
+  top <- concepts$id[concepts$facet == facet & is.na(concepts$parent_id)]
+  glue('<details id="facet-{slug}"><summary>{h(facet)} <span class="n">{sum(concepts$facet == facet)} terms, {length(top)} top concepts</span></summary><p class="src">{h(facet_def)}</p><div class="tree">{tree(top)}</div></details>')
 })
 fair_table <- paste0("<tr><td class=p>", fair_rows$principle, "</td><td>", h(fair_rows$test), "</td><td class=",
                      if_else(str_starts(fair_rows$status, "Yes"), "ok", "pend"), ">", h(fair_rows$status), "</td></tr>", collapse = "")
