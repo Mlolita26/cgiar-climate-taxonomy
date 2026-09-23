@@ -29,8 +29,11 @@ The custodian applies the term intake protocol used to build version 5. In short
 4. **Is it used?** Evidence from CGIAR reporting or plans that the word occurs and matters.
 5. **Where does it sit?** One facet, one parent; the parent must be a true "is-a" parent.
 
-Every decision is logged. Refused proposals go to the register of terms not to add, with the
-reason, so the same discussion does not happen twice.
+Every decision is logged in `governance/decisions.csv`: date, proposal, decision, reason, redirect,
+and whether the vocabulary changed. Refused proposals stay visible so the same discussion does not
+happen twice. A worked example: [issue #1](https://github.com/Mlolita26/cgiar-climate-taxonomy/issues/1),
+*Climate-resilient agriculture*, refused on 2026-09-23 because it is a compound of two existing
+concepts (see `notes/governance-rehearsal.md` for the steps).
 
 ## Rules that never change
 

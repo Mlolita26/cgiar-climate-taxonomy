@@ -35,6 +35,8 @@ a DOI, and registration in a vocabulary repository. See the self-assessment on t
 | `docs/` | The website served by GitHub Pages: landing page and one page per term |
 | `templates/` | The two HTML templates the pages are made from (`page.html` shell, `index.html` landing page) |
 | `GOVERNANCE.md` | Who decides, how to propose a term, rules that never change |
+| `governance/decisions.csv` | Every decision on a term request: date, proposal, decision, reason |
+| `notes/` | Working notes, e.g. the governance rehearsal (one request run end to end) |
 | `CHANGELOG.md` | What changed between version 4 and 5 (generated) |
 | `LICENSE.md`, `CITATION.cff` | Licence and how to cite |
 
