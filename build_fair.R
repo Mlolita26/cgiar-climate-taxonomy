@@ -273,12 +273,16 @@ fair_rows <- read_csv("source/fair_checklist.csv", show_col_types = FALSE)   # C
 tree <- function(ids) {
   if (!length(ids)) return("")
   ids <- ids[order(concepts$term[match(ids, concepts$id)])]
-  items <- map_chr(ids, \(i) glue('<li><a href="terms/{i}.html">{h(concepts$term[concepts$id == i])}</a>{tree(children$kids[match(i, children$parent_id)][[1]])}</li>'))
+  items <- map_chr(ids, function(i) {
+    kids <- children$kids[match(i, children$parent_id)][[1]]
+    a <- glue('<a href="terms/{i}.html">{h(concepts$term[concepts$id == i])}</a>')
+    if (length(kids)) glue('<li><details><summary>{a} <span class="n">{length(kids)}</span></summary>{tree(kids)}</details></li>') else glue("<li>{a}</li>")
+  })
   paste0("<ul>", paste(items, collapse = ""), "</ul>")
 }
 browse <- pmap_chr(facets, \(facet, facet_def, slug) {
   top <- concepts$id[concepts$facet == facet & is.na(concepts$parent_id)]
-  glue('<details id="facet-{slug}"><summary>{h(facet)} <span class="n">{sum(concepts$facet == facet)} terms, {length(top)} top concepts</span></summary><p class="src">{h(facet_def)}</p><div class="tree">{tree(top)}</div></details>')
+  glue('<details class="facet" id="facet-{slug}"><summary>{h(facet)} <span class="n">{sum(concepts$facet == facet)} terms, {length(top)} top concepts</span></summary><p class="src">{h(facet_def)}</p><div class="tree">{tree(top)}</div></details>')
 })
 fair_table <- paste0("<tr><td class=p>", fair_rows$principle, "</td><td>", h(fair_rows$test), "</td><td class=",
                      if_else(str_starts(fair_rows$status, "Yes"), "ok", "pend"), ">", h(fair_rows$status), "</td></tr>", collapse = "")
