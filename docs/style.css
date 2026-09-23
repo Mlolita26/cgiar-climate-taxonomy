@@ -1,7 +1,7 @@
 :root{--bg:#f7f9f8;--card:#fff;--ink:#15211c;--ink2:#51625b;--ink3:#86938d;--line:#e3e8e5;--green:#065F4A;--green-dark:#033529;--green-soft:#e6f4ef;--amber-soft:#fdf1dc;--amber-ink:#7a4f0a}
 *{box-sizing:border-box}html{color-scheme:light}body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.55}
 header{display:flex;justify-content:space-between;align-items:baseline;padding:16px 24px;border-bottom:1px solid var(--line);background:var(--card)}
-header a{color:var(--green-dark);font-weight:600;text-decoration:none}header .v{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--ink3)}
+header a{color:var(--green-dark);font-weight:600;text-decoration:none}header nav{display:flex;gap:18px;margin-left:auto;margin-right:18px}header nav a{font-weight:500;color:var(--ink2);font-size:14px}header nav a:hover{color:var(--green)}ol li{margin:6px 0}header .v{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--ink3)}
 .banner{background:var(--amber-soft);color:var(--amber-ink);font-size:13px;padding:8px 24px}
 main{max-width:860px;margin:0 auto;padding:24px}
 h1{font-size:26px;margin:4px 0 10px;color:var(--green-dark)}h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);margin:26px 0 8px}

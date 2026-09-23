@@ -232,7 +232,7 @@ cat("Wrote dist/climate-taxonomy.csv and CHANGELOG.md\n")
 
 # 5. Pages: one per term, plus the landing page ---------------------------------------------------
 h <- function(x) x |> str_replace_all("&", "&amp;") |> str_replace_all("<", "&lt;") |> str_replace_all(">", "&gt;")
-link <- function(ids) if (length(ids)) paste0(glue('<a href="{ids}.html">{h(concepts$term[match(ids, concepts$id)])}</a>'), collapse = ", ") else "—"
+link <- function(ids) if (length(ids)) paste0(glue('<a href="{ids}.html">{h(concepts$term[match(ids, concepts$id)])}</a>'), collapse = ", ") else "none"
 CSS  <- read_file("docs/style.css")
 PAGE <- read_file("templates/page.html")                       # the shell every page shares; <<...>> are filled by glue
 page <- function(title, body, depth = "") glue(PAGE, .open = "<<", .close = ">>")
@@ -243,7 +243,7 @@ pwalk(concepts, function(id, term, synonyms, facet, parent_id, definition, sourc
   kids <- children$kids[match(id, children$parent_id)][[1]]
   rel_html <- paste0("<span class=k>", rels$type, "</span> ", map_chr(rels$target, link), collapse = "<br>")
   rows <- c(
-    glue("<dt>Synonyms</dt><dd>{if (length(synonyms)) h(paste(synonyms, collapse = ', ')) else '—'}</dd>"),
+    glue("<dt>Synonyms</dt><dd>{if (length(synonyms)) h(paste(synonyms, collapse = ', ')) else 'none'}</dd>"),
     glue("<dt>Broader</dt><dd>{if (is.na(parent_id)) 'Top concept of the scheme' else link(parent_id)}</dd>"),
     glue("<dt>Narrower</dt><dd>{link(kids)}</dd>"),
     if (nrow(rels)) glue("<dt>Relations</dt><dd>{rel_html}</dd>"),
@@ -278,6 +278,7 @@ fair_table <- paste0("<tr><td class=p>", fair_rows$principle, "</td><td>", h(fai
 cite_doi   <- if (!nzchar(DOI)) "DOI to follow." else if (str_starts(DOI, "10.5072")) glue('Test DOI (Zenodo Sandbox, not resolvable outside it): <a href="https://sandbox.zenodo.org/records/{str_extract(DOI, "[0-9]+$")}">{DOI}</a>. A permanent DOI comes with the first non-draft release.') else glue('<a href="https://doi.org/{DOI}">doi:{DOI}</a>')
 browse     <- paste(browse, collapse = "")
 write_file(page(TITLE, glue(read_file("templates/index.html"), .open = "<<", .close = ">>")), "docs/index.html")
+write_file(page("Method", glue(read_file("templates/method.html"), .open = "<<", .close = ">>")), "docs/method.html")
 invisible(file.create("docs/.nojekyll"))
 dir.create("docs/dist", showWarnings = FALSE)
 file.copy(list.files("dist", full.names = TRUE), "docs/dist", overwrite = TRUE) |> invisible()

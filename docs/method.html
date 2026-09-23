@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Method</title><style>:root{--bg:#f7f9f8;--card:#fff;--ink:#15211c;--ink2:#51625b;--ink3:#86938d;--line:#e3e8e5;--green:#065F4A;--green-dark:#033529;--green-soft:#e6f4ef;--amber-soft:#fdf1dc;--amber-ink:#7a4f0a}
+*{box-sizing:border-box}html{color-scheme:light}body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.55}
+header{display:flex;justify-content:space-between;align-items:baseline;padding:16px 24px;border-bottom:1px solid var(--line);background:var(--card)}
+header a{color:var(--green-dark);font-weight:600;text-decoration:none}header nav{display:flex;gap:18px;margin-left:auto;margin-right:18px}header nav a{font-weight:500;color:var(--ink2);font-size:14px}header nav a:hover{color:var(--green)}ol li{margin:6px 0}header .v{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--ink3)}
+.banner{background:var(--amber-soft);color:var(--amber-ink);font-size:13px;padding:8px 24px}
+main{max-width:860px;margin:0 auto;padding:24px}
+h1{font-size:26px;margin:4px 0 10px;color:var(--green-dark)}h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);margin:26px 0 8px}
+.eyebrow{font-size:12px;color:var(--ink3);margin:0}.eyebrow a{color:var(--green);text-decoration:none}
+.def{font-size:16px;max-width:70ch}.src{font-size:12.5px;color:var(--ink3)}.src a{color:var(--green)}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:8px 18px;margin:18px 0;font-size:14px}dt{color:var(--ink3);font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding-top:3px}dd{margin:0}dd a{color:var(--green)}
+.k{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--green);margin-right:6px}code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;background:var(--green-soft);padding:1px 5px;border-radius:3px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:8px}.grid section{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px}.grid h2{margin:0 0 6px}.grid p{margin:0;font-size:14px}.grid a{color:var(--green)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;background:var(--card);border:1px solid var(--line);border-radius:8px}th,td{text-align:left;padding:8px 10px;border-top:1px solid var(--line);vertical-align:top}th{border-top:0;color:var(--ink2);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+td.p{font-weight:600;color:var(--green);width:24px}td.ok{color:var(--green)}td.pend{color:var(--amber-ink)}
+details{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:8px 0}summary{cursor:pointer;font-weight:600;color:var(--green-dark)}summary .n{font-weight:400;color:var(--ink3);font-size:12px;margin-left:6px}.terms{font-size:13.5px;line-height:1.9}.terms a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}.terms a:hover{color:var(--green);border-color:var(--green)}
+footer{max-width:860px;margin:16px auto 32px;padding:0 24px;font-size:12px;color:var(--ink3)}footer a{color:var(--green)}
+</style></head><body>
+<header><a href="index.html">Climate adaptation taxonomy</a><nav><a href="index.html">Vocabulary</a><a href="method.html">Method</a><a href="https://github.com/Mlolita26/cgiar-climate-taxonomy">Repository</a></nav><span class="v">5.0.0-draft</span></header>
+<div class="banner">Draft for the MELIAF build-shop, Rabat, October 2026. Term identifiers are stable; their web address is provisional and will become <code>https://w3id.org/cgiar/climate-taxonomy/&lt;ID&gt;</code> afterwards. Licence proposed: CC BY 4.0.</div>
+<main><h1>Method</h1>
+<p class="def">How the climate taxonomy became a FAIR vocabulary, in plain words. The whole method is one R script, <code>build_fair.R</code>, in the <a href="https://github.com/Mlolita26/cgiar-climate-taxonomy">repository</a>. Running it again rebuilds everything on this site.</p>
+
+<h2>Starting point</h2>
+<p>The taxonomy already existed as version 5: a master spreadsheet, checked and built into one JSON file with 739 concepts, their definitions and sources, synonyms, parent terms, typed relations, and the rules that say when a term counts as adaptation or mitigation. Each concept had a stable identifier such as <code>CRK_102</code>. What it did not have was a web address, a standard format, a licence, or a published way to change it.</p>
+
+<h2>What we did</h2>
+<ol>
+<li><b>Copied the source files</b> into this repository. Copies only; the originals stay where they are. <code>source/SOURCES.md</code> lists each file, where it came from, its date and its checksum.</li>
+<li><b>Gave every term a web address.</b> The identifier stays the same; the address is the identifier after <code>terms/</code>. The address is provisional and will become <code>https://w3id.org/cgiar/climate-taxonomy/ID</code> later.</li>
+<li><b>Translated each field into SKOS</b>, the web standard for vocabularies: the term becomes the preferred label, synonyms become alternative labels, the definition and its source are kept, the parent becomes the broader term, the facet becomes a collection, and the condition under which a term counts becomes a scope note. The typed relations (addresses, produces, and so on) have no SKOS equivalent, so they are defined in a small companion file.</li>
+<li><b>Kept the retired identifiers.</b> The 23 identifiers retired in version 5 are still in the vocabulary, marked deprecated and pointing to their successor, so old reports stay readable.</li>
+<li><b>Wrote the vocabulary in three formats:</b> Turtle and JSON-LD for machines, CSV for spreadsheets.</li>
+<li><b>Made one web page per term</b>, plus this site. Each page shows the term for a reader and embeds the same data for a machine.</li>
+<li><b>Checked the result</b> with a second script, <code>qa/check_skos.R</code>: unique identifiers, a label and a definition for every term, every parent and relation target exists, no loops in the hierarchy, and the files parse back correctly. Nineteen checks, all passing.</li>
+<li><b>Published.</b> The site is served by GitHub Pages from the repository. Each version is a tagged release with the files attached, and a test deposit was made in Zenodo Sandbox to try the citation step.</li>
+</ol>
+
+<h2>Files created</h2>
+<table>
+<tr><th>File</th><th>What it is</th></tr>
+<tr><td><code>build_fair.R</code></td><td>The script that makes everything below from the source files</td></tr>
+<tr><td><code>dist/climate-taxonomy.ttl</code></td><td>The vocabulary in Turtle (SKOS)</td></tr>
+<tr><td><code>dist/climate-taxonomy.jsonld</code></td><td>The same in JSON-LD</td></tr>
+<tr><td><code>dist/climate-taxonomy.csv</code></td><td>The same as a flat table</td></tr>
+<tr><td><code>dist/meliaf-relations.ttl</code></td><td>Definitions of the typed relations and rule attributes</td></tr>
+<tr><td><code>docs/index.html</code>, <code>docs/terms/*.html</code></td><td>This site: the landing page and 762 term pages</td></tr>
+<tr><td><code>source/provenance_map.csv</code></td><td>Turns the free text about where a term came from into four classes</td></tr>
+<tr><td><code>source/relation_definitions.csv</code></td><td>One line explaining each typed relation</td></tr>
+<tr><td><code>source/fair_checklist.csv</code></td><td>The self-assessment shown on the landing page</td></tr>
+<tr><td><code>GOVERNANCE.md</code></td><td>Who decides, how to propose a term, rules that never change</td></tr>
+<tr><td><code>CHANGELOG.md</code></td><td>What changed between version 4 and 5 (generated)</td></tr>
+<tr><td><code>LICENSE.md</code>, <code>CITATION.cff</code></td><td>Licence and how to cite</td></tr>
+<tr><td><code>qa/check_skos.R</code></td><td>The checks</td></tr>
+</table>
+
+<h2>What is provisional</h2>
+<p>The web address (a permanent namespace comes next), the licence (CC BY 4.0, proposed), the DOI (a test one), and registration in a vocabulary repository. None of these change a term identifier.</p>
+
+<h2>Using the same method for another vocabulary</h2>
+<p>Replace the JSON file in <code>source/</code>, adjust the list of fields at the top of <code>build_fair.R</code>, and run it. The matching, the pages, the checks and the publishing steps stay the same. This is the method the MELIAF build-shop can reuse for the next domain vocabulary.</p></main>
+<footer>CGIAR Climate Adaptation and Mitigation Taxonomy · <a href="dist/climate-taxonomy.ttl">Turtle</a> · <a href="dist/climate-taxonomy.jsonld">JSON-LD</a> · <a href="dist/climate-taxonomy.csv">CSV</a> · <a href="https://github.com/Mlolita26/cgiar-climate-taxonomy">Repository</a> · Custodian: CGIAR MELIAF Climate Adaptation Activator (Andreea Nowak, Lolita Muller), Alliance of Bioversity International and CIAT</footer>
+</body></html>

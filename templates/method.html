@@ -1,0 +1,41 @@
+<h1>Method</h1>
+<p class="def">How the climate taxonomy became a FAIR vocabulary, in plain words. The whole method is one R script, <code>build_fair.R</code>, in the <a href="https://github.com/Mlolita26/cgiar-climate-taxonomy">repository</a>. Running it again rebuilds everything on this site.</p>
+
+<h2>Starting point</h2>
+<p>The taxonomy already existed as version 5: a master spreadsheet, checked and built into one JSON file with <<nrow(concepts)>> concepts, their definitions and sources, synonyms, parent terms, typed relations, and the rules that say when a term counts as adaptation or mitigation. Each concept had a stable identifier such as <code>CRK_102</code>. What it did not have was a web address, a standard format, a licence, or a published way to change it.</p>
+
+<h2>What we did</h2>
+<ol>
+<li><b>Copied the source files</b> into this repository. Copies only; the originals stay where they are. <code>source/SOURCES.md</code> lists each file, where it came from, its date and its checksum.</li>
+<li><b>Gave every term a web address.</b> The identifier stays the same; the address is the identifier after <code>terms/</code>. The address is provisional and will become <code><<FUTURE_IRI>>ID</code> later.</li>
+<li><b>Translated each field into SKOS</b>, the web standard for vocabularies: the term becomes the preferred label, synonyms become alternative labels, the definition and its source are kept, the parent becomes the broader term, the facet becomes a collection, and the condition under which a term counts becomes a scope note. The typed relations (addresses, produces, and so on) have no SKOS equivalent, so they are defined in a small companion file.</li>
+<li><b>Kept the retired identifiers.</b> The <<nrow(retired)>> identifiers retired in version 5 are still in the vocabulary, marked deprecated and pointing to their successor, so old reports stay readable.</li>
+<li><b>Wrote the vocabulary in three formats:</b> Turtle and JSON-LD for machines, CSV for spreadsheets.</li>
+<li><b>Made one web page per term</b>, plus this site. Each page shows the term for a reader and embeds the same data for a machine.</li>
+<li><b>Checked the result</b> with a second script, <code>qa/check_skos.R</code>: unique identifiers, a label and a definition for every term, every parent and relation target exists, no loops in the hierarchy, and the files parse back correctly. Nineteen checks, all passing.</li>
+<li><b>Published.</b> The site is served by GitHub Pages from the repository. Each version is a tagged release with the files attached, and a test deposit was made in Zenodo Sandbox to try the citation step.</li>
+</ol>
+
+<h2>Files created</h2>
+<table>
+<tr><th>File</th><th>What it is</th></tr>
+<tr><td><code>build_fair.R</code></td><td>The script that makes everything below from the source files</td></tr>
+<tr><td><code>dist/climate-taxonomy.ttl</code></td><td>The vocabulary in Turtle (SKOS)</td></tr>
+<tr><td><code>dist/climate-taxonomy.jsonld</code></td><td>The same in JSON-LD</td></tr>
+<tr><td><code>dist/climate-taxonomy.csv</code></td><td>The same as a flat table</td></tr>
+<tr><td><code>dist/meliaf-relations.ttl</code></td><td>Definitions of the typed relations and rule attributes</td></tr>
+<tr><td><code>docs/index.html</code>, <code>docs/terms/*.html</code></td><td>This site: the landing page and <<nrow(concepts) + nrow(retired)>> term pages</td></tr>
+<tr><td><code>source/provenance_map.csv</code></td><td>Turns the free text about where a term came from into four classes</td></tr>
+<tr><td><code>source/relation_definitions.csv</code></td><td>One line explaining each typed relation</td></tr>
+<tr><td><code>source/fair_checklist.csv</code></td><td>The self-assessment shown on the landing page</td></tr>
+<tr><td><code>GOVERNANCE.md</code></td><td>Who decides, how to propose a term, rules that never change</td></tr>
+<tr><td><code>CHANGELOG.md</code></td><td>What changed between version 4 and 5 (generated)</td></tr>
+<tr><td><code>LICENSE.md</code>, <code>CITATION.cff</code></td><td>Licence and how to cite</td></tr>
+<tr><td><code>qa/check_skos.R</code></td><td>The checks</td></tr>
+</table>
+
+<h2>What is provisional</h2>
+<p>The web address (a permanent namespace comes next), the licence (CC BY 4.0, proposed), the DOI (a test one), and registration in a vocabulary repository. None of these change a term identifier.</p>
+
+<h2>Using the same method for another vocabulary</h2>
+<p>Replace the JSON file in <code>source/</code>, adjust the list of fields at the top of <code>build_fair.R</code>, and run it. The matching, the pages, the checks and the publishing steps stay the same. This is the method the MELIAF build-shop can reuse for the next domain vocabulary.</p>
