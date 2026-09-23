@@ -15,7 +15,7 @@
     dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
     dcterms:rights "Licence proposed (CC BY 4.0), pending confirmation by the custodian."@en ;
     owl:versionInfo "5.0.0-draft" ;
-    skos:note "Status: draft. Published for the MELIAF build-shop (Rabat, October 2026) so the container can be seen working. Identifiers use the GitHub Pages address for now; a permanent namespace will replace it without changing term ids."@en ;
+    skos:note "Status: draft. Published for the MELIAF build-shop (Rabat, October 2026) so the container can be seen working. Identifiers use the GitHub Pages address for now; the planned permanent form is https://w3id.org/cgiar/climate-taxonomy/<ID>, which will replace it without changing term ids."@en ;
     skos:historyNote "Version 5 built 2026-09-04 from master_v5.csv by build_taxonomy_v5.R; 739 concepts, 0 build errors. Version 4 (626 concepts) is the previous release."@en ;
     rdfs:seeAlso <https://github.com/Mlolita26/cgiar-climate-taxonomy> .
 ct:facet-climate-risk a skos:Collection ;

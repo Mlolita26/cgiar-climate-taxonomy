@@ -6,7 +6,8 @@
 library(dplyr); library(purrr); library(tidyr); library(stringr); library(readr); library(jsonlite); library(glue)
 
 # 0. Settings: the only block that changes after the build-shop ------------------------------
-BASE_IRI  <- "https://mlolita26.github.io/cgiar-climate-taxonomy/"   # later: a w3id.org namespace
+BASE_IRI  <- "https://mlolita26.github.io/cgiar-climate-taxonomy/"   # provisional: where the pages are served today
+FUTURE_IRI <- "https://w3id.org/cgiar/climate-taxonomy/"              # planned permanent namespace (to register after the build-shop)
 VERSION   <- "5.0.0-draft"
 STATUS    <- "draft"
 LICENCE   <- "https://creativecommons.org/licenses/by/4.0/"          # proposed, pending confirmation
@@ -16,6 +17,7 @@ DOI       <- ""                                                        # Zenodo 
 TODAY     <- format(Sys.Date())
 SCHEME    <- paste0(BASE_IRI, "scheme")
 term_iri  <- function(id) paste0(BASE_IRI, "terms/", id)
+future_iri <- function(id) paste0(FUTURE_IRI, id)
 
 # 1. Read the taxonomy ------------------------------------------------------------------------
 raw <- read_json("source/taxonomy_v5.json")
@@ -82,7 +84,7 @@ scheme_ttl <- glue('
     dcterms:license <{LICENCE}> ;
     dcterms:rights {lit("Licence proposed (CC BY 4.0), pending confirmation by the custodian.")} ;
     owl:versionInfo "{VERSION}" ;
-    skos:note {lit(glue("Status: {STATUS}. Published for the MELIAF build-shop (Rabat, October 2026) so the container can be seen working. Identifiers use the GitHub Pages address for now; a permanent namespace will replace it without changing term ids."))} ;
+    skos:note {lit(glue("Status: {STATUS}. Published for the MELIAF build-shop (Rabat, October 2026) so the container can be seen working. Identifiers use the GitHub Pages address for now; the planned permanent form is {FUTURE_IRI}<ID>, which will replace it without changing term ids."))} ;
     skos:historyNote {lit("Version 5 built 2026-09-04 from master_v5.csv by build_taxonomy_v5.R; 739 concepts, 0 build errors. Version 4 (626 concepts) is the previous release.")} ;
     rdfs:seeAlso <https://github.com/Mlolita26/cgiar-climate-taxonomy> .
 ')
@@ -249,7 +251,7 @@ pwalk(concepts, function(id, term, synonyms, facet, parent_id, definition, sourc
     if (mitigation != "n/a") glue("<dt>Mitigation</dt><dd>{h(mitigation)}{if (mitigation == 'Mitigation-conditional') paste0(': ', h(m_condition)) else ''}</dd>"),
     if (nzchar(example)) glue("<dt>Example of use</dt><dd>{h(example)}</dd>"),
     glue("<dt>Provenance</dt><dd>{h(prov_class)}</dd>"),
-    glue("<dt>Identifier</dt><dd><code>{id}</code> · <a href='{term_iri(id)}'>{term_iri(id)}</a></dd>")
+    glue("<dt>Identifier</dt><dd><code>{id}</code> · <a href='{term_iri(id)}'>{term_iri(id)}</a><br><span class='src'>(planned permanent identifier: {future_iri(id)})</span></dd>")
   )
   body <- glue('<p class="eyebrow"><a href="../index.html#facet-{facets$slug[facets$facet == facet]}">{h(facet)}</a> · {h(stage)}</p>
 <h1>{h(term)}</h1>
@@ -261,7 +263,8 @@ pwalk(concepts, function(id, term, synonyms, facet, parent_id, definition, sourc
 pwalk(retired, function(ID, Term, Facet, successor, reason) {
   body <- glue('<p class="eyebrow">{h(Facet)} · deprecated</p><h1>{h(Term)}</h1>
 <p class="def">This term was retired in version 5 ({h(reason)}). The identifier <code>{ID}</code> is kept so that older reporting stays readable, and will never be reused.</p>
-<dl><dt>Replaced by</dt><dd>{if (is.na(successor)) "No successor (concept dropped)" else link(successor)}</dd></dl>')
+<dl><dt>Replaced by</dt><dd>{if (is.na(successor)) "No successor (concept dropped)" else link(successor)}</dd>
+<dt>Identifier</dt><dd><code>{ID}</code> · <a href="{term_iri(ID)}">{term_iri(ID)}</a><br><span class="src">(planned permanent identifier: {future_iri(ID)})</span></dd></dl>')
   write_file(page(paste(Term, "(retired)"), body, "../"), glue("docs/terms/{ID}.html"))
 })
 
