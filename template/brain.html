@@ -47,6 +47,9 @@ textarea#txt{position:relative;display:block;min-height:150px;background:transpa
 .chip{font-size:12px;padding:2px 9px;border-radius:12px;background:var(--green-soft);color:var(--green-dark)}
 .chip.synonym{background:var(--amber-soft);color:var(--amber-ink)}
 .chip.synonym b{font-weight:500}
+a.chip{text-decoration:none}a.chip:hover{outline:1px solid var(--green)}
+.related{padding:4px 16px 16px;border-top:1px solid var(--line)}.related h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin:12px 0 6px;font-weight:600}
+.rel-row{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:4px 0}.rel-why{font-size:12px;color:var(--ink-3)}
 
 /* the pathway */
 .verdict{padding:16px}
@@ -91,6 +94,7 @@ footer a{color:var(--green)}
       <div class="count amber"><b class="mono" id="n-syn">0</b><span>synonyms</span></div>
     </div>
     <div class="chips" id="chips"></div>
+    <div class="related" id="related" hidden></div>
   </section>
 
   <aside class="card">
@@ -117,6 +121,7 @@ const GUARDS   = __GUARDS__.map(g => ({id: g.id, re: new RegExp(g.pattern, 'i')}
 const SAMPLES  = __SAMPLES__;
 
 const byId = Object.fromEntries(CONCEPTS.map(c => [c.id, c]));
+const FAIR = 'https://mlolita26.github.io/cgiar-climate-taxonomy/terms/';   // published vocabulary: one page per term
 const STOP = new Set(RULES.stop_words);
 
 // ---------- index: one lookup key per label ----------
@@ -213,13 +218,45 @@ function renderBackdrop(text, matches){
   txt.style.height = 'auto'; txt.style.height = Math.max(150, txt.scrollHeight) + 'px';   // grow with the text, never scroll
 }
 
+// concepts related to what the text already mentions, but not mentioned: parents, children and typed relations
+function renderRelated(matches, text){
+  const present = new Set(matches.map(m => m.id));
+  const firstHit = {}; for (const m of matches) if (!(m.id in firstHit)) firstHit[m.id] = m;
+  const sentences = text.split(/(?<=[.!?;])\s+/);
+  const suggest = new Map();   // id -> {why:[], anchor}
+  const add = (id, why, from) => {
+    if (present.has(id) || !byId[id]) return;
+    if (!suggest.has(id)) suggest.set(id, {why: [], anchor: from});
+    const s = suggest.get(id); if (s.why.length < 2) s.why.push(why);
+  };
+  for (const id of present){
+    const c = byId[id];
+    if (c.parent_id) add(c.parent_id, `broader than ${c.term}`, id);
+    for (const k of CONCEPTS) if (k.parent_id === id) add(k.id, `a kind of ${c.term}`, id);
+    for (const r of c.relations) add(r.target, `${c.term} ${r.type} it`, id);
+    for (const k of CONCEPTS) for (const r of k.relations) if (r.target === id) add(k.id, `it ${r.type} ${c.term}`, id);
+  }
+  const rows = [...suggest.entries()]
+    .map(([id, s]) => ({id, c: byId[id], why: s.why.join('; '), anchor: firstHit[s.anchor]}))
+    .sort((a, b) => (b.c.adaptation === 'Adaptation-specific') - (a.c.adaptation === 'Adaptation-specific') || b.why.length - a.why.length)
+    .slice(0, 8);
+  const box = document.getElementById('related');
+  if (!rows.length){ box.hidden = true; return; }
+  box.hidden = false;
+  box.innerHTML = '<h3>Related concepts not mentioned</h3>' + rows.map(r => {
+    const sent = sentences.find(x => x.includes(r.anchor.found)) || '';
+    const where = sent ? `near “…${esc(sent.slice(0, 70).trim())}…”` : '';
+    return `<div class="rel-row"><a class="chip" href="${FAIR}${r.id}.html" target="_blank">${esc(r.c.term)}</a><span class="rel-why">${esc(r.why)} · ${where}</span></div>`;
+  }).join('');
+}
+
 function renderChips(matches){
   const seen = new Set(), chips = [];
   for (const m of matches){
     const key = m.id + '|' + m.found.toLowerCase(); if (seen.has(key)) continue; seen.add(key);
     const c = byId[m.id];
-    chips.push(m.kind === 'term' ? `<span class="chip">${esc(c.term)}</span>`
-                                 : `<span class="chip synonym">${esc(m.found)} → <b>${esc(c.term)}</b></span>`);
+    chips.push(m.kind === 'term' ? `<a class="chip" href="${FAIR}${c.id}.html" target="_blank" title="Open the term's page">${esc(c.term)}</a>`
+                                 : `<a class="chip synonym" href="${FAIR}${c.id}.html" target="_blank" title="Open the term's page">${esc(m.found)} → <b>${esc(c.term)}</b></a>`);
   }
   document.getElementById('chips').innerHTML = chips.join('');
 }
@@ -256,6 +293,7 @@ function run(){
   document.getElementById('n-terms').textContent = matches.filter(x => x.kind === 'term').length;
   document.getElementById('n-syn').textContent = matches.filter(x => x.kind === 'synonym').length;
   renderChips(matches);
+  renderRelated(matches, text);
   renderPathway(a, m);
 }
 let timer; txt.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(run, 120); });
