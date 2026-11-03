@@ -3,6 +3,8 @@
   "id": "test-2025",
   "name": "Test, 2025 results (taxonomy v4)",
   "taxonomy": "taxonomy_v4_plus.json",
-  "n": 60
+  "n": 60,
+  "v": "2108872e30",
+  "tv": "75ec94054a"
  }
 ]

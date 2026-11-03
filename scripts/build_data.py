@@ -6,7 +6,7 @@
 Writes data/taxonomy.json, data/batch-<batch>.json and updates data/batches.json.
 Reviews are not here: they are stored by the worker (worker/).
 """
-import argparse, json, os, random
+import argparse, hashlib, json, os, random
 
 ROOT = r"C:\Users\mlolita\OneDrive - CGIAR\Nowak, Andreea (Alliance Bioversity-CIAT)'s files - MELIAF-Implementation"
 DEFAULT_TAGS = os.path.join(ROOT, r"Data\outputs\prms_2025_final\_working\prms_tags.jsonl")
@@ -48,11 +48,12 @@ if a.n and a.n < len(recs):                      # a mix of verdicts, so the bat
     pick += rnd.sample(mit, min(max(0, a.n - len(pick)), len(mit)))
     recs = pick[:a.n]
 
+aslist = lambda x: x if isinstance(x, list) else ([x] if x else [])   # a single element is stored as plain text
 KEEP = ("concept_id", "concept_name", "facet", "a_counts", "m_counts", "pathway_stage", "detection_excerpt")
 results = [{"id": str(r["unit_id"]), "title": r.get("title") or "", "description": r.get("description") or "",
             "marker": r.get("climate_marker") or "", "level": r.get("level") or "", "type": r.get("type") or "",
             "ai_a": r.get("adaptation_verdict"), "ai_m": r.get("mitigation_verdict"),
-            "ai_a_el": r.get("adaptation_elements") or [], "ai_m_el": r.get("mitigation_elements") or [],
+            "ai_a_el": aslist(r.get("adaptation_elements")), "ai_m_el": aslist(r.get("mitigation_elements")),
             "ai_a_path": r.get("adaptation_pathway") or "", "ai_m_path": r.get("mitigation_pathway") or "",
             "tags": [{k: t.get(k) for k in KEEP} for t in r.get("tags") or []]} for r in recs]
 results.sort(key=lambda r: (not r["id"].isdigit(), int(r["id"]) if r["id"].isdigit() else 0, r["id"]))
@@ -61,6 +62,9 @@ json.dump({"batch": a.batch, "taxonomy": tver, "results": results},
 
 bp = os.path.join(OUT, "batches.json")
 batches = [b for b in (json.load(open(bp, encoding="utf-8")) if os.path.exists(bp) else []) if b["id"] != a.batch]
-batches.append({"id": a.batch, "name": a.name or a.batch, "taxonomy": tver, "n": len(results)})
+# v / tv: short content stamps, so browsers cache the files and fetch them again only when they change
+stamp = lambda f: hashlib.sha1(open(os.path.join(OUT, f), "rb").read()).hexdigest()[:10]
+batches.append({"id": a.batch, "name": a.name or a.batch, "taxonomy": tver, "n": len(results),
+                "v": stamp(f"batch-{a.batch}.json"), "tv": stamp("taxonomy.json")})
 json.dump(batches, open(bp, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 print(f"batch '{a.batch}': {len(results)} results · taxonomy {tver}: {len(terms)} terms -> data/")

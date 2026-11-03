@@ -1,10 +1,10 @@
 // Stores the reviews. Rules: two reviewers per result; a reviewer sees the other review only
 // once both are submitted; a review is locked once both are submitted.
 //   GET  /me                       -> {name}
-//   GET  /state?batch=B            -> {mine: [...], counts: {result_id: {started, submitted}}, done: [...]}
-//   PUT  /review                   -> save or submit your review of one result
+//   GET  /state?batch=B            -> {name, mine: [...], counts: {result_id: {started, submitted}}, done: [...]}
+//   POST /review                   -> save or submit your review of one result (body as text/plain)
 //   GET  /export?batch=B           -> every review of the batch (for the download file)
-// The reviewer is identified by the X-Reviewer header (their personal code).
+// The reviewer is identified by ?r=<personal code> (or the X-Reviewer header).
 
 const JSON_COLS = ["tag_decisions", "added_terms", "proposals"];
 
@@ -12,14 +12,15 @@ export default {
   async fetch(req, env) {
     const cors = {
       "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN || "*",
-      "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, X-Reviewer",
+      "Access-Control-Max-Age": "86400",
     };
     if (req.method === "OPTIONS") return new Response(null, { headers: cors });
     const out = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
     try {
       const url = new URL(req.url);
-      const code = (req.headers.get("X-Reviewer") || "").trim();
+      const code = (url.searchParams.get("r") || req.headers.get("X-Reviewer") || "").trim();
       const me = code ? await env.DB.prepare("SELECT code, name FROM reviewers WHERE code = ?").bind(code).first() : null;
       if (!me) return out({ error: "Unknown reviewer link." }, 401);
       const names = Object.fromEntries((await env.DB.prepare("SELECT code, name FROM reviewers").all()).results.map(r => [r.code, r.name]));
@@ -40,11 +41,11 @@ export default {
         all.forEach(r => { const c = counts[r.result_id] ||= { started: 0, submitted: 0 }; c.started++; if (r.submitted) c.submitted++; });
         const mine = all.filter(r => r.reviewer_code === me.code).map(shape);
         const done = all.filter(r => r.submitted && counts[r.result_id].submitted >= 2).map(shape);
-        return out({ mine, counts, done });
+        return out({ name: me.name, mine, counts, done });
       }
 
-      if (url.pathname === "/review" && req.method === "PUT") {
-        const r = await req.json();
+      if (url.pathname === "/review" && (req.method === "PUT" || req.method === "POST")) {
+        const r = JSON.parse(await req.text());   // sent as text/plain so the browser skips the permission check
         if (!r.result_id || !r.batch_id) return out({ error: "result_id and batch_id are required." }, 400);
         const others = (await env.DB.prepare("SELECT reviewer_code, submitted FROM reviews WHERE result_id = ? AND reviewer_code != ?")
           .bind(r.result_id, me.code).all()).results;
