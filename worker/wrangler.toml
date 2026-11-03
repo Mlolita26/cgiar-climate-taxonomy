@@ -1,0 +1,13 @@
+name = "tagging-review"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+[vars]
+# the address of the review page; "*" while testing
+ALLOWED_ORIGIN = "*"
+
+# created by: npx wrangler d1 create tagging-review   (paste the id it prints here)
+[[d1_databases]]
+binding = "DB"
+database_name = "tagging-review"
+database_id = "00000000-0000-0000-0000-000000000000"   # local test only; replace with the id from d1 create

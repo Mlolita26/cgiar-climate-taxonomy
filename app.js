@@ -1,112 +1,72 @@
-// Tagging review. Plain JS, no build step. Data and logins in Supabase (tables rv_*).
-const sb = supabase.createClient(CONFIG.url, CONFIG.key);
+// Tagging review. Plain JS, no build step. The taxonomy and the results are static files in data/;
+// the reviews are stored by a small worker (worker/), which knows the reviewer from their personal link (?r=code).
 const $ = (s, el = document) => el.querySelector(s);
 const esc = s => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const VERDICTS = ["Full", "Partial", "Minimal", "None"];
 const COUNTED = ["specific", "conditional_met"];
 
 const S = {
-  user: null, names: {}, batch: null, batches: [],
+  code: "", me: "", batch: null, batches: [],
   terms: {}, kids: {}, facets: [],
-  list: [], status: {}, mine: {}, others: {},   // others: reviews of finished results, by result id
+  list: [], byId: {}, status: {}, mine: {}, others: {},   // others: both reviews of finished results, by result id
   tab: "todo", cur: null, rev: null,
 };
 
+async function api(path, opts = {}) {
+  const r = await fetch(CONFIG.api + path, { ...opts, headers: { "Content-Type": "application/json", "X-Reviewer": S.code } });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.error || r.statusText);
+  return body;
+}
+const getJson = async p => { const r = await fetch(p, { cache: "no-cache" }); if (!r.ok) throw new Error(p + ": " + r.status); return r.json(); };
+
 // ---------------------------------------------------------------- start
 async function boot() {
-  const { data } = await sb.auth.getSession();
-  if (!data.session) return login();
-  S.user = data.session.user;
-  const { data: me } = await sb.from("rv_reviewers").select("*").eq("id", S.user.id).maybeSingle();
-  if (!me) return askName();
-  const [{ data: rs }, { data: bs }] = await Promise.all([
-    sb.from("rv_reviewers").select("id,name"), sb.from("rv_batches").select("*").order("created_at")]);
-  (rs || []).forEach(r => S.names[r.id] = r.name);
-  S.batches = bs || [];
-  $("#who").innerHTML = `${esc(me.name)} · <a href="#" id="out">sign out</a>`;
-  $("#out").onclick = async e => { e.preventDefault(); await sb.auth.signOut(); location.hash = ""; location.reload(); };
-  await loadTerms();
+  const u = new URL(location.href), r = u.searchParams.get("r");
+  if (r) { try { localStorage.setItem("rv_code", r); } catch (e) {} u.searchParams.delete("r"); history.replaceState(null, "", u.pathname + u.search + u.hash); }
+  try { S.code = r || localStorage.getItem("rv_code") || ""; } catch (e) { S.code = r || ""; }
+  if (!S.code) { $("#main").innerHTML = "<p>Open the page with your personal link.</p>"; return; }
+  try { S.me = (await api("/me")).name; }
+  catch (e) { $("#main").innerHTML = `<p>${esc(e.message)} Open the page with your personal link.</p>`; return; }
+  $("#who").textContent = S.me;
+  const [tax, batches] = await Promise.all([getJson("data/taxonomy.json"), getJson("data/batches.json")]);
+  setTerms(tax.terms); S.batches = batches;
   const sel = $("#batch");
-  sel.innerHTML = S.batches.map(b => `<option value="${esc(b.id)}">${esc(b.name || b.id)}</option>`).join("");
-  S.batch = localStorage.getItem("rv_batch") || (S.batches[0] || {}).id;
-  if (!S.batches.find(b => b.id === S.batch)) S.batch = (S.batches[0] || {}).id;
+  sel.innerHTML = S.batches.map(b => `<option value="${esc(b.id)}">${esc(b.name || b.id)} (${b.n})</option>`).join("");
+  try { S.batch = localStorage.getItem("rv_batch"); } catch (e) {}
+  if (!S.batches.find(b => b.id === S.batch)) S.batch = (S.batches[S.batches.length - 1] || {}).id;
   sel.value = S.batch || "";
-  sel.onchange = async () => { S.batch = sel.value; localStorage.setItem("rv_batch", S.batch); await loadBatch(); location.hash = "#/list/todo"; route(); };
-  if (!S.batch) { $("#main").innerHTML = "<p>No batch loaded yet.</p>"; return; }
-  await loadBatch();
+  sel.onchange = async () => { S.batch = sel.value; try { localStorage.setItem("rv_batch", S.batch); } catch (e) {} await loadBatch(true); location.hash = "#/list/todo"; route(); };
+  if (!S.batch) { $("#main").innerHTML = "<p>No batch yet.</p>"; return; }
+  await loadBatch(true);
   window.onhashchange = route;
   route();
 }
 
-function login() {
-  $("#tabs").innerHTML = ""; $("#batch").style.display = "none";
-  $("#main").innerHTML = `<div class="login">
-    <h2>Sign in</h2>
-    <input id="em" type="email" placeholder="email" autocomplete="username">
-    <input id="pw" type="password" placeholder="password" autocomplete="current-password">
-    <div class="bar"><button class="main" id="in">Sign in</button><button id="up">Create account</button></div>
-    <p id="msg" class="small"></p></div>`;
-  const go = async signup => {
-    const email = $("#em").value.trim(), password = $("#pw").value;
-    const r = signup ? await sb.auth.signUp({ email, password }) : await sb.auth.signInWithPassword({ email, password });
-    if (r.error) return $("#msg").textContent = r.error.message;
-    if (signup && !r.data.session) return $("#msg").textContent = "Check your email to confirm the account, then sign in.";
-    location.reload();
-  };
-  $("#in").onclick = () => go(false); $("#up").onclick = () => go(true);
-  $("#pw").onkeydown = e => { if (e.key === "Enter") go(false); };
-}
-
-function askName() {
-  $("#main").innerHTML = `<div class="login"><h2>Your name</h2><p class="small">Shown to the other reviewers.</p>
-    <input id="nm" placeholder="First and last name"><div class="bar"><button class="main" id="ok">Save</button></div><p id="msg" class="small"></p></div>`;
-  $("#ok").onclick = async () => {
-    const name = $("#nm").value.trim(); if (!name) return;
-    const { error } = await sb.from("rv_reviewers").insert({ id: S.user.id, name });
-    if (error) return $("#msg").textContent = error.message;
-    location.reload();
-  };
-}
-
 // ---------------------------------------------------------------- data
-async function loadTerms() {
-  let all = [], from = 0;
-  while (true) {
-    const { data, error } = await sb.from("rv_terms").select("*").range(from, from + 999);
-    if (error || !data.length) break;
-    all = all.concat(data); if (data.length < 1000) break; from += 1000;
-  }
+function setTerms(all) {
   S.terms = {}; S.kids = {};
-  all.forEach(t => { S.terms[t.id] = t; (S.kids[t.parent_id || "_" + t.facet] ||= []).push(t.id); });
+  all.forEach(t => { t.role_adaptation = t.role_a; t.role_mitigation = t.role_m; S.terms[t.id] = t; (S.kids[t.parent_id || "_" + t.facet] ||= []).push(t.id); });
   Object.values(S.kids).forEach(a => a.sort((x, y) => S.terms[x].term.localeCompare(S.terms[y].term)));
   const n = {}; all.forEach(t => n[t.facet] = (n[t.facet] || 0) + 1);
   S.facets = Object.keys(n).sort((a, b) => n[b] - n[a]);
 }
 
-async function loadBatch() {
-  const cols = "id,title,climate_marker,level,type,ai_adaptation,ai_mitigation,ai_scope";
-  const [{ data: rs }, { data: st }, { data: mine }] = await Promise.all([
-    sb.from("rv_results").select(cols).eq("batch_id", S.batch).order("id"),
-    sb.from("rv_result_status").select("*").eq("batch_id", S.batch),
-    sb.from("rv_reviews").select("*").eq("reviewer_id", S.user.id)]);
-  S.list = (rs || []).sort((a, b) => (+a.id || 0) - (+b.id || 0));
-  S.status = {}; (st || []).forEach(s => S.status[s.result_id] = s);
-  S.mine = {}; (mine || []).forEach(r => S.mine[r.result_id] = r);
-  const done = S.list.filter(r => n2(r.id) >= 2).map(r => r.id);
-  S.others = {};
-  for (let i = 0; i < done.length; i += 200) {
-    const { data } = await sb.from("rv_reviews").select("*").in("result_id", done.slice(i, i + 200)).eq("submitted", true);
-    (data || []).forEach(v => (S.others[v.result_id] ||= []).push(v));
+async function loadBatch(withResults) {
+  if (withResults) {
+    const b = await getJson(`data/batch-${S.batch}.json`);
+    S.list = b.results.map(r => ({ id: r.id, title: r.title, description: r.description, climate_marker: r.marker, level: r.level, type: r.type,
+      ai_adaptation: r.ai_a, ai_mitigation: r.ai_m, ai_adaptation_elements: r.ai_a_el, ai_mitigation_elements: r.ai_m_el,
+      ai_adaptation_pathway: r.ai_a_path, ai_mitigation_pathway: r.ai_m_path, ai_tags: r.tags }));
+    S.byId = Object.fromEntries(S.list.map(r => [r.id, r]));
   }
-  S.full = {};
+  const st = await api(`/state?batch=${encodeURIComponent(S.batch)}`);
+  S.status = st.counts || {};
+  S.mine = {}; (st.mine || []).forEach(r => S.mine[r.result_id] = r);
+  S.others = {}; (st.done || []).forEach(v => (S.others[v.result_id] ||= []).push(v));
 }
-const n2 = id => (S.status[id] || {}).n_submitted || 0;
-
-async function fullResult(id) {
-  if (S.full[id]) return S.full[id];
-  const { data } = await sb.from("rv_results").select("*").eq("id", id).single();
-  return (S.full[id] = data);
-}
+const n2 = id => (S.status[id] || {}).submitted || 0;
+async function fullResult(id) { return S.byId[id]; }
 
 // final answer of one review: verdicts and the set of tags it keeps
 function finalOf(rev, res) {
@@ -149,14 +109,14 @@ function tabs() {
   S.list.forEach(r => c[bucket(r)]++);
   const lab = { todo: "To review", waiting: "Waiting for 2nd review", agree: "Done: agree", disagree: "Done: disagree" };
   $("#tabs").innerHTML = Object.keys(lab).map(k => `<a href="#/list/${k}" class="${S.tab === k ? "on" : ""}">${lab[k]} (${c[k]})</a>`).join("")
-    + ` <a href="#" id="exp">Export</a>`;
-  $("#exp").onclick = e => { e.preventDefault(); exportCsv(); };
+    + ` <a href="#" id="exp">Download file</a>`;
+  $("#exp").onclick = e => { e.preventDefault(); exportFile(); };
 }
 
 function listView() {
   tabs();
   const rows = S.list.filter(r => bucket(r) === S.tab);
-  const who = id => (S.others[id] || []).map(v => esc(S.names[v.reviewer_id] || "?")).join(", ");
+  const who = id => (S.others[id] || []).map(v => esc(v.reviewer)).join(", ");
   const st = r => { const m = S.mine[r.id]; return m ? (m.submitted ? "submitted" : "draft saved") : ""; };
   $("#main").innerHTML = rows.length ? `<table><tr><th>ID</th><th>Marker</th><th>AI adaptation</th><th>AI mitigation</th><th>Title</th><th>${S.tab.startsWith("d") || S.tab === "agree" ? "Reviewers" : "You"}</th></tr>
     ${rows.map(r => `<tr class="click" data-id="${esc(r.id)}"><td>${esc(r.id)}</td><td>${esc(r.climate_marker)}</td><td>${esc(r.ai_adaptation)}</td>
@@ -208,7 +168,8 @@ async function openResult(id) {
   S.cur = res;
   if (n2(id) >= 2) return compareView(res);
   const m = S.mine[id];
-  S.rev = m ? JSON.parse(JSON.stringify(m)) : { result_id: id, adaptation_ok: null, adaptation_verdict: null, mitigation_ok: null,
+  const b = v => (v === 1 || v === true ? true : v === 0 || v === false ? false : null);
+  S.rev = m ? { ...JSON.parse(JSON.stringify(m)), adaptation_ok: b(m.adaptation_ok), mitigation_ok: b(m.mitigation_ok) } : { result_id: id, adaptation_ok: null, adaptation_verdict: null, mitigation_ok: null,
     mitigation_verdict: null, tag_decisions: {}, added_terms: [], proposals: [], comment: "" };
   (res.ai_tags || []).forEach(t => { if (!S.rev.tag_decisions[t.concept_id]) S.rev.tag_decisions[t.concept_id] = "agree"; });
   reviewView();
@@ -400,16 +361,13 @@ async function save(submit) {
       if (R[ax + "_ok"] === false && !R[ax + "_verdict"]) return msg.textContent = `Choose the ${ax} verdict it should be.`;
     }
   }
-  const row = { result_id: R.result_id, reviewer_id: S.user.id, submitted: submit || !!(S.mine[R.result_id] || {}).submitted,
+  const row = { result_id: R.result_id, batch_id: S.batch, submitted: submit || !!(S.mine[R.result_id] || {}).submitted,
     adaptation_ok: R.adaptation_ok, adaptation_verdict: R.adaptation_verdict, mitigation_ok: R.mitigation_ok, mitigation_verdict: R.mitigation_verdict,
-    tag_decisions: R.tag_decisions, added_terms: R.added_terms, proposals: R.proposals, comment: R.comment, updated_at: new Date().toISOString() };
-  const { data, error } = await sb.from("rv_reviews").upsert(row, { onConflict: "result_id,reviewer_id" }).select().single();
-  if (error) return msg.textContent = error.message;
-  S.mine[R.result_id] = data;
-  const { data: st } = await sb.from("rv_result_status").select("*").eq("result_id", R.result_id).single();
-  if (st) S.status[R.result_id] = st;
+    tag_decisions: R.tag_decisions, added_terms: R.added_terms, proposals: R.proposals, comment: R.comment };
+  try { S.mine[R.result_id] = await api("/review", { method: "PUT", body: JSON.stringify(row) }); }
+  catch (e) { return msg.textContent = e.message; }
+  await loadBatch(false);
   if (!submit) { msg.textContent = "Saved."; tabs(); return; }
-  if (n2(R.result_id) >= 2) await loadBatch();
   const next = S.list.find(r => bucket(r) === "todo" && r.id !== R.result_id);
   location.hash = next ? "#/r/" + encodeURIComponent(next.id) : "#/list/todo";
 }
@@ -417,7 +375,7 @@ async function save(submit) {
 // ---------------------------------------------------------------- both reviews side by side
 function compareView(res) {
   const v = (S.others[res.id] || []).slice(0, 2);
-  const nm = r => esc(S.names[r.reviewer_id] || "?");
+  const nm = r => esc(r.reviewer);
   const vd = (r, ax) => r[ax + "_ok"] ? "agree" : esc(r[ax + "_verdict"] || "—");
   const same = (a, b) => a === b ? "ok" : "diff";
   const agree = reviewersAgree(res.id, res);
@@ -440,22 +398,46 @@ function compareView(res) {
     </table></div></div>`;
 }
 
-// ---------------------------------------------------------------- export: one CSV, one row per review
-async function exportCsv() {
-  const ids = S.list.map(r => r.id); let all = [];
-  for (let i = 0; i < ids.length; i += 200) {
-    const { data } = await sb.from("rv_reviews").select("*").in("result_id", ids.slice(i, i + 200));
-    all = all.concat(data || []);
-  }
-  const head = ["result_id", "reviewer", "submitted", "adaptation_ok", "adaptation_verdict", "mitigation_ok", "mitigation_verdict",
-    "tags_disagreed", "terms_added", "proposals", "comment", "updated_at"];
-  const q = s => `"${String(s ?? "").replace(/"/g, '""')}"`;
-  const lines = all.map(r => [r.result_id, S.names[r.reviewer_id] || r.reviewer_id, r.submitted, r.adaptation_ok, r.adaptation_verdict, r.mitigation_ok, r.mitigation_verdict,
-    Object.entries(r.tag_decisions || {}).filter(([, d]) => d === "disagree").map(([c]) => c).join("; "),
-    (r.added_terms || []).join("; "), (r.proposals || []).map(p => `${p.kind}:${p.label}${p.of_id ? "->" + p.of_id : ""}${p.facet ? " (" + p.facet + ")" : ""}`).join("; "),
-    r.comment, r.updated_at].map(q).join(","));
-  const blob = new Blob(["﻿" + [head.join(","), ...lines].join("\r\n")], { type: "text/csv" });
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `reviews_${S.batch}.csv`; a.click();
+// ---------------------------------------------------------------- export: one file, one row per PRMS result
+async function exportFile() {
+  let revs;
+  try { revs = await api(`/export?batch=${encodeURIComponent(S.batch)}`); } catch (e) { return alert(e.message); }
+  const by = {}; revs.forEach(r => (by[r.result_id] ||= []).push(r));
+  const tname = id => (S.terms[id] || {}).term || id;
+  const counted = t => COUNTED.includes(t.a_counts) || COUNTED.includes(t.m_counts);
+  const verdict = (r, ax) => r[ax + "_ok"] === 1 || r[ax + "_ok"] === true ? "agree" : r[ax + "_ok"] === 0 || r[ax + "_ok"] === false ? "should be " + (r[ax + "_verdict"] || "?") : "";
+  const one = (r, res) => r ? [r.reviewer, r.submitted ? "submitted" : "draft", verdict(r, "adaptation"), verdict(r, "mitigation"),
+    Object.entries(r.tag_decisions || {}).filter(([, d]) => d === "disagree").map(([c]) => tname(c)).join("; "),
+    (r.added_terms || []).map(tname).join("; "),
+    (r.proposals || []).map(p => p.kind === "new" ? `new term: ${p.label}${p.facet ? " (" + p.facet + ")" : ""}` : `synonym: ${p.label} -> ${tname(p.of_id)}`).join("; "),
+    r.comment || "", r.updated_at || ""] : ["", "", "", "", "", "", "", "", ""];
+  const RV = ["reviewer", "status", "adaptation decision", "mitigation decision", "AI tags rejected", "terms added", "proposed new terms / synonyms", "comment", "date"];
+  const head = ["result_id", "climate_marker", "level", "type", "title", "description", "AI adaptation", "AI mitigation", "AI counted terms", "AI terms not counted",
+    "review status", "reviewers agree", ...RV.map(c => "R1 " + c), ...RV.map(c => "R2 " + c)];
+  const rows = S.list.map(res => {
+    const v = (by[res.id] || []).slice(0, 2), sub = v.filter(r => r.submitted).length;
+    const agree = sub >= 2 ? (reviewersAgree(res.id, res) === null ? "" : (agreeLite(res.id) ? "yes" : "no")) : "";
+    return [res.id, res.climate_marker, res.level, res.type, res.title, res.description, res.ai_adaptation, res.ai_mitigation,
+      (res.ai_tags || []).filter(counted).map(t => t.concept_name).join("; "), (res.ai_tags || []).filter(t => !counted(t)).map(t => t.concept_name).join("; "),
+      sub >= 2 ? "2 reviews" : sub === 1 ? "1 review" : v.length ? "in progress" : "not reviewed", agree, ...one(v[0], res), ...one(v[1], res)];
+  });
+  const readme = [["Tagging review: " + S.batch], [],
+    ["One row per PRMS result. R1 and R2 are the two reviewers. Use the filters on the 'reviews' sheet."],
+    ["adaptation / mitigation decision", "agree = agrees with the AI verdict; should be X = the reviewer's verdict"],
+    ["AI tags rejected", "AI tags the reviewer disagreed with"],
+    ["terms added", "taxonomy terms the reviewer added"],
+    ["proposed new terms / synonyms", "terms not in the taxonomy, proposed as new terms or as synonyms of an existing term"],
+    ["review status", "not reviewed, in progress, 1 review, 2 reviews"],
+    ["reviewers agree", "yes when both reviewers end with the same verdicts and the same tags"],
+    ["blind rule", "you see another reviewer's answers only once both reviews of that result are submitted"],
+    ["downloaded", new Date().toISOString().slice(0, 16).replace("T", " ") + " by " + S.me]];
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([head, ...rows]);
+  ws["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: rows.length, c: head.length - 1 } }) };
+  ws["!cols"] = head.map(h => ({ wch: /title|description|comment|terms|tags|proposed/.test(h) ? 40 : 14 }));
+  XLSX.utils.book_append_sheet(wb, ws, "reviews");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(readme), "read me");
+  XLSX.writeFile(wb, `review_${S.batch}.xlsx`);
 }
 
 boot();
