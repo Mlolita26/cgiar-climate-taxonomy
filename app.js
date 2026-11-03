@@ -28,11 +28,12 @@ const getJson = async (p, fresh) => { const r = await fetch(p, fresh ? { cache: 
 const pageMsg = html => $("#main").innerHTML = `<div class="empty">${html}</div>`;
 
 // ---------------------------------------------------------------- start
+// One shared link. A reviewer is known by name: the first visit asks for it in a bar at the top,
+// and the browser remembers it. A personal link (?r=code) still works.
 async function boot() {
   const u = new URL(location.href), r = u.searchParams.get("r");
   if (r) { try { localStorage.setItem("rv_code", r); } catch (e) {} u.searchParams.delete("r"); history.replaceState(null, "", u.pathname + u.search + u.hash); }
   try { S.code = r || localStorage.getItem("rv_code") || ""; } catch (e) { S.code = r || ""; }
-  if (!S.code) return pageMsg("This page is for invited reviewers.<br>Open it with the personal link you received.");
   pageMsg("Loading…");
 
   S.batches = await getJson("data/batches.json", true);                     // tiny, always fresh
@@ -42,18 +43,56 @@ async function boot() {
   const B = S.batches.find(b => b.id === S.batch);
   S.termsReady = getJson(`data/taxonomy.json?v=${B.tv || ""}`).then(t => setTerms(t.terms));   // in the background
   try { await loadBatch(true); }
-  catch (e) { return pageMsg(esc(e.message) + "<br>Open this page with your personal link."); }
+  catch (e) {                                   // an unknown or old code: ask for the name instead
+    try { localStorage.removeItem("rv_code"); } catch (x) {}
+    S.code = ""; await loadBatch(true);
+  }
 
-  $("#who").textContent = S.me;
   const sel = $("#batch");
   sel.innerHTML = S.batches.map(b => `<option value="${esc(b.id)}">${esc(b.name || b.id)} · ${b.n}</option>`).join("");
   sel.value = S.batch;
   sel.onchange = async () => { S.batch = sel.value; try { localStorage.setItem("rv_batch", S.batch); } catch (e) {} pageMsg("Loading…"); await loadBatch(true); location.hash = "#/list/todo"; route(); };
+  whoBar();
   window.onhashchange = route;
   route();
   $("#help").hidden = false; $("#help").onclick = () => Tour.start();
   Tour.maybeStart();
 }
+
+// the name bar (not identified yet) or the name with a "change" link (identified)
+function whoBar() {
+  const bar = $("#namebar");
+  if (S.code) {
+    bar.hidden = true;
+    $("#who").innerHTML = `${esc(S.me)} <a href="#" id="chg" class="small">change</a>`;
+    $("#chg").onclick = e => { e.preventDefault(); if (!confirm(`You are reviewing as ${S.me}. Change the name?`)) return;
+      try { localStorage.removeItem("rv_code"); } catch (x) {} location.hash = "#/list/todo"; location.reload(); };
+    return;
+  }
+  $("#who").textContent = "";
+  bar.hidden = false;
+  requestAnimationFrame(() => bar.classList.add("show"));
+  const go = async () => {
+    const name = $("#nm").value.trim(), msg = $("#nmsg");
+    if (name.split(/\s+/).length < 2) { msg.textContent = "Please type your first and last name."; $("#nm").focus(); return; }
+    $("#nok").disabled = true; msg.textContent = "";
+    try {
+      const j = await fetch(CONFIG.api + "/join", { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ name }) });
+      const out = await j.json(); if (!j.ok) throw new Error(out.error || j.statusText);
+      S.code = out.code; S.me = out.name; try { localStorage.setItem("rv_code", S.code); } catch (x) {}
+      await loadBatch(false);
+      bar.classList.remove("show"); setTimeout(() => { whoBar(); route(); }, 250);
+    } catch (e) { msg.textContent = e.message; $("#nok").disabled = false; }
+  };
+  $("#nok").onclick = go;
+  $("#nm").onkeydown = e => { if (e.key === "Enter") go(); };
+}
+const needName = () => {
+  if (S.code) return false;
+  const bar = $("#namebar"); bar.classList.remove("nudge"); void bar.offsetWidth; bar.classList.add("nudge");
+  $("#nm").focus(); $("#nmsg").textContent = "Type your name first.";
+  return true;
+};
 
 function setTerms(all) {
   S.terms = {}; S.kids = {};
@@ -68,7 +107,7 @@ async function loadBatch(withResults) {
   const B = S.batches.find(b => b.id === S.batch) || {};
   const [b, st] = await Promise.all([
     withResults ? getJson(`data/batch-${S.batch}.json?v=${B.v || ""}`) : null,
-    api(`/state?batch=${encodeURIComponent(S.batch)}`)]);
+    S.code ? api(`/state?batch=${encodeURIComponent(S.batch)}`) : { counts: {}, mine: [], done: [] }]);
   if (b) { S.list = b.results; S.byId = Object.fromEntries(S.list.map(r => [r.id, r])); }
   S.me = st.name || S.me;
   setState(st);
@@ -78,7 +117,7 @@ function setState(st) {
   S.mine = {}; (st.mine || []).forEach(r => S.mine[r.result_id] = r);
   S.others = {}; (st.done || []).forEach(v => (S.others[v.result_id] ||= []).push(v));
 }
-const refreshState = () => api(`/state?batch=${encodeURIComponent(S.batch)}`).then(st => { setState(st); tabs(); }).catch(() => {});
+const refreshState = () => !S.code ? Promise.resolve() : api(`/state?batch=${encodeURIComponent(S.batch)}`).then(st => { setState(st); tabs(); }).catch(() => {});
 const n2 = id => (S.status[id] || {}).submitted || 0;
 
 // ---------------------------------------------------------------- agreement
@@ -169,6 +208,7 @@ function wireMarks() { $$("mark").forEach(m => m.onclick = () => flash($("#t-" +
 
 // ---------------------------------------------------------------- one result
 async function openResult(id) {
+  if (!Tour.running() && needName()) { location.hash = "#/list/" + S.tab; return; }
   tabs();
   const res = S.byId[id];
   if (!res) return pageMsg("Not found.");
@@ -342,6 +382,7 @@ function wireTree(root, add) {
 }
 
 async function save(submit) {
+  if (needName()) return;
   const R = S.rev, msg = $("#msg");
   R.comment = $("#cm").value;
   if (submit) for (const ax of ["adaptation", "mitigation"]) {
@@ -398,6 +439,7 @@ function loadXlsx() {
   return new Promise((ok, ko) => { const s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"; s.onload = ok; s.onerror = ko; document.head.appendChild(s); });
 }
 async function exportFile() {
+  if (needName()) return;
   const link = $("#exp"), label = link.textContent; link.textContent = "Preparing…";
   let revs;
   try { [revs] = await Promise.all([api(`/export?batch=${encodeURIComponent(S.batch)}`), loadXlsx(), S.termsReady]); }

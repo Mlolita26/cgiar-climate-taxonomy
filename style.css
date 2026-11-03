@@ -160,3 +160,14 @@ table.cmp tr.sec th { background: #FAFCFB; font-size: 12px; color: var(--muted);
 .tour-pulse { animation: tourpulse 1.4s ease-in-out infinite; border-radius: 8px; }
 @keyframes tourpulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0,140,107,.0); } 50% { box-shadow: 0 0 0 5px rgba(0,140,107,.35); } }
 @media (prefers-reduced-motion: reduce) { .tour, .tour-hole, .tour-card { transition: none; } .tour-pulse { animation: none; } }
+
+/* name bar */
+.namebar { position: sticky; top: 53px; z-index: 9; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 12px 24px; background: var(--green-lt); border-bottom: 1px solid #BFDDD3; color: var(--green-dk);
+  transform: translateY(-8px); opacity: 0; transition: transform .35s ease, opacity .35s ease; }
+.namebar.show { transform: none; opacity: 1; }
+.namebar input { width: 260px; max-width: 100%; }
+.namebar #nmsg { color: var(--red); }
+.namebar.nudge { animation: nudge .5s ease; }
+@keyframes nudge { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+#who a { margin-left: 6px; }

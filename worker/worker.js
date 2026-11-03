@@ -1,5 +1,6 @@
 // Stores the reviews. Rules: two reviewers per result; a reviewer sees the other review only
 // once both are submitted; a review is locked once both are submitted.
+//   POST /join  {name}             -> {code, name}: identifies a reviewer by name (created if new)
 //   GET  /me                       -> {name}
 //   GET  /state?batch=B            -> {name, mine: [...], counts: {result_id: {started, submitted}}, done: [...]}
 //   POST /review                   -> save or submit your review of one result (body as text/plain)
@@ -20,6 +21,18 @@ export default {
     const out = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
     try {
       const url = new URL(req.url);
+      // join with a name: returns that reviewer's code, creating the reviewer if the name is new
+      if (url.pathname === "/join" && req.method === "POST") {
+        let name = "";
+        try { name = String(JSON.parse(await req.text()).name || ""); } catch (e) {}
+        name = name.replace(/\s+/g, " ").trim();
+        if (name.length < 2 || name.length > 80) return out({ error: "Please type your first and last name." }, 400);
+        const found = await env.DB.prepare("SELECT code, name FROM reviewers WHERE lower(name) = lower(?)").bind(name).first();
+        if (found) return out(found);
+        const code = crypto.randomUUID().replace(/-/g, "").slice(0, 16);
+        await env.DB.prepare("INSERT INTO reviewers (code, name) VALUES (?, ?)").bind(code, name).run();
+        return out({ code, name });
+      }
       const code = (url.searchParams.get("r") || req.headers.get("X-Reviewer") || "").trim();
       const me = code ? await env.DB.prepare("SELECT code, name FROM reviewers WHERE code = ?").bind(code).first() : null;
       if (!me) return out({ error: "Unknown reviewer link." }, 401);

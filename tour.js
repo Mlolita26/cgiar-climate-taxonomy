@@ -25,6 +25,9 @@ const Tour = (() => {
   function build() {
     steps = [
       { title: "Welcome", text: "You will check how the AI tagged PRMS results against the climate taxonomy. Each result is reviewed by two people. You do not see the other person's answers until you have both submitted.", at: openList },
+      { el: "#namebar", title: "First, your name", text: "Type your first and last name and press Start. It identifies your reviews and is shown to the other reviewers. This browser remembers you next time.", at: openList,
+        skipIf: () => !!S.code, demo: async () => { const n = document.querySelector("#nm"); await typeInto(n, "Jane Doe"); }, undo: () => { const n = document.querySelector("#nm"); if (n) n.value = ""; } },
+      { el: "#who", title: "That's you", text: "Your name stays here. If it is not you, for example on a shared computer, click change.", at: openList, skipIf: () => !S.code },
       { el: "#tabs", title: "Your queues", text: "To review: results waiting for you. Waiting for 2nd review: you submitted, the other reviewer has not. Done: both reviews are in, split into agree and disagree.", at: openList },
       { el: "#tabs .tab:first-child", title: "Start here", text: "Open To review and click a result. We will open one now.", at: openList },
       { el: ".text", title: "The result", text: "The title and description as reported in PRMS. Yellow: terms the AI counted. Grey: terms it found but did not count, because the climate context was missing. Blue: terms you add. Click a highlight to find its row in the tags table.", at: openReview, side: "right" },
@@ -60,7 +63,10 @@ const Tour = (() => {
     card.style.left = Math.max(12, Math.min(cl, vw - cw - 12)) + "px";
   }
 
-  async function show(n) {
+  async function show(n, dir = 1) {
+    if (!running) return;
+    while (steps[n] && steps[n].skipIf && steps[n].skipIf()) n += dir;
+    if (!steps[n]) return dir > 0 ? end() : show(0, 1);
     if (cleanup) { cleanup(); cleanup = null; }
     $$(".tour-pulse").forEach(e => e.classList.remove("tour-pulse"));
     i = n; const s = steps[i];
@@ -68,20 +74,22 @@ const Tour = (() => {
     if (s.at) await s.at();
     const el = s.el ? await until(s.el) : null;
     if (el) { el.scrollIntoView({ block: "center", behavior: "smooth" }); await wait(380); }
-    card.innerHTML = `<div class="tour-k">${i + 1} / ${steps.length}</div><h4>${esc(s.title)}</h4><p>${esc(s.text)}</p>
-      <div class="tour-b"><a href="#" class="tour-skip">${s.last ? "" : "Skip"}</a><span>${i ? `<button class="tour-prev">Back</button>` : ""}<button class="primary tour-next">${s.last ? "Start reviewing" : "Next"}</button></span></div>`;
+    const vis = steps.filter(x => !(x.skipIf && x.skipIf()));
+    card.innerHTML = `<div class="tour-k">${vis.indexOf(s) + 1} / ${vis.length}</div><h4>${esc(s.title)}</h4><p>${esc(s.text)}</p>
+      <div class="tour-b"><a href="#" class="tour-skip">${s.last ? "" : "Skip"}</a><span>${vis.indexOf(s) > 0 ? `<button class="tour-prev">Back</button>` : ""}<button class="primary tour-next">${s.last ? (S.code ? "Start reviewing" : "Enter my name") : "Next"}</button></span></div>`;
     place(el, s.side);
     card.classList.remove("fade");
     $(".tour-next", card).onclick = () => (s.last ? end() : show(i + 1));
-    if ($(".tour-prev", card)) $(".tour-prev", card).onclick = () => show(i - 1);
+    if ($(".tour-prev", card)) $(".tour-prev", card).onclick = () => show(i - 1, -1);
     $(".tour-skip", card).onclick = e => { e.preventDefault(); end(); };
     if (s.pulse) $$(s.pulse).slice(0, 2).forEach(e => e.classList.add("tour-pulse"));
-    if (s.demo) { await s.demo(); await wait(300); if (steps[i] === s) place(document.querySelector(s.el), s.side); }
-    if (s.undo) cleanup = s.undo;
+    if (s.undo) cleanup = s.undo;                     // set before the demo, so closing mid-demo still cleans up
+    if (s.demo) { await s.demo(); await wait(300); if (running && steps[i] === s) place(document.querySelector(s.el), s.side); }
   }
 
   function end() {
     running = false;
+    if (!S.code) setTimeout(() => { const n = document.querySelector("#nm"); if (n) n.focus(); }, 350);
     if (cleanup) { cleanup(); cleanup = null; }
     $$(".tour-pulse").forEach(e => e.classList.remove("tour-pulse"));
     box.classList.add("out"); setTimeout(() => box.remove(), 300);
@@ -102,5 +110,5 @@ const Tour = (() => {
     show(0);
   }
   function maybeStart() { let seen = null; try { seen = localStorage.getItem("rv_tour_seen"); } catch (e) {} if (!seen) setTimeout(start, 500); }
-  return { start, maybeStart };
+  return { start, maybeStart, running: () => running };
 })();
