@@ -164,7 +164,7 @@ function listView() {
   const done = S.tab === "agree" || S.tab === "disagree";
   const who = id => (S.others[id] || []).map(v => esc(v.reviewer)).join(", ");
   const you = r => { const m = S.mine[r.id]; return m ? (m.submitted ? "submitted" : "draft") : ""; };
-  $("#main").innerHTML = rows.length ? `<div class="card flush"><table class="list">
+  $("#main").innerHTML = rows.length ? `<p class="hint">Each row is one PRMS result. Click a row to open it${done ? " and see both reviews" : " and review it"}.</p><div class="card flush"><table class="list">
     <thead><tr><th>ID</th><th>Marker</th><th>Adaptation</th><th>Mitigation</th><th>Title</th><th>${done ? "Reviewers" : "You"}</th></tr></thead><tbody>
     ${rows.map(r => `<tr data-id="${esc(r.id)}"><td class="mono">${esc(r.id)}</td><td class="nowrap">${esc(r.marker)}</td><td>${pill(r.ai_a)}</td><td>${pill(r.ai_m)}</td>
       <td>${esc(r.title)}</td><td class="muted small nowrap">${done ? who(r.id) : you(r)}</td></tr>`).join("")}</tbody></table></div>`
@@ -198,9 +198,10 @@ function highlight(text, phrases) {
   hits.forEach(h => { html += esc(text.slice(at, h.b)) + `<mark class="${h.cls}" data-id="${esc(h.id)}" title="${esc((S.terms[h.id] || {}).term || h.id)}">${esc(text.slice(h.b, h.e))}</mark>`; at = h.e; });
   return html + esc(text.slice(at));
 }
-function textBlock(res, added) {
+function textBlock(res, added, editable) {
   const ph = phrasesFor(res, added);
-  return `<div class="text card"><div class="legend"><span class="k hc">counted</span><span class="k hg">detected, not counted</span><span class="k ha">added by you</span></div>
+  return `<div class="text card" ${editable ? "data-edit" : ""}><div class="legend"><span class="k hc">counted</span><span class="k hg">detected, not counted</span><span class="k ha">added by you</span></div>
+    ${editable ? `<div class="hint small">Select a word or phrase in the text to tag it.</div>` : ""}
     <h2>${highlight(res.title, ph)}</h2><p>${highlight(res.description, ph)}</p></div>`;
 }
 const flash = el => { if (!el) return; el.scrollIntoView({ block: "center", behavior: "smooth" }); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1000); };
@@ -250,7 +251,7 @@ function reviewView() {
   const tags = (res.tags || []).slice().sort((a, b) => isCounted(b) - isCounted(a));
   const submitted = S.mine[res.id] && S.mine[res.id].submitted;
   $("#main").innerHTML = navBar(res) + (submitted ? `<div class="notice">Submitted. You can still change it until the second reviewer submits.</div>` : "")
-  + `<div class="cols">${textBlock(res, R.added_terms)}<div class="side">
+  + `<div class="cols">${textBlock(res, R.added_terms, true)}<div class="side">
     <section class="card"><h3>AI verdict</h3>
       ${verdictRow("adaptation", res.ai_a, res.ai_a_el, res.ai_a_path)}
       ${verdictRow("mitigation", res.ai_m, res.ai_m_el, res.ai_m_path)}</section>
@@ -314,7 +315,7 @@ function wireReview() {
   wireMarks();
   $$("a.jump").forEach(a => a.onclick = e => { e.preventDefault(); flash($(`mark[data-id="${CSS.escape(a.dataset.id)}"]`)); });
 
-  const refreshText = () => { const box = $(".text"), y = box.scrollTop; box.outerHTML = textBlock(res, R.added_terms); $(".text").scrollTop = y; wireMarks(); };
+  const refreshText = () => { const box = $(".text"), y = box.scrollTop; box.outerHTML = textBlock(res, R.added_terms, true); $(".text").scrollTop = y; wireMarks(); };
   const lists = () => {
     $("#added").innerHTML = addedHtml(); $("#props").innerHTML = propsHtml();
     $$("a.rm").forEach(a => a.onclick = e => { e.preventDefault(); R.added_terms = R.added_terms.filter(x => x !== a.dataset.id); refreshText(); lists(); });
@@ -354,6 +355,7 @@ function wireReview() {
     };
   };
 
+  S.pickApi = { add, propose: (kind, text) => { q.value = text; showHits(); propForm(kind, text); $("#q").scrollIntoView({ block: "center", behavior: "smooth" }); } };
   $("#brw").onclick = e => { e.preventDefault(); const t = $("#tree"); t.hidden = !t.hidden; if (!t.dataset.on) { t.dataset.on = 1; t.innerHTML = treeHtml(); wireTree(t, add); } };
   $("#save").onclick = () => save(false);
   $("#sub").onclick = () => save(true);
@@ -404,6 +406,80 @@ async function save(submit) {
   if (!submit) { msg.textContent = "Saved."; $("#save").disabled = $("#sub").disabled = false; tabs(); return; }
   const next = S.list.find(r => bucket(r) === "todo" && r.id !== R.result_id);
   location.hash = next ? "#/r/" + encodeURIComponent(next.id) : "#/list/todo";
+}
+
+// ---------------------------------------------------------------- select words in the text to tag them
+function pickMatches(text) {
+  const low = text.toLowerCase(), seen = new Set(), out = [];
+  search(text).forEach(h => { if (!seen.has(h.t.id)) { seen.add(h.t.id); out.push(h); } });
+  // terms or synonyms that appear inside a longer selection, e.g. "drought tolerant crop production"
+  const wb = w => new RegExp("(^|[^a-z0-9])" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "($|[^a-z0-9])");
+  for (const x of S.termList) {
+    if (seen.has(x.t.id)) continue;
+    const hit = [x.name, ...x.syn].find(f => f.length >= 4 && f.length < low.length && wb(f).test(low));
+    if (hit) { seen.add(x.t.id); out.push({ t: x.t, via: hit === x.name ? "" : x.t.synonyms[x.syn.indexOf(hit)] }); }
+  }
+  return out.slice(0, 7);
+}
+function closePick() { const p = $("#pick"); if (p) p.remove(); }
+function showPick(text, rect) {
+  closePick();
+  if (!S.pickApi || !text) return;
+  const tagged = new Set([...(S.cur.tags || []).map(t => t.concept_id), ...(S.rev.added_terms || [])]);
+  const hits = pickMatches(text);
+  const p = document.createElement("div"); p.id = "pick"; p.className = "pick";
+  p.innerHTML = `<div class="pk-h">“${esc(text)}”</div>
+    ${hits.length ? hits.map(h => `<div class="hit"><button class="add" data-id="${esc(h.t.id)}" ${tagged.has(h.t.id) ? "disabled" : ""}>${tagged.has(h.t.id) ? "tagged" : "+ add"}</button><b>${esc(h.t.term)}</b>
+      <span class="muted small">${esc(h.t.facet)}${h.via ? " · synonym “" + esc(h.via) + "”" : ""}</span></div>`).join("") : `<div class="muted small pk-none">No term in the taxonomy matches.</div>`}
+    <div class="pk-f"><button class="pk-new">Propose as a new term</button><button class="pk-syn">as a synonym</button></div>`;
+  document.body.appendChild(p);
+  const w = p.offsetWidth, h = p.offsetHeight;
+  let top = rect.bottom + 8, left = rect.left;
+  if (top + h > innerHeight - 8) top = Math.max(8, rect.top - h - 8);
+  left = Math.max(8, Math.min(left, innerWidth - w - 8));
+  p.style.top = top + "px"; p.style.left = left + "px";
+  requestAnimationFrame(() => p.classList.add("show"));
+  $$("button.add", p).forEach(b => b.onclick = () => { S.pickApi.add(b.dataset.id); closePick(); getSelection().removeAllRanges(); });
+  $(".pk-new", p).onclick = () => { closePick(); S.pickApi.propose("new", text); };
+  $(".pk-syn", p).onclick = () => { closePick(); S.pickApi.propose("synonym", text); };
+}
+document.addEventListener("mouseup", e => {
+  if (e.target.closest && e.target.closest("#pick")) return;
+  setTimeout(() => {
+    const sel = getSelection(), text = sel.toString().replace(/\s+/g, " ").trim();
+    const box = sel.rangeCount && sel.anchorNode && (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement).closest(".text[data-edit]");
+    if (!box || text.length < 2 || text.length > 80) return;
+    showPick(text, sel.getRangeAt(0).getBoundingClientRect());
+  }, 10);
+});
+document.addEventListener("mousedown", e => { if (!(e.target.closest && e.target.closest("#pick"))) closePick(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closePick(); });
+addEventListener("hashchange", closePick);
+
+// for the tour: select a phrase of the description that is in the taxonomy and not tagged yet, and open the pop-up
+function demoPick() {
+  const p = $(".text[data-edit] p"); if (!p) return false;
+  const full = p.textContent, low = full.toLowerCase();
+  const tagged = new Set((S.cur.tags || []).map(t => t.concept_id));
+  let at = -1, len = 0;
+  for (const x of S.termList.slice().sort((a, b) => b.name.length - a.name.length)) {
+    if (tagged.has(x.t.id) || x.name.length < 5 || x.name.length > 30) continue;
+    const m = new RegExp("(^|[^a-z0-9])(" + x.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")($|[^a-z0-9])").exec(low);
+    if (m) { at = m.index + m[1].length; len = x.name.length; break; }
+  }
+  if (at < 0) { const m = /[a-z]{7,}/.exec(low); if (!m) return false; at = m.index; len = m[0].length; }
+  const walker = document.createTreeWalker(p, NodeFilter.SHOW_TEXT), range = document.createRange();
+  let pos = 0, n, started = false;
+  while ((n = walker.nextNode())) {
+    const end = pos + n.length;
+    if (!started && at < end) { range.setStart(n, at - pos); started = true; }
+    if (started && at + len <= end) { range.setEnd(n, at + len - pos); break; }
+    pos = end;
+  }
+  const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range);
+  range.startContainer.parentElement.scrollIntoView({ block: "center" });
+  showPick(full.slice(at, at + len), range.getBoundingClientRect());
+  return true;
 }
 
 // ---------------------------------------------------------------- both reviews side by side
