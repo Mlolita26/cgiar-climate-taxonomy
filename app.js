@@ -32,7 +32,7 @@ async function boot() {
   const u = new URL(location.href), r = u.searchParams.get("r");
   if (r) { try { localStorage.setItem("rv_code", r); } catch (e) {} u.searchParams.delete("r"); history.replaceState(null, "", u.pathname + u.search + u.hash); }
   try { S.code = r || localStorage.getItem("rv_code") || ""; } catch (e) { S.code = r || ""; }
-  if (!S.code) return pageMsg("Open this page with your personal link.");
+  if (!S.code) return pageMsg("This page is for invited reviewers.<br>Open it with the personal link you received.");
   pageMsg("Loading…");
 
   S.batches = await getJson("data/batches.json", true);                     // tiny, always fresh
@@ -51,6 +51,8 @@ async function boot() {
   sel.onchange = async () => { S.batch = sel.value; try { localStorage.setItem("rv_batch", S.batch); } catch (e) {} pageMsg("Loading…"); await loadBatch(true); location.hash = "#/list/todo"; route(); };
   window.onhashchange = route;
   route();
+  $("#help").hidden = false; $("#help").onclick = () => Tour.start();
+  Tour.maybeStart();
 }
 
 function setTerms(all) {
