@@ -75,8 +75,8 @@ const Tour = (() => {
     i = n; const s = steps[i];
     card.classList.add("fade");
     if (s.at) await s.at();
-    const el = s.el ? await until(s.el) : null;
-    if (el) { el.scrollIntoView({ block: "center", behavior: "smooth" }); await wait(380); }
+    let el = s.el ? await until(s.el) : null;
+    if (el) { el.scrollIntoView({ block: "center", behavior: "smooth" }); await wait(380); el = document.querySelector(s.el) || el; }   // measure the element on the page now (the list may have been redrawn)
     const vis = steps.filter(x => !(x.skipIf && x.skipIf()));
     card.innerHTML = `<div class="tour-k">${vis.indexOf(s) + 1} / ${vis.length}</div><h4>${esc(s.title)}</h4><p>${esc(s.text)}</p>
       <div class="tour-b"><a href="#" class="tour-skip">${s.last ? "" : "Skip"}</a><span>${vis.indexOf(s) > 0 ? `<button class="tour-prev">Back</button>` : ""}<button class="primary tour-next">${s.last ? (S.code ? "Start reviewing" : "Enter my name") : "Next"}</button></span></div>`;
