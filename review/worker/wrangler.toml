@@ -1,0 +1,13 @@
+name = "tagging-review"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+[vars]
+# the address of the review page; "*" while testing
+ALLOWED_ORIGIN = "https://mlolita26.github.io"
+
+# created by: npx wrangler d1 create tagging-review   (paste the id it prints here)
+[[d1_databases]]
+binding = "DB"
+database_name = "tagging-review"
+database_id = "04109672-80a8-41c2-8960-b4986cb33bc5"
