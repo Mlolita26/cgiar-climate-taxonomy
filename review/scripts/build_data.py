@@ -10,7 +10,7 @@ import argparse, hashlib, json, os, random
 
 ROOT = r"C:\Users\mlolita\OneDrive - CGIAR\Nowak, Andreea (Alliance Bioversity-CIAT)'s files - MELIAF-Implementation"
 DEFAULT_TAGS = os.path.join(ROOT, r"Taxonomy\3_Tagging\outputs\2026-08 2025 marked - 4343 results - v4\_working\prms_tags.jsonl")
-DEFAULT_TAX = os.path.join(ROOT, r"Taxonomy\1_Versions\v4 - Aug 2026 - 2025 run\machine_readable\taxonomy_v4_plus.json")
+DEFAULT_TAX = os.path.join(ROOT, r"Taxonomy\1_Versions\v4 - Aug 2026\machine_readable\taxonomy_v4_plus.json")
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "docs", "review", "data")
 
 ap = argparse.ArgumentParser()
