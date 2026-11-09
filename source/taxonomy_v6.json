@@ -3,13 +3,13 @@
     "schema": "cgiar-climate-taxonomy/v6",
     "source_file": "master_v6.csv",
     "source_sha1": "aa5f41c69db7",
-    "built_at": "2026-11-09T12:03:03+0100",
+    "built_at": "2026-11-09T12:20:02+0100",
     "builder": "build_taxonomy_v6.R",
     "n_concepts": 768,
     "n_with_relations": 192,
     "n_edges": 352,
     "n_errors": 3,
-    "n_warnings": 0,
+    "n_warnings": 17,
     "n_info": 0
   },
   "controlled_vocab": {
@@ -38652,7 +38652,7 @@
   ],
   "validation": {
     "errors": ["Required field 'Impact area' blank in: OUT_082", "CCC_39 reuses an identifier retired in v5 (was 'Nature-positive'); now 'Climate mitigation'. Give the new concept a new ID.", "Dangling relation target: INT_267 -produces-> OUT_081 (raw: produces: OUT_081)"],
-    "warnings": [],
+    "warnings": ["CRK_143 was 'Zoonotic disease emergence' in the published v5 and is 'Zoonotic disease' in v6: a rename of the same concept, or the ID reused for a different one?", "CRK_151 was 'Compound hazard' in the published v5 and is 'Compound climate hazard' in v6: a rename of the same concept, or the ID reused for a different one?", "CRK_160 was 'Cascading hazard' in the published v5 and is 'Cascading climate hazard' in v6: a rename of the same concept, or the ID reused for a different one?", "CRK_165 was 'Climate sensitivity' in the published v5 and is 'Sensitivity to climate' in v6: a rename of the same concept, or the ID reused for a different one?", "SYS_118 was 'Seed supply chain' in the published v5 and is 'Climate-smart crop system' in v6: a rename of the same concept, or the ID reused for a different one?", "INT_024 was 'Tillage management' in the published v5 and is 'Tillage' in v6: a rename of the same concept, or the ID reused for a different one?", "INT_151 was 'Curriculum' in the published v5 and is 'Curriculum development' in v6: a rename of the same concept, or the ID reused for a different one?", "INT_160 was 'Community of practice' in the published v5 and is 'Community of practice facilitation' in v6: a rename of the same concept, or the ID reused for a different one?", "INT_096 was 'Climate forecast' in the published v5 and is 'Climate forecasting' in v6: a rename of the same concept, or the ID reused for a different one?", "INT_100 was 'Early warning system' in the published v5 and is 'Early warning service' in v6: a rename of the same concept, or the ID reused for a different one?", "OUT_059 was 'Vulnerability index' in the published v5 and is 'Climate vulnerability index' in v6: a rename of the same concept, or the ID reused for a different one?", "OUT_060 was 'Resilience index' in the published v5 and is 'Climate resilience index' in v6: a rename of the same concept, or the ID reused for a different one?", "OUT_029 was 'Bulletin' in the published v5 and is 'Climate bulletin' in v6: a rename of the same concept, or the ID reused for a different one?", "IMP_001 was 'Loss avoided' in the published v5 and is 'Avoided climate loss' in v6: a rename of the same concept, or the ID reused for a different one?", "IMP_002 was 'Agronomic loss avoided' in the published v5 and is 'Avoided agronomic loss' in v6: a rename of the same concept, or the ID reused for a different one?", "IMP_003 was 'Welfare loss avoided' in the published v5 and is 'Avoided welfare loss' in v6: a rename of the same concept, or the ID reused for a different one?", "CCC_38 was 'Resource recovery' in the published v5 and is 'Climate adaptation' in v6: a rename of the same concept, or the ID reused for a different one?"],
     "info": []
   }
 }

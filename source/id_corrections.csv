@@ -1,2 +1,4 @@
-id_in_master,published_id,term,reason
-CCC_39,CCC_47,Climate mitigation,"master_v6 reuses CCC_39, which was retired in v5 (Nature-positive) and must never be reused; published under the next free CCC number until the master is corrected"
+id_in_master,published_id,term,previous_term,previous_facet,previous_successor,reason
+CCC_39,CCC_49,Climate mitigation,Nature-positive,Cross-cutting concept,INT_271 Nature-based solution,"master_v6 reuses CCC_39, retired in v5 (Nature-positive) and never to be reused; published under a number never used before"
+CCC_38,CCC_50,Climate adaptation,Resource recovery,Intervention,INT_278 Circular economy,"master_v6 reuses CCC_38, published in v5 as Resource recovery (now a synonym of INT_278 Circular economy); published under a number never used before, and CCC_38 is retired"
+SYS_118,SYS_123,Climate-smart crop system,Seed supply chain,System,SYS_107 Seed system,"master_v6 reuses SYS_118, published in v5 as Seed supply chain (now a synonym of SYS_107 Seed system); published under a number never used before, and SYS_118 is retired"

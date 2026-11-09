@@ -7,18 +7,21 @@ Version 6 replaced the per-axis columns (climate scope, adaptation tag and condi
 ## Version 6 compared with version 5
 
 768 concepts (version 5 had 739). Changes recorded at term level (a concept can appear under several):
-- ADDED: 37
-- MOVED: 40
-- MOVED (NEW ID): 4
-- REDEFINED: 44
-- RENAMED: 9
-- RETIRED: 1
-Synonyms: 61 added, 86 removed, 24 moved to another concept.
+- ADDED: 41
+- MOVED: 35
+- MOVED (NEW ID): 8
+- REDEFINED: 291
+- RENAMED: 15
+- RETIRED: 2
+Synonyms: 75 added, 86 removed, 31 moved to another concept.
 ### Added concepts
 
-- `CCC_38` Climate adaptation (Cross-cutting concept)
 - `CRK_170` Climate-induced migration (Climate risk)
 - `IMP_006` Climate loss (Impact)
+- `INT_331` Peacebuilding (Intervention)
+- `INT_332` Co-design (Intervention)
+- `INT_333` Biofertilizer (Intervention)
+- `INT_334` Biocontrol agent (Intervention)
 - `INT_335` Bundled climate service (Intervention)
 - `INT_336` Climate-resilient breeding (Intervention)
 - `INT_337` Low-emission breeding (Intervention)
@@ -46,40 +49,54 @@ Synonyms: 61 added, 86 removed, 24 moved to another concept.
 - `STK_075` Green Climate Fund (Stakeholder)
 - `STK_076` Adaptation Fund (Stakeholder)
 - `STK_077` Fund for responding to Loss and Damage (Stakeholder)
-- `SYS_118` Climate-smart crop system (System)
 - `SYS_119` Climate-smart livestock system (System)
 - `SYS_120` Climate-smart aquaculture system (System)
 - `SYS_121` Climate-smart fishery (System)
 - `SYS_122` Climate-smart food system (System)
 - `TRT_11` Biological nitrification inhibition (Breeding trait)
-- `CCC_47` Climate mitigation (Cross-cutting concept)
+- `CCC_49` Climate mitigation (Cross-cutting concept)
+- `CCC_50` Climate adaptation (Cross-cutting concept)
+- `SYS_123` Climate-smart crop system (System)
 
 ### Concepts moved to a new identifier (old identifier kept, marked deprecated, pointing to the new one)
 
 - `CCC_32` Youth inclusion (Outcome)
-- `INT_194` Climate-induced migration (Intervention)
+- `CCC_47` Peacebuilding (Intervention)
+- `CCC_48` Co-design (Intervention)
+- `INT_194` Migration (Intervention)
 - `INT_281` Breeding network (Intervention)
 - `OUT_018` Bundled climate service (Intervention)
+- `OUT_080` Biofertilizer (Intervention)
+- `OUT_081` Biocontrol agent (Intervention)
 
 ### Retired concepts
 
 - `CDI_07` Nitrogen fixation (Climate driver)
+- `OUT_044` Nationally Determined Contribution component (Output)
 
 ### Renamed concepts
 
+- `CRK_143` Zoonotic disease (Climate risk)
+- `CRK_151` Compound climate hazard (Climate risk)
+- `CRK_160` Cascading climate hazard (Climate risk)
 - `CRK_165` Sensitivity to climate (Climate risk)
+- `IMP_001` Avoided climate loss (Impact)
 - `IMP_002` Avoided agronomic loss (Impact)
 - `IMP_003` Avoided welfare loss (Impact)
+- `INT_024` Tillage (Intervention)
 - `INT_096` Climate forecasting (Intervention)
 - `INT_100` Early warning service (Intervention)
 - `INT_151` Curriculum development (Intervention)
 - `INT_160` Community of practice facilitation (Intervention)
+- `OUT_029` Climate bulletin (Output)
 - `OUT_059` Climate vulnerability index (Output)
 - `OUT_060` Climate resilience index (Output)
 
 ### Identifier correction
 
-- Climate mitigation: published as `CCC_47`, not `CCC_39` (master_v6 reuses CCC_39, which was retired in v5 (Nature-positive) and must never be reused; published under the next free CCC number until the master is corrected).
+- Climate mitigation: published as `CCC_49`, not `CCC_39` (master_v6 reuses CCC_39, retired in v5 (Nature-positive) and never to be reused; published under a number never used before).
+- Climate adaptation: published as `CCC_50`, not `CCC_38` (master_v6 reuses CCC_38, published in v5 as Resource recovery (now a synonym of INT_278 Circular economy); published under a number never used before, and CCC_38 is retired).
+- Climate-smart crop system: published as `SYS_123`, not `SYS_118` (master_v6 reuses SYS_118, published in v5 as Seed supply chain (now a synonym of SYS_107 Seed system); published under a number never used before, and SYS_118 is retired).
 
 Full detail: `source/v5_to_v6_TERM_CHANGES.csv` and `source/v5_to_v6_SYNONYM_CHANGES.csv`.
 

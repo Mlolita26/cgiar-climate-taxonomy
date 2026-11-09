@@ -15,6 +15,7 @@ synonyms <- map(raw$concepts, \(c) as.character(unlist(c$synonyms)))
 facets   <- map_chr(raw$concepts, "facet")
 targets  <- unlist(map(raw$concepts, \(c) map_chr(c$relations, "target")))
 retired  <- bind_rows(read_csv("source/v5_retired_ids.csv", show_col_types = FALSE), read_csv("source/v6_retired_ids.csv", show_col_types = FALSE))
+retired  <- bind_rows(retired, fix |> filter(!id_in_master %in% retired$ID) |> transmute(ID = id_in_master, Term = previous_term, successor = previous_successor))
 recode   <- function(x) { i <- match(x, fix$id_in_master); ifelse(is.na(i), x, fix$published_id[i]) }   # same correction as the build
 ids <- recode(ids); parents <- recode(parents); targets <- recode(targets)
 dangling <- setdiff(targets, ids)                    # relation targets missing from the master; the build leaves these relations out
@@ -28,6 +29,8 @@ depth <- function(id, seen = character()) {
 
 checks <- tribble(
   ~check,                                                   ~ok,
+  "no published id is reused: every corrected id is new, every reused id is retired",
+                                                             !any(fix$published_id %in% retired$ID) && all(fix$id_in_master %in% retired$ID) && !any(fix$id_in_master %in% ids),
   "768 concepts",                                            length(ids) == 768,
   "ids are unique",                                          !anyDuplicated(ids),
   "every concept has a label",                               all(nzchar(labels)),

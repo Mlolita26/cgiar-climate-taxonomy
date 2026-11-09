@@ -30,7 +30,7 @@ footer{max-width:860px;margin:16px auto 32px;padding:0 24px;font-size:12px;color
 <li><b>Copied the source files</b> into this repository. Copies only; the originals stay where they are. <code>source/SOURCES.md</code> lists each file, where it came from, its date and its checksum.</li>
 <li><b>Gave every term a web address.</b> The identifier stays the same; the address is the identifier after <code>terms/</code>. The address is provisional and will become <code>https://w3id.org/cgiar/climate-taxonomy/ID</code> later.</li>
 <li><b>Translated each field into SKOS</b>, the web standard for vocabularies: the term becomes the preferred label, synonyms become alternative labels, the definition and its source are kept, the parent becomes the broader term, the facet becomes a collection, and the condition under which a term counts becomes a scope note. The typed relations (addresses, produces, and so on) have no SKOS equivalent, so they are defined in a small companion file.</li>
-<li><b>Kept the retired identifiers.</b> The 28 identifiers retired in versions 5 and 6 are still in the vocabulary, marked deprecated and pointing to their successor, so old reports stay readable.</li>
+<li><b>Kept the retired identifiers.</b> The 35 identifiers retired in versions 5 and 6 are still in the vocabulary, marked deprecated and pointing to their successor, so old reports stay readable.</li>
 <li><b>Wrote the vocabulary in three formats:</b> Turtle and JSON-LD for machines, CSV for spreadsheets.</li>
 <li><b>Made one web page per term</b>, plus this site. Each page shows the term for a reader and embeds the same data for a machine.</li>
 <li><b>Checked the result</b> with a second script, <code>qa/check_skos.R</code>: unique identifiers, a label and a definition for every term, every parent and relation target exists, no loops in the hierarchy, and the files parse back correctly. Nineteen checks, all passing.</li>
@@ -45,7 +45,7 @@ footer{max-width:860px;margin:16px auto 32px;padding:0 24px;font-size:12px;color
 <tr><td><code>dist/climate-taxonomy.jsonld</code></td><td>The same in JSON-LD</td></tr>
 <tr><td><code>dist/climate-taxonomy.csv</code></td><td>The same as a flat table</td></tr>
 <tr><td><code>dist/meliaf-relations.ttl</code></td><td>Definitions of the typed relations and rule attributes</td></tr>
-<tr><td><code>docs/index.html</code>, <code>docs/terms/*.html</code></td><td>This site: the landing page and 796 term pages</td></tr>
+<tr><td><code>docs/index.html</code>, <code>docs/terms/*.html</code></td><td>This site: the landing page and 803 term pages</td></tr>
 <tr><td><code>source/provenance_map.csv</code></td><td>Turns the free text about where a term came from into four classes</td></tr>
 <tr><td><code>source/relation_definitions.csv</code></td><td>One line explaining each typed relation</td></tr>
 <tr><td><code>source/fair_checklist.csv</code></td><td>The self-assessment shown on the landing page</td></tr>

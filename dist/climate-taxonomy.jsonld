@@ -156,7 +156,7 @@
       "type": "skos:Collection",
       "prefLabel": "System",
       "definition": "Agri-food and ecological systems and components acted upon or affected. Prefix SYS_.",
-      "member": ["ct:SYS_115", "ct:SYS_109", "ct:SYS_001", "ct:SYS_118", "ct:SYS_108", "ct:SYS_002", "ct:SYS_003", "ct:SYS_004", "ct:SYS_005", "ct:SYS_006", "ct:SYS_007", "ct:SYS_008", "ct:SYS_010", "ct:SYS_093", "ct:SYS_094", "ct:SYS_011", "ct:SYS_012", "ct:SYS_013", "ct:SYS_102", "ct:SYS_014", "ct:SYS_099", "ct:SYS_015", "ct:SYS_100", "ct:SYS_101", "ct:SYS_016", "ct:SYS_017", "ct:SYS_078", "ct:SYS_009", "ct:SYS_095", "ct:SYS_096", "ct:SYS_097", "ct:SYS_098", "ct:SYS_079", "ct:SYS_092", "ct:SYS_018", "ct:SYS_119", "ct:SYS_019", "ct:SYS_020", "ct:SYS_021", "ct:SYS_022", "ct:SYS_104", "ct:SYS_105", "ct:SYS_023", "ct:SYS_024", "ct:SYS_025", "ct:SYS_026", "ct:SYS_028", "ct:SYS_114", "ct:SYS_029", "ct:SYS_032", "ct:SYS_120", "ct:SYS_033", "ct:SYS_034", "ct:SYS_035", "ct:SYS_036", "ct:SYS_103", "ct:SYS_037", "ct:SYS_077", "ct:SYS_121", "ct:SYS_030", "ct:SYS_031", "ct:SYS_086", "ct:SYS_111", "ct:SYS_075", "ct:SYS_038", "ct:SYS_027", "ct:SYS_076", "ct:SYS_116", "ct:SYS_039", "ct:SYS_040", "ct:SYS_041", "ct:SYS_042", "ct:SYS_043", "ct:SYS_044", "ct:SYS_045", "ct:SYS_046", "ct:SYS_047", "ct:SYS_117", "ct:SYS_048", "ct:SYS_050", "ct:SYS_051", "ct:SYS_052", "ct:SYS_053", "ct:SYS_054", "ct:SYS_080", "ct:SYS_049", "ct:SYS_081", "ct:SYS_082", "ct:SYS_087", "ct:SYS_106", "ct:SYS_110", "ct:SYS_112", "ct:SYS_107", "ct:SYS_055", "ct:SYS_122", "ct:SYS_062", "ct:SYS_065", "ct:SYS_089", "ct:SYS_067", "ct:SYS_068", "ct:SYS_069", "ct:SYS_070", "ct:SYS_071", "ct:SYS_072", "ct:SYS_073", "ct:SYS_088", "ct:SYS_056", "ct:SYS_057", "ct:SYS_058", "ct:SYS_059", "ct:SYS_060", "ct:SYS_074", "ct:SYS_083", "ct:SYS_084", "ct:SYS_085", "ct:SYS_090", "ct:SYS_091", "ct:SYS_113"]
+      "member": ["ct:SYS_115", "ct:SYS_109", "ct:SYS_001", "ct:SYS_123", "ct:SYS_108", "ct:SYS_002", "ct:SYS_003", "ct:SYS_004", "ct:SYS_005", "ct:SYS_006", "ct:SYS_007", "ct:SYS_008", "ct:SYS_010", "ct:SYS_093", "ct:SYS_094", "ct:SYS_011", "ct:SYS_012", "ct:SYS_013", "ct:SYS_102", "ct:SYS_014", "ct:SYS_099", "ct:SYS_015", "ct:SYS_100", "ct:SYS_101", "ct:SYS_016", "ct:SYS_017", "ct:SYS_078", "ct:SYS_009", "ct:SYS_095", "ct:SYS_096", "ct:SYS_097", "ct:SYS_098", "ct:SYS_079", "ct:SYS_092", "ct:SYS_018", "ct:SYS_119", "ct:SYS_019", "ct:SYS_020", "ct:SYS_021", "ct:SYS_022", "ct:SYS_104", "ct:SYS_105", "ct:SYS_023", "ct:SYS_024", "ct:SYS_025", "ct:SYS_026", "ct:SYS_028", "ct:SYS_114", "ct:SYS_029", "ct:SYS_032", "ct:SYS_120", "ct:SYS_033", "ct:SYS_034", "ct:SYS_035", "ct:SYS_036", "ct:SYS_103", "ct:SYS_037", "ct:SYS_077", "ct:SYS_121", "ct:SYS_030", "ct:SYS_031", "ct:SYS_086", "ct:SYS_111", "ct:SYS_075", "ct:SYS_038", "ct:SYS_027", "ct:SYS_076", "ct:SYS_116", "ct:SYS_039", "ct:SYS_040", "ct:SYS_041", "ct:SYS_042", "ct:SYS_043", "ct:SYS_044", "ct:SYS_045", "ct:SYS_046", "ct:SYS_047", "ct:SYS_117", "ct:SYS_048", "ct:SYS_050", "ct:SYS_051", "ct:SYS_052", "ct:SYS_053", "ct:SYS_054", "ct:SYS_080", "ct:SYS_049", "ct:SYS_081", "ct:SYS_082", "ct:SYS_087", "ct:SYS_106", "ct:SYS_110", "ct:SYS_112", "ct:SYS_107", "ct:SYS_055", "ct:SYS_122", "ct:SYS_062", "ct:SYS_065", "ct:SYS_089", "ct:SYS_067", "ct:SYS_068", "ct:SYS_069", "ct:SYS_070", "ct:SYS_071", "ct:SYS_072", "ct:SYS_073", "ct:SYS_088", "ct:SYS_056", "ct:SYS_057", "ct:SYS_058", "ct:SYS_059", "ct:SYS_060", "ct:SYS_074", "ct:SYS_083", "ct:SYS_084", "ct:SYS_085", "ct:SYS_090", "ct:SYS_091", "ct:SYS_113"]
     },
     {
       "id": "ct:facet-intervention",
@@ -212,7 +212,7 @@
       "type": "skos:Collection",
       "prefLabel": "Cross-cutting concept",
       "definition": "A construct that qualifies other terms rather than occupying a position on the results chain: normative principles, named ways of working, and greenhouse-gas accounting constructs. Prefix CCC_. A term belongs here only if it cannot fill a pathway element on its own; if it can, it belongs in a chain facet.",
-      "member": ["ct:CCC_29", "ct:CCC_30", "ct:CCC_27", "ct:CCC_26", "ct:CCC_36", "ct:CCC_38", "ct:CCC_47", "ct:CCC_33", "ct:CCC_34", "ct:CCC_31", "ct:CCC_35", "ct:CCC_28", "ct:CCC_01", "ct:CCC_02", "ct:CCC_03", "ct:CCC_05", "ct:CCC_06", "ct:CCC_09", "ct:CCC_10", "ct:CCC_11", "ct:CCC_12", "ct:CCC_13", "ct:CCC_14", "ct:CCC_15", "ct:CCC_17", "ct:CCC_18", "ct:CCC_19", "ct:CCC_20", "ct:CCC_23", "ct:CCC_25", "ct:CCC_37"]
+      "member": ["ct:CCC_29", "ct:CCC_30", "ct:CCC_27", "ct:CCC_26", "ct:CCC_36", "ct:CCC_50", "ct:CCC_49", "ct:CCC_33", "ct:CCC_34", "ct:CCC_31", "ct:CCC_35", "ct:CCC_28", "ct:CCC_01", "ct:CCC_02", "ct:CCC_03", "ct:CCC_05", "ct:CCC_06", "ct:CCC_09", "ct:CCC_10", "ct:CCC_11", "ct:CCC_12", "ct:CCC_13", "ct:CCC_14", "ct:CCC_15", "ct:CCC_17", "ct:CCC_18", "ct:CCC_19", "ct:CCC_20", "ct:CCC_23", "ct:CCC_25", "ct:CCC_37"]
     },
     {
       "id": "ct:CDI_10",
@@ -1824,7 +1824,7 @@
       "source": "AGROVOC: cropping systems",
       "seeAlso": ["https://www.cgiar.org/innovations/climate-smart-maize"],
       "broader": "ct:SYS_115",
-      "narrower": ["ct:SYS_118", "ct:SYS_108", "ct:SYS_002", "ct:SYS_010", "ct:SYS_011", "ct:SYS_014", "ct:SYS_015", "ct:SYS_016", "ct:SYS_017", "ct:SYS_078", "ct:SYS_079"],
+      "narrower": ["ct:SYS_123", "ct:SYS_108", "ct:SYS_002", "ct:SYS_010", "ct:SYS_011", "ct:SYS_014", "ct:SYS_015", "ct:SYS_016", "ct:SYS_017", "ct:SYS_078", "ct:SYS_079"],
       "scopeNote": "Counts only in context: System is exposed to a climate hazard, OR is acted on by a hazard-addressing intervention, OR benefits from a qualifying outcome or a stand-alone adaptation impact; NOT adaptation when named only as the sector or commodity of work, with no exposure and no hazard-addressing action on it.",
       "example": "Stress-tolerant maize and flood-tolerant rice target exposed crop systems in climate-risk-prone environments. | Climate context: exposed to climate hazards affecting crop performance.",
       "climateArea": "Adaptation",
@@ -1836,10 +1836,10 @@
       "historyNote": "Provenance note in the master file: Andreea+Todd"
     },
     {
-      "id": "ct:SYS_118",
+      "id": "ct:SYS_123",
       "type": "skos:Concept",
       "inScheme": "https://mlolita26.github.io/cgiar-climate-taxonomy/scheme",
-      "notation": "SYS_118",
+      "notation": "SYS_123",
       "prefLabel": "Climate-smart crop system",
       "altLabel": ["climate-smart cropping system", "climate-smart crop production"],
       "definition": "Crop system managed according to climate-smart agriculture principles, so that it sustainably raises productivity and incomes, adapts and builds resilience to climate change, and reduces or removes greenhouse gas emissions where possible.",
@@ -14295,10 +14295,10 @@
       "historyNote": "Provenance note in the master file: New (v5)"
     },
     {
-      "id": "ct:CCC_38",
+      "id": "ct:CCC_50",
       "type": "skos:Concept",
       "inScheme": "https://mlolita26.github.io/cgiar-climate-taxonomy/scheme",
-      "notation": "CCC_38",
+      "notation": "CCC_50",
       "prefLabel": "Climate adaptation",
       "altLabel": ["climate change adaptation", "adaptation to climate change"],
       "definition": "In human systems, the process of adjustment to actual or expected climate and its effects, in order to moderate harm or exploit beneficial opportunities; in natural systems, the process of adjustment to actual climate and its effects, where human intervention may facilitate adjustment to expected climate and its effects.",
@@ -14312,10 +14312,10 @@
       "historyNote": "Provenance note in the master file: New (v6 revision 2026-10-16)"
     },
     {
-      "id": "ct:CCC_47",
+      "id": "ct:CCC_49",
       "type": "skos:Concept",
       "inScheme": "https://mlolita26.github.io/cgiar-climate-taxonomy/scheme",
-      "notation": "CCC_47",
+      "notation": "CCC_49",
       "prefLabel": "Climate mitigation",
       "altLabel": ["climate change mitigation", "mitigation of climate change", "GHG mitigation"],
       "definition": "Human intervention to reduce emissions or enhance the sinks of greenhouse gases.",
@@ -14979,17 +14979,37 @@
       "prefLabel": "Breeding network",
       "deprecated": true,
       "isReplacedBy": "ct:OUT_136",
-      "changeNote": "Retired in version 6 (moved in v6 to Output as OUT_136; successor note: OUT_136 Breeding network)."
+      "changeNote": "Retired in version 6 (moved in v6 to Output as OUT_136 Breeding network; successor note: OUT_136 Breeding network)."
+    },
+    {
+      "id": "ct:OUT_080",
+      "type": "skos:Concept",
+      "inScheme": "https://mlolita26.github.io/cgiar-climate-taxonomy/scheme",
+      "notation": "OUT_080",
+      "prefLabel": "Biofertilizer",
+      "deprecated": true,
+      "isReplacedBy": "ct:INT_333",
+      "changeNote": "Retired in version 6 (moved in v6 to Intervention as INT_333 Biofertilizer; successor note: INT_333 Biofertilizer)."
+    },
+    {
+      "id": "ct:OUT_081",
+      "type": "skos:Concept",
+      "inScheme": "https://mlolita26.github.io/cgiar-climate-taxonomy/scheme",
+      "notation": "OUT_081",
+      "prefLabel": "Biocontrol agent",
+      "deprecated": true,
+      "isReplacedBy": "ct:INT_334",
+      "changeNote": "Retired in version 6 (moved in v6 to Intervention as INT_334 Biocontrol agent; successor note: INT_334 Biocontrol agent)."
     },
     {
       "id": "ct:INT_194",
       "type": "skos:Concept",
       "inScheme": "https://mlolita26.github.io/cgiar-climate-taxonomy/scheme",
       "notation": "INT_194",
-      "prefLabel": "Climate-induced migration",
+      "prefLabel": "Migration",
       "deprecated": true,
       "isReplacedBy": "ct:CRK_170",
-      "changeNote": "Retired in version 6 (moved in v6 to Climate risk as CRK_170; successor note: CRK_170 Climate-induced migration)."
+      "changeNote": "Retired in version 6 (moved in v6 to Climate risk as CRK_170 Climate-induced migration; successor note: CRK_170 Climate-induced migration)."
     },
     {
       "id": "ct:OUT_018",
@@ -14999,7 +15019,16 @@
       "prefLabel": "Bundled climate service",
       "deprecated": true,
       "isReplacedBy": "ct:INT_335",
-      "changeNote": "Retired in version 6 (moved in v6 to Intervention as INT_335; successor note: INT_335 Bundled climate service)."
+      "changeNote": "Retired in version 6 (moved in v6 to Intervention as INT_335 Bundled climate service; successor note: INT_335 Bundled climate service)."
+    },
+    {
+      "id": "ct:OUT_044",
+      "type": "skos:Concept",
+      "inScheme": "https://mlolita26.github.io/cgiar-climate-taxonomy/scheme",
+      "notation": "OUT_044",
+      "prefLabel": "Nationally Determined Contribution component",
+      "deprecated": true,
+      "changeNote": "Retired in version 6 (removed in the v6 revision (2026-10-16); successor note: dropped)."
     },
     {
       "id": "ct:CCC_32",
@@ -15009,7 +15038,47 @@
       "prefLabel": "Youth inclusion",
       "deprecated": true,
       "isReplacedBy": "ct:OTC_140",
-      "changeNote": "Retired in version 6 (moved in v6 to Outcome as OTC_140; successor note: OTC_140 Youth inclusion)."
+      "changeNote": "Retired in version 6 (moved in v6 to Outcome as OTC_140 Youth inclusion; successor note: OTC_140 Youth inclusion)."
+    },
+    {
+      "id": "ct:CCC_47",
+      "type": "skos:Concept",
+      "inScheme": "https://mlolita26.github.io/cgiar-climate-taxonomy/scheme",
+      "notation": "CCC_47",
+      "prefLabel": "Peacebuilding",
+      "deprecated": true,
+      "isReplacedBy": "ct:INT_331",
+      "changeNote": "Retired in version 6 (moved in v6 to Intervention as INT_331 Peacebuilding; successor note: INT_331 Peacebuilding)."
+    },
+    {
+      "id": "ct:CCC_48",
+      "type": "skos:Concept",
+      "inScheme": "https://mlolita26.github.io/cgiar-climate-taxonomy/scheme",
+      "notation": "CCC_48",
+      "prefLabel": "Co-design",
+      "deprecated": true,
+      "isReplacedBy": "ct:INT_332",
+      "changeNote": "Retired in version 6 (moved in v6 to Intervention as INT_332 Co-design; successor note: INT_332 Co-design)."
+    },
+    {
+      "id": "ct:CCC_38",
+      "type": "skos:Concept",
+      "inScheme": "https://mlolita26.github.io/cgiar-climate-taxonomy/scheme",
+      "notation": "CCC_38",
+      "prefLabel": "Resource recovery",
+      "deprecated": true,
+      "isReplacedBy": "ct:INT_278",
+      "changeNote": "Retired in version 6 (identifier reused in master_v6 for a different concept (Climate adaptation, published as CCC_50); successor note: INT_278 Circular economy)."
+    },
+    {
+      "id": "ct:SYS_118",
+      "type": "skos:Concept",
+      "inScheme": "https://mlolita26.github.io/cgiar-climate-taxonomy/scheme",
+      "notation": "SYS_118",
+      "prefLabel": "Seed supply chain",
+      "deprecated": true,
+      "isReplacedBy": "ct:SYS_107",
+      "changeNote": "Retired in version 6 (identifier reused in master_v6 for a different concept (Climate-smart crop system, published as SYS_123); successor note: SYS_107 Seed system)."
     }
   ]
 }

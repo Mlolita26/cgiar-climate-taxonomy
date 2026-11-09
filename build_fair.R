@@ -53,8 +53,13 @@ relations <- map_dfr(raw$concepts, \(c) map_dfr(c$relations, \(r) tibble(id = c$
   mutate(prop = str_replace_all(type, "-(\\w)", \(m) toupper(str_sub(m, 2))))       # applies-to -> appliesTo
 
 children <- concepts |> filter(!is.na(parent_id)) |> summarise(kids = list(id), .by = parent_id)
+# an ID the master reuses for a different concept: the meaning it had when published is retired in v6
+reused_ret <- function(retired_so_far) fix |> filter(!id_in_master %in% retired_so_far$ID) |>
+  transmute(ID = id_in_master, Term = previous_term, Facet = previous_facet, successor = previous_successor,
+            reason = paste0("identifier reused in master_v6 for a different concept (", term, ", published as ", published_id, ")"))
 retired  <- bind_rows(read_csv("source/v5_retired_ids.csv", show_col_types = FALSE) |> mutate(retired_in = "5"),
-                      read_csv("source/v6_retired_ids.csv", show_col_types = FALSE) |> mutate(retired_in = "6")) |>
+                      read_csv("source/v6_retired_ids.csv", show_col_types = FALSE) |> mutate(retired_in = "6"))
+retired  <- bind_rows(retired, reused_ret(retired) |> mutate(retired_in = "6")) |>
   mutate(reason    = paste0(reason, if_else(is.na(successor), "", paste0("; successor note: ", successor))),
          successor = str_extract(successor, "[A-Z]{2,4}_[0-9]+"),                     # "INT_306 Insurance" -> INT_306; "dropped" -> NA
          successor = if_else(successor %in% concepts$id, successor, NA_character_))
@@ -217,7 +222,8 @@ concepts |>
                                  parent_id = successor, definition = paste0("Retired in version ", retired_in, ": ", reason), version = VERSION)) |>
   write_csv("dist/climate-taxonomy.csv", na = "")
 
-tc <- read_csv("source/v5_to_v6_TERM_CHANGES.csv", show_col_types = FALSE) |> mutate(ID = recode(ID), change = if_else(change == "ADDED (ID REUSED)", "ADDED", change))
+tc <- read_csv("source/v5_to_v6_TERM_CHANGES.csv", show_col_types = FALSE) |> mutate(ID = recode(ID), change = if_else(ID %in% fix$published_id, "ADDED", change)) |>
+  distinct(change, ID, .keep_all = TRUE)                                     # a corrected ID is a new concept: one ADDED line
 sc <- read_csv("source/v5_to_v6_SYNONYM_CHANGES.csv", show_col_types = FALSE)
 listed <- function(kind) tc |> filter(change %in% kind) |> distinct(ID, term, facet) |> transmute(line = glue("- `{ID}` {term} ({facet})")) |> pull(line)
 old_log <- read_lines("CHANGELOG.md")
@@ -235,7 +241,7 @@ write_lines(c(
   "\n### Retired concepts\n", listed("RETIRED"),
   "\n### Renamed concepts\n", listed("RENAMED"),
   "\n### Identifier correction\n",
-  pmap_chr(fix, \(id_in_master, published_id, term, reason) glue("- {term}: published as `{published_id}`, not `{id_in_master}` ({reason}).")),
+  pmap_chr(select(fix, id_in_master, published_id, term, reason), \(id_in_master, published_id, term, reason) glue("- {term}: published as `{published_id}`, not `{id_in_master}` ({reason}).")),
   "\nFull detail: `source/v5_to_v6_TERM_CHANGES.csv` and `source/v5_to_v6_SYNONYM_CHANGES.csv`.\n",
   old_log
 ), "CHANGELOG.md")
