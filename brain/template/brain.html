@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Climate Taxonomy Brain</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f7f9f8; --card:#ffffff; --ink:#15211c; --ink-2:#51625b; --ink-3:#86938d;
+  --line:#e3e8e5; --line-2:#c9d3ce;
+  --green:#065F4A; --green-dark:#033529; --green-soft:#e6f4ef; --green-mid:#b9e3d3;
+  --amber:#b7791f; --amber-soft:#fdf1dc; --amber-ink:#7a4f0a;
+  --grey-soft:#eef0ef;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.5;padding:0 20px 28px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:20px 0 12px;border-bottom:1px solid var(--line)}
+header h1{font-size:18px;font-weight:600;margin:0;color:var(--green-dark)}
+header .meta{color:var(--ink-3);font-size:12px}
+.wrap{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px;margin-top:18px;align-items:start}
+@media (max-width:920px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;min-width:0}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--line)}
+.card-h h2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);margin:0;font-weight:600}
+select,button{font:inherit;font-size:13px;color:var(--ink);background:var(--card);border:1px solid var(--line-2);border-radius:6px;padding:4px 10px;cursor:pointer}
+button:hover{border-color:var(--green)}
+button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--green);outline-offset:1px}
+
+/* the box: the text you type sits on top of a highlight layer with identical metrics */
+.editor{position:relative;margin:14px 16px 0;border:1.5px solid var(--line-2);border-radius:8px;background:var(--card)}
+.editor:focus-within{border-color:var(--green)}
+.layer{font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.8;padding:14px 16px;margin:0;border:0;width:100%;white-space:pre-wrap;overflow-wrap:break-word;word-break:normal;letter-spacing:normal;border-radius:8px;box-sizing:border-box}
+.backdrop{position:absolute;inset:0;color:transparent;pointer-events:none;overflow:hidden}
+textarea#txt{position:relative;display:block;min-height:150px;background:transparent;color:var(--ink);caret-color:var(--green);resize:none;overflow:hidden;outline:none}
+.backdrop .t{display:inline !important;color:transparent;border-radius:3px;padding:2px 0}
+.backdrop .t.term{background:var(--green-soft);box-shadow:inset 0 -2px 0 var(--green)}
+.backdrop .t.synonym{background:var(--amber-soft);box-shadow:inset 0 -2px 0 var(--amber)}
+.counts{display:flex;gap:28px;padding:14px 16px 6px}
+.count b{display:block;font-size:22px;font-weight:500;line-height:1.1}
+.count span{font-size:11px;color:var(--ink-3)}
+.count.green b{color:var(--green)} .count.amber b{color:var(--amber-ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:6px 16px 16px}
+.chip{font-size:12px;padding:2px 9px;border-radius:12px;background:var(--green-soft);color:var(--green-dark)}
+.chip.synonym{background:var(--amber-soft);color:var(--amber-ink)}
+.chip.synonym b{font-weight:500}
+a.chip{text-decoration:none}a.chip:hover{outline:1px solid var(--green)}
+.related{padding:4px 16px 16px;border-top:1px solid var(--line)}.related h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin:12px 0 6px;font-weight:600}
+.rel-row{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:4px 0}.rel-why{font-size:12px;color:var(--ink-3)}
+
+/* the pathway */
+.verdict{padding:16px}
+.vrow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.vrow .big{font-size:26px;font-weight:600}
+.vrow .big.Full,.vrow .big.Partial{color:var(--green)} .vrow .big.Minimal{color:var(--ink-2)} .vrow .big.None{color:var(--ink-3)}
+.vrow .w{color:var(--ink-3);font-size:13px}
+.vsub{color:var(--ink-2);font-size:13px;margin:4px 0 14px}
+.pathway{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 0}
+.chev{position:relative;height:40px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;color:#fff;background:var(--green);
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%,14px 50%);margin-right:-8px;padding:0 16px 0 22px;text-align:center;line-height:1.15}
+.chev:first-child{clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%);padding-left:14px}
+.chev.off{background:var(--green-soft);color:var(--green)}   /* not evidenced: pale green, so amber stays reserved for synonyms */
+.found{font-size:11.5px;line-height:1.4;color:var(--ink-2);padding:4px 10px 0 6px;border-left:2px solid var(--green-mid);margin:0 8px 0 6px}
+.found.off{color:var(--ink-3);border-left-color:var(--line)}
+@media (max-width:560px){.pathway{grid-template-columns:repeat(2,1fr);gap:10px 8px}.chev{margin-right:0}}
+.mit{margin-top:14px;font-size:12.5px;color:var(--ink-2)}
+.mit b{color:var(--ink)}
+.proxy{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:12px;color:var(--ink-3)}
+footer{margin-top:20px;color:var(--ink-3);font-size:12px}
+footer a{color:var(--green)}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Climate Taxonomy Brain</h1>
+</header>
+
+<div class="wrap">
+  <section class="card">
+    <div class="card-h">
+      <h2>Text</h2>
+      <div><select id="sample" autocomplete="off"></select> <button id="clear">Clear</button></div>
+    </div>
+    <div class="editor">
+      <div class="backdrop layer" id="backdrop" aria-hidden="true"></div>
+      <textarea id="txt" class="layer" spellcheck="false" autocomplete="off" placeholder="Type or paste text here, or load a sample above"></textarea>
+    </div>
+    <div class="counts">
+      <div class="count green"><b class="mono" id="n-terms">0</b><span>taxonomy terms</span></div>
+      <div class="count amber"><b class="mono" id="n-syn">0</b><span>synonyms</span></div>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="related" id="related" hidden></div>
+  </section>
+
+  <aside class="card">
+    <div class="card-h"><h2>Impact pathway</h2></div>
+    <div class="verdict">
+      <div class="vrow"><span class="big None" id="v-adapt">None</span><span class="w mono" id="v-weight">0.00</span></div>
+      <div class="vsub" id="v-sub"></div>
+      <div class="pathway" id="elements"></div>
+      <div class="mit" id="mit" hidden></div>
+      <label class="proxy"><input type="checkbox" id="proxy" checked> Count conditional terms when the text names a climate hazard or an adaptation-specific term</label>
+    </div>
+  </aside>
+</div>
+
+<footer>Climate adaptation taxonomy v5 · pathway rule as in the PRMS tagging pipeline · <a href="https://github.com/Mlolita26/climate-taxonomy-brain">how it works</a></footer>
+
+<script>
+// Data and rule parameters written by build_brain.R. Nothing here changes when the taxonomy changes.
+const META     = __META__;
+const CONCEPTS = __CONCEPTS__;
+const LABELS   = __LABELS__;
+const RULES    = __RULES__;
+const GUARDS   = __GUARDS__.map(g => ({id: g.id, re: new RegExp(g.pattern, 'i')}));
+const SAMPLES  = __SAMPLES__;
+
+const byId = Object.fromEntries(CONCEPTS.map(c => [c.id, c]));
+const FAIR = 'https://mlolita26.github.io/cgiar-climate-taxonomy/terms/';   // published vocabulary: one page per term
+const STOP = new Set(RULES.stop_words);
+
+// ---------- index: one lookup key per label ----------
+const WORD = /[A-Za-z0-9À-ɏ]+/g;
+function normWord(w){ w = w.toLowerCase(); if (w.length > 3){ if (w.endsWith('ies')) return w.slice(0,-3)+'y'; if (w.endsWith('s') && !w.endsWith('ss')) return w.slice(0,-1); } return w; }
+const keyOf = label => (label.match(WORD) || []).map(normWord).join(' ');
+const index = new Map(), acronyms = new Map(); let maxWords = 1;
+for (const l of LABELS){
+  const label = l.label.trim();
+  if (/^[A-Z][A-Z0-9]{1,5}$/.test(label)){ if (!acronyms.has(label)) acronyms.set(label, l); continue; }
+  const k = keyOf(label);
+  if (k.length < 3 || STOP.has(k)) continue;
+  maxWords = Math.max(maxWords, k.split(' ').length);
+  const prev = index.get(k);
+  if (!prev || (prev.kind === 'synonym' && l.kind === 'term')) index.set(k, l);
+}
+
+// ---------- matching: longest phrase first, homonym guards, sentence number ----------
+function sentenceStarts(text){ const s = [0]; const re = /[.!?;]\s+/g; let m; while ((m = re.exec(text)) !== null) s.push(m.index + m[0].length); return s; }
+function analyze(text){
+  const toks = []; let m; WORD.lastIndex = 0;
+  while ((m = WORD.exec(text)) !== null) toks.push({s:m.index, e:m.index+m[0].length, raw:m[0], n:normWord(m[0])});
+  const starts = sentenceStarts(text);
+  const sentenceOf = pos => { let i = 0; while (i+1 < starts.length && starts[i+1] <= pos) i++; return i; };
+  const matches = [];
+  for (let i = 0; i < toks.length;){
+    let hit = acronyms.get(toks[i].raw) || null, span = 1;
+    if (!hit) for (let n = Math.min(maxWords, toks.length - i); n >= 1; n--){
+      const k = toks.slice(i, i+n).map(t => t.n).join(' ');
+      const e = index.get(k);
+      if (e && (n > 1 || k.length >= 4)){ hit = e; span = n; break; }
+    }
+    if (!hit){ i++; continue; }
+    const s = toks[i].s, e = toks[i+span-1].e;
+    const context = text.slice(Math.max(0, s-80), Math.min(text.length, e+80));
+    const guard = GUARDS.find(g => g.id === hit.id);
+    if (!(guard && guard.re.test(context))) matches.push({s, e, id:hit.id, kind:hit.kind, found:text.slice(s,e), sentence: sentenceOf(s)});
+    i += span;
+  }
+  return matches;
+}
+
+// ---------- the rule: does a detected term count, and which element does it fill? ----------
+// Mirrors derive_verdicts() in PRMS_Tagging_v5.Rmd. axis = 'adaptation' | 'mitigation'.
+function score(matches, axis, useProxy){
+  const detected = new Map();
+  for (const m of matches){ if (!detected.has(m.id)) detected.set(m.id, {c: byId[m.id], sentences: new Set()}); detected.get(m.id).sentences.add(m.sentence); }
+  const tagOf = c => c[axis];
+  const isSpecific = c => tagOf(c).endsWith('-specific');
+  const isConditional = c => tagOf(c).endsWith('-conditional');
+  const rels = new Set(axis === 'adaptation' ? RULES.adaptation_relations : RULES.mitigation_relations);
+  const hazardOnly = new Set(RULES.hazard_only_relations);
+
+  const qualified = new Set();
+  for (const [id, d] of detected) if (isSpecific(d.c)) qualified.add(id);
+  const okTarget = (type, targetId) => qualified.has(targetId) && !(axis === 'adaptation' && hazardOnly.has(type) && !byId[targetId].is_hazard);
+  function propagate(){                      // stored relations, either direction, until stable
+    let changed = true;
+    while (changed){
+      changed = false;
+      for (const [id, d] of detected){
+        if (qualified.has(id) || !isConditional(d.c)) continue;
+        const out = d.c.relations.some(r => rels.has(r.type) && okTarget(r.type, r.target));
+        const inc = [...qualified].some(q => byId[q].relations.some(r => r.target === id && rels.has(r.type)));
+        if (out || inc){ qualified.add(id); changed = true; }
+      }
+    }
+  }
+  propagate();
+  if (useProxy){                              // proxy for the model-judged from-text relations: an anchor anywhere in the text
+    const hasAnchor = [...detected.values()].some(d => isSpecific(d.c));
+    if (hasAnchor) for (const [id, d] of detected) if (!qualified.has(id) && isConditional(d.c)) qualified.add(id);
+    propagate();
+  }
+  const elementOf = c => c.group === 'crosscutting' ? (isSpecific(c) ? 'rationale' : null) : (RULES.element_of[c.group] || null);
+  const rows = [...detected.values()].map(d => ({c: d.c, element: qualified.has(d.c.id) ? elementOf(d.c) : null}));
+  const present = [...new Set(rows.filter(r => r.element).map(r => r.element))];
+  const v = RULES.verdicts.find(v => present.length >= v.min);
+  return {rows, present, count: present.length, verdict: v.verdict, weight: v.weight};
+}
+
+// ---------- rendering ----------
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const txt = document.getElementById('txt'), backdrop = document.getElementById('backdrop');
+
+function renderBackdrop(text, matches){
+  let out = '', pos = 0;
+  for (const m of matches){
+    out += esc(text.slice(pos, m.s));
+    out += `<span class="t ${m.kind}">${esc(text.slice(m.s, m.e))}</span>`;
+    pos = m.e;
+  }
+  backdrop.innerHTML = out + esc(text.slice(pos)) + '\n';   // trailing newline keeps both layers the same height
+  txt.style.height = 'auto'; txt.style.height = Math.max(150, txt.scrollHeight) + 'px';   // grow with the text, never scroll
+}
+
+// concepts related to what the text already mentions, but not mentioned: parents, children and typed relations
+function renderRelated(matches, text){
+  const present = new Set(matches.map(m => m.id));
+  const firstHit = {}; for (const m of matches) if (!(m.id in firstHit)) firstHit[m.id] = m;
+  const sentences = text.split(/(?<=[.!?;])\s+/);
+  const suggest = new Map();   // id -> {why:[], anchor}
+  const add = (id, why, from) => {
+    if (present.has(id) || !byId[id]) return;
+    if (!suggest.has(id)) suggest.set(id, {why: [], anchor: from});
+    const s = suggest.get(id); if (s.why.length < 2) s.why.push(why);
+  };
+  for (const id of present){
+    const c = byId[id];
+    if (c.parent_id) add(c.parent_id, `broader than ${c.term}`, id);
+    for (const k of CONCEPTS) if (k.parent_id === id) add(k.id, `a kind of ${c.term}`, id);
+    for (const r of c.relations) add(r.target, `${c.term} ${r.type} it`, id);
+    for (const k of CONCEPTS) for (const r of k.relations) if (r.target === id) add(k.id, `it ${r.type} ${c.term}`, id);
+  }
+  const rows = [...suggest.entries()]
+    .map(([id, s]) => ({id, c: byId[id], why: s.why.join('; '), anchor: firstHit[s.anchor]}))
+    .sort((a, b) => (b.c.adaptation === 'Adaptation-specific') - (a.c.adaptation === 'Adaptation-specific') || b.why.length - a.why.length)
+    .slice(0, 8);
+  const box = document.getElementById('related');
+  if (!rows.length){ box.hidden = true; return; }
+  box.hidden = false;
+  box.innerHTML = '<h3>Related concepts not mentioned</h3>' + rows.map(r => {
+    const sent = sentences.find(x => x.includes(r.anchor.found)) || '';
+    const where = sent ? `near “…${esc(sent.slice(0, 70).trim())}…”` : '';
+    return `<div class="rel-row"><a class="chip" href="${FAIR}${r.id}.html" target="_blank">${esc(r.c.term)}</a><span class="rel-why">${esc(r.why)} · ${where}</span></div>`;
+  }).join('');
+}
+
+function renderChips(matches){
+  const seen = new Set(), chips = [];
+  for (const m of matches){
+    const key = m.id + '|' + m.found.toLowerCase(); if (seen.has(key)) continue; seen.add(key);
+    const c = byId[m.id];
+    chips.push(m.kind === 'term' ? `<a class="chip" href="${FAIR}${c.id}.html" target="_blank" title="Open the term's page">${esc(c.term)}</a>`
+                                 : `<a class="chip synonym" href="${FAIR}${c.id}.html" target="_blank" title="Open the term's page">${esc(m.found)} → <b>${esc(c.term)}</b></a>`);
+  }
+  document.getElementById('chips').innerHTML = chips.join('');
+}
+
+const ELEMENTS = [
+  {key:'rationale', name:'Rationale'}, {key:'intervention', name:'Intervention'},
+  {key:'system/stakeholder', name:'System / who'}, {key:'result', name:'Result'},
+];
+
+function renderPathway(a, m){
+  const big = document.getElementById('v-adapt');
+  big.textContent = a.verdict; big.className = 'big ' + a.verdict;
+  document.getElementById('v-weight').textContent = a.weight.toFixed(2);
+  const missing = ELEMENTS.filter(e => !a.present.includes(e.key)).map(e => e.name.toLowerCase());
+  document.getElementById('v-sub').textContent = a.count === 4 ? 'Complete: all four pathway elements are evidenced.'
+    : a.count === 0 ? 'No term passes the adaptation test.'
+    : `${a.count} of 4 elements. Missing: ${missing.join(', ')}.`;
+  const chevrons = ELEMENTS.map(e => `<div class="chev ${a.present.includes(e.key) ? '' : 'off'}">${e.name}</div>`).join('');
+  const boxes = ELEMENTS.map(e => {
+    const filled = a.rows.filter(r => r.element === e.key).map(r => r.c.term);
+    return `<div class="found ${filled.length ? '' : 'off'}">${filled.length ? esc(filled.join(', ')) : 'not evidenced'}</div>`;
+  }).join('');
+  document.getElementById('elements').innerHTML = chevrons + boxes;
+  const mit = document.getElementById('mit');
+  mit.hidden = m.count === 0;
+  if (m.count) mit.innerHTML = `Mitigation: <b>${m.verdict}</b> <span class="mono">${m.weight.toFixed(2)}</span> · ${m.present.join(', ')}`;
+}
+
+function run(){
+  const text = txt.value, useProxy = document.getElementById('proxy').checked;
+  const matches = analyze(text);
+  const a = score(matches, 'adaptation', useProxy), m = score(matches, 'mitigation', useProxy);
+  renderBackdrop(text, matches);
+  document.getElementById('n-terms').textContent = matches.filter(x => x.kind === 'term').length;
+  document.getElementById('n-syn').textContent = matches.filter(x => x.kind === 'synonym').length;
+  renderChips(matches);
+  renderRelated(matches, text);
+  renderPathway(a, m);
+}
+let timer; txt.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(run, 120); });
+document.getElementById('proxy').addEventListener('change', run);
+
+const sel = document.getElementById('sample');
+sel.innerHTML = '<option value="">Type your own text</option>' + SAMPLES.map((s,i) => `<option value="${i}">Sample: ${esc(s.name)}</option>`).join('');
+sel.addEventListener('change', () => {
+  txt.value = sel.value === '' ? '' : SAMPLES[+sel.value].text;   // the first option gives an empty box
+  run(); if (sel.value === '') txt.focus();
+});
+document.getElementById('clear').addEventListener('click', () => { txt.value = ''; sel.value = ''; run(); txt.focus(); });
+
+txt.value = ''; sel.value = ''; run();   // open with an empty box, even if the browser restored old content
+</script>
+</body>
+</html>
