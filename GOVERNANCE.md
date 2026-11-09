@@ -18,7 +18,7 @@ belongs under, synonyms, and evidence that the term is actually used in CGIAR wo
 
 ## How a proposal is screened
 
-The custodian applies the term intake protocol used to build version 5. In short:
+The custodian applies the term intake protocol used to build versions 5 and 6. In short:
 
 1. **Is it already here?** Search labels and synonyms. If the concept exists under another
    word, the proposal becomes a synonym, not a new term.
@@ -53,7 +53,7 @@ available.
 
 ## Status of this version
 
-`5.0.0-draft`. Published for the MELIAF build-shop so the container can be seen working. The
+`6.0.0-draft` (taxonomy version 6). Version 5 was published for the MELIAF build-shop so the container could be seen working; version 6 replaces it. The
 licence (CC BY 4.0) is proposed and awaits the custodian's confirmation. The identifiers use the
 GitHub Pages address for now; a permanent namespace will replace it after the build-shop,
 without changing the term IDs.

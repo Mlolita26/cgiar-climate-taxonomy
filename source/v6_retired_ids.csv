@@ -1,0 +1,6 @@
+"ID","Term","Facet","successor","reason"
+"CDI_07","Nitrogen fixation","Climate driver","dropped","removed in the v6 revision (2026-10-16)"
+"INT_281","Breeding network","Intervention","OUT_136 Breeding network","moved in v6 to Output as OUT_136"
+"INT_194","Climate-induced migration","Intervention","CRK_170 Climate-induced migration","moved in v6 to Climate risk as CRK_170"
+"OUT_018","Bundled climate service","Intervention","INT_335 Bundled climate service","moved in v6 to Intervention as INT_335"
+"CCC_32","Youth inclusion","Outcome","OTC_140 Youth inclusion","moved in v6 to Outcome as OTC_140"

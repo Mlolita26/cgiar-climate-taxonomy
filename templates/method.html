@@ -2,14 +2,14 @@
 <p class="def">How the climate taxonomy became a FAIR vocabulary, in plain words. The whole method is one R script, <code>build_fair.R</code>, in the <a href="https://github.com/Mlolita26/cgiar-climate-taxonomy">repository</a>. Running it again rebuilds everything on this site.</p>
 
 <h2>Starting point</h2>
-<p>The taxonomy already existed as version 5: a master spreadsheet, checked and built into one JSON file with <<nrow(concepts)>> concepts, their definitions and sources, synonyms, parent terms, typed relations, and the rules that say when a term counts as adaptation or mitigation. Each concept had a stable identifier such as <code>CRK_102</code>. What it did not have was a web address, a standard format, a licence, or a published way to change it.</p>
+<p>The taxonomy already existed as a master spreadsheet, now in version 6: a master spreadsheet, checked and built into one JSON file with <<nrow(concepts)>> concepts, their definitions and sources, synonyms, parent terms, typed relations, and the rules that say when a term counts as adaptation or mitigation. Each concept had a stable identifier such as <code>CRK_102</code>. What it did not have was a web address, a standard format, a licence, or a published way to change it.</p>
 
 <h2>What we did</h2>
 <ol>
 <li><b>Copied the source files</b> into this repository. Copies only; the originals stay where they are. <code>source/SOURCES.md</code> lists each file, where it came from, its date and its checksum.</li>
 <li><b>Gave every term a web address.</b> The identifier stays the same; the address is the identifier after <code>terms/</code>. The address is provisional and will become <code><<FUTURE_IRI>>ID</code> later.</li>
 <li><b>Translated each field into SKOS</b>, the web standard for vocabularies: the term becomes the preferred label, synonyms become alternative labels, the definition and its source are kept, the parent becomes the broader term, the facet becomes a collection, and the condition under which a term counts becomes a scope note. The typed relations (addresses, produces, and so on) have no SKOS equivalent, so they are defined in a small companion file.</li>
-<li><b>Kept the retired identifiers.</b> The <<nrow(retired)>> identifiers retired in version 5 are still in the vocabulary, marked deprecated and pointing to their successor, so old reports stay readable.</li>
+<li><b>Kept the retired identifiers.</b> The <<nrow(retired)>> identifiers retired in versions 5 and 6 are still in the vocabulary, marked deprecated and pointing to their successor, so old reports stay readable.</li>
 <li><b>Wrote the vocabulary in three formats:</b> Turtle and JSON-LD for machines, CSV for spreadsheets.</li>
 <li><b>Made one web page per term</b>, plus this site. Each page shows the term for a reader and embeds the same data for a machine.</li>
 <li><b>Checked the result</b> with a second script, <code>qa/check_skos.R</code>: unique identifiers, a label and a definition for every term, every parent and relation target exists, no loops in the hierarchy, and the files parse back correctly. Nineteen checks, all passing.</li>
@@ -29,7 +29,7 @@
 <tr><td><code>source/relation_definitions.csv</code></td><td>One line explaining each typed relation</td></tr>
 <tr><td><code>source/fair_checklist.csv</code></td><td>The self-assessment shown on the landing page</td></tr>
 <tr><td><code>GOVERNANCE.md</code></td><td>Who decides, how to propose a term, rules that never change</td></tr>
-<tr><td><code>CHANGELOG.md</code></td><td>What changed between version 4 and 5 (generated)</td></tr>
+<tr><td><code>CHANGELOG.md</code></td><td>What changed in each version (generated)</td></tr>
 <tr><td><code>LICENSE.md</code>, <code>CITATION.cff</code></td><td>Licence and how to cite</td></tr>
 <tr><td><code>qa/check_skos.R</code></td><td>The checks</td></tr>
 </table>
@@ -39,7 +39,7 @@
 <dt>LICENSE.md</dt><dd>Proposes CC BY 4.0: anyone may copy, share and build on the vocabulary, including commercially, as long as they credit the source and say if they changed it. Marked as proposed until the custodian confirms. Explains why attribution rather than public domain: many definitions cite IPCC, AGROVOC, FAO, WMO or UNFCCC and that credit should stay visible. States that Lexicon icons are not part of the vocabulary and not covered.</dd>
 <dt>GOVERNANCE.md</dt><dd>Names the custodian (the Climate Adaptation Activator team). Says anyone in CGIAR may propose to add, change, merge or retire a term, through a term request form. Describes the five screening questions (is it already here, is it one concept, does it have a sourced definition, is it used, where does it sit). Sets the rules that never change: identifiers are never reused, retired terms are deprecated not deleted, a definition may improve without the identifier moving. Explains numbered releases.</dd>
 <dt>CITATION.cff</dt><dd>A small machine readable file that GitHub reads to show a "Cite this repository" button: title, version, date, authors, licence, and the test DOI.</dd>
-<dt>CHANGELOG.md</dt><dd>Generated from the version 4 to version 5 comparison files: how many terms were added, retired, renamed or redefined, and the lists of added, retired and renamed terms.</dd>
+<dt>CHANGELOG.md</dt><dd>Generated from the comparison files between versions (now version 5 to version 6): how many terms were added, retired, renamed or redefined, and the lists of added, retired and renamed terms.</dd>
 <dt>source/SOURCES.md</dt><dd>For each copied file: where it came from, when, and its checksum, so a copy can always be traced and refreshed.</dd>
 </dl>
 
@@ -53,7 +53,7 @@
 <ol>
 <li><b>Confirm the licence and the custodian</b> with the taxonomy lead. Everything else below can then stop being marked provisional.</li>
 <li><b>Register a permanent namespace</b> at w3id.org (one pull request to their repository). Then change one line in the script and rebuild; all term identifiers stay the same and the old addresses redirect.</li>
-<li><b>Make a real release</b> (version 5.0.0, not draft) and deposit it in the real Zenodo, which gives a permanent DOI for the vocabulary and one per version.</li>
+<li><b>Make a real release</b> (not draft) and deposit it in the real Zenodo, which gives a permanent DOI for the vocabulary and one per version.</li>
 <li><b>Register in AgroPortal</b> (agroportal.lirmm.fr), the vocabulary repository for agriculture. This is where people in this field look for vocabularies. It gives search, browsing, version history, and a place to record mappings to AGROVOC. The Turtle file is what gets submitted.</li>
 <li><b>Add mappings to other vocabularies</b>: which of our terms equal or are close to terms in AGROVOC, and later in the MELIAF taxonomy. In SKOS these are exactMatch, closeMatch and broadMatch links. This is the one FAIR test still open that is not about registration.</li>
 <li><b>Serve machine formats at the term address itself.</b> Today a term address returns a web page with the data embedded. Better practice is that the same address returns Turtle or JSON-LD when a program asks for it. The w3id redirect rules can do this.</li>

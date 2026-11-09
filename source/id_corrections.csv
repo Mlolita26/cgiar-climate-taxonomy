@@ -1,0 +1,2 @@
+id_in_master,published_id,term,reason
+CCC_39,CCC_47,Climate mitigation,"master_v6 reuses CCC_39, which was retired in v5 (Nature-positive) and must never be reused; published under the next free CCC number until the master is corrected"

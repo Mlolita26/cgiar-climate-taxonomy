@@ -8,19 +8,25 @@ library(dplyr); library(purrr); library(tidyr); library(stringr); library(readr)
 # 0. Settings: the only block that changes after the build-shop ------------------------------
 BASE_IRI  <- "https://mlolita26.github.io/cgiar-climate-taxonomy/"   # provisional: where the pages are served today
 FUTURE_IRI <- "https://w3id.org/cgiar/climate-taxonomy/"              # planned permanent namespace (to register after the build-shop)
-VERSION   <- "5.0.0-draft"
+VERSION   <- "6.0.0-draft"
 STATUS    <- "draft"
 LICENCE   <- "https://creativecommons.org/licenses/by/4.0/"          # proposed, pending confirmation
 CUSTODIAN <- "CGIAR MELIAF Climate Adaptation Activator (Andreea Nowak, Lolita Muller), Alliance of Bioversity International and CIAT"
 TITLE     <- "CGIAR Climate Adaptation and Mitigation Taxonomy"
-DOI       <- "10.5072/zenodo.607948"                                   # Zenodo SANDBOX test DOI (10.5072 = test prefix); a real 10.5281 DOI comes with v5.0.0
+DOI       <- ""                                                        # none for v6 yet (the Zenodo Sandbox test DOI 10.5072/zenodo.607948 belonged to the v5 draft release)
 TODAY     <- format(Sys.Date())
 SCHEME    <- paste0(BASE_IRI, "scheme")
 term_iri  <- function(id) paste0(BASE_IRI, "terms/", id)
 future_iri <- function(id) paste0(FUTURE_IRI, id)
 
 # 1. Read the taxonomy ------------------------------------------------------------------------
-raw <- read_json("source/taxonomy_v5.json")
+raw <- read_json("source/taxonomy_v6.json")
+# identifiers the master must not use (a retired ID reused for a new concept) are published under a corrected ID
+fix <- read_csv("source/id_corrections.csv", show_col_types = FALSE)
+recode <- function(x) { i <- match(x, fix$id_in_master); ifelse(is.na(i), x, fix$published_id[i]) }
+raw$concepts <- map(raw$concepts, function(c) {
+  c$id <- recode(c$id); if (!is.null(c$parent_id)) c$parent_id <- recode(c$parent_id)
+  c$relations <- map(c$relations, \(r) { if (!is.null(r$target)) r$target <- recode(r$target); r }); c })
 concepts <- tibble(
   id            = map_chr(raw$concepts, "id"),
   term          = map_chr(raw$concepts, "term"),
@@ -32,11 +38,9 @@ concepts <- tibble(
   source        = map_chr(raw$concepts, "definition_source", .default = ""),
   urls          = map(raw$concepts, \(c) str_split_1(c$reference_urls %||% "", "[;\\s]+") |> keep(nzchar)),
   stage         = map_chr(raw$concepts, "pathway_stage", .default = ""),
-  scope         = map_chr(raw$concepts, "climate_scope", .default = ""),
-  adaptation    = map_chr(raw$concepts, c("adaptation", "tag")),
-  condition     = map_chr(raw$concepts, c("adaptation", "condition")),
-  mitigation    = map_chr(raw$concepts, c("mitigation", "tag")),
-  m_condition   = map_chr(raw$concepts, c("mitigation", "condition")),
+  area          = map_chr(raw$concepts, "climate_area", .default = ""),     # Adaptation | Adaptation + Mitigation | Mitigation
+  role          = map_chr(raw$concepts, "tagging_role", .default = ""),     # Stand-alone | Context-dependent
+  rule          = map_chr(raw$concepts, "context_rule", .default = ""),     # when a context-dependent term counts
   is_hazard     = map_lgl(raw$concepts, c("derived", "is_hazard")),
   example       = map_chr(raw$concepts, "cgiar_example", .default = ""),
   provenance    = map_chr(raw$concepts, c("provenance", "source"), .default = "")
@@ -49,7 +53,8 @@ relations <- map_dfr(raw$concepts, \(c) map_dfr(c$relations, \(r) tibble(id = c$
   mutate(prop = str_replace_all(type, "-(\\w)", \(m) toupper(str_sub(m, 2))))       # applies-to -> appliesTo
 
 children <- concepts |> filter(!is.na(parent_id)) |> summarise(kids = list(id), .by = parent_id)
-retired  <- read_csv("source/v5_retired_ids.csv", show_col_types = FALSE) |>
+retired  <- bind_rows(read_csv("source/v5_retired_ids.csv", show_col_types = FALSE) |> mutate(retired_in = "5"),
+                      read_csv("source/v6_retired_ids.csv", show_col_types = FALSE) |> mutate(retired_in = "6")) |>
   mutate(reason    = paste0(reason, if_else(is.na(successor), "", paste0("; successor note: ", successor))),
          successor = str_extract(successor, "[A-Z]{2,4}_[0-9]+"),                     # "INT_306 Insurance" -> INT_306; "dropped" -> NA
          successor = if_else(successor %in% concepts$id, successor, NA_character_))
@@ -85,12 +90,11 @@ scheme_ttl <- glue('
     dcterms:rights {lit("Licence proposed (CC BY 4.0), pending confirmation by the custodian.")} ;
     owl:versionInfo "{VERSION}" ;
     skos:note {lit(glue("Status: {STATUS}. Published for the MELIAF build-shop (Rabat, October 2026) so the container can be seen working. Identifiers use the GitHub Pages address for now; the planned permanent form is {FUTURE_IRI}<ID>, which will replace it without changing term ids."))} ;
-    skos:historyNote {lit("Version 5 built 2026-09-04 from master_v5.csv by build_taxonomy_v5.R; 739 concepts, 0 build errors. Version 4 (626 concepts) is the previous release.")} ;
+    skos:historyNote {lit(glue("Version 6 built from master_v6.csv (revision of 16 October 2026) by build_taxonomy_v6.R; {nrow(concepts)} concepts. Version 6 replaced the per-axis adaptation and mitigation tags with three fields: climate area, tagging role and context rule. Version 5 (739 concepts, published 23 September 2026) is the previous release."))} ;
     rdfs:seeAlso <https://github.com/Mlolita26/cgiar-climate-taxonomy> .
 ')
 
-concept_ttl <- function(id, term, synonyms, facet, parent_id, definition, source, urls, stage, scope,
-                        adaptation, condition, mitigation, m_condition, is_hazard, example, prov_class, provenance, ...) {
+concept_ttl <- function(id, term, synonyms, facet, parent_id, definition, source, urls, stage, area, role, rule, is_hazard, example, prov_class, provenance, ...) {
   rels <- relations |> filter(id == !!id)
   kids <- children$kids[match(id, children$parent_id)][[1]]
   body <- c(
@@ -102,11 +106,11 @@ concept_ttl <- function(id, term, synonyms, facet, parent_id, definition, source
     opt("rdfs:seeAlso", glue("<{urls}>")),
     if (is.na(parent_id)) glue("skos:topConceptOf <{SCHEME}>") else glue("skos:broader ct:{parent_id}"),
     opt("skos:narrower", glue("ct:{kids}")),
-    if (adaptation == "Adaptation-conditional") glue("skos:scopeNote {lit(paste('Counts as adaptation when:', condition))}"),
-    if (mitigation == "Mitigation-conditional") glue("skos:scopeNote {lit(paste('Counts as mitigation when:', m_condition))}"),
+    if (role == "Context-dependent") glue("skos:scopeNote {lit(paste('Counts only in context:', rule))}"),
     if (nzchar(example)) glue("skos:example {lit(example)}"),
-    glue('meliaf:adaptationTag "{adaptation}"'), glue('meliaf:mitigationTag "{mitigation}"'),
-    glue('meliaf:pathwayStage "{stage}"'), glue('meliaf:climateScope "{scope}"'),
+    glue('meliaf:climateArea "{area}"'), glue('meliaf:taggingRole "{role}"'),
+    if (nzchar(rule)) glue("meliaf:contextRule {lit(rule)}"),
+    glue('meliaf:pathwayStage "{stage}"'),
     glue("meliaf:isHazard {tolower(is_hazard)}"),
     opt("meliaf:provenance", glue('"{str_split_1(prov_class, "; ")}"')),
     glue("skos:historyNote {lit(paste('Provenance note in the master file:', provenance))}")
@@ -124,14 +128,14 @@ ct:facet-{slug} a skos:Collection ;
     skos:member {paste0("ct:", concepts$id[concepts$facet == facet], collapse = " , ")} .
 '))
 
-retired_ttl <- pmap_chr(retired, \(ID, Term, Facet, successor, reason) glue('
+retired_ttl <- pmap_chr(retired, \(ID, Term, Facet, successor, reason, retired_in) glue('
 ct:{ID} a skos:Concept ;
     skos:inScheme <{SCHEME}> ;
     skos:notation "{ID}" ;
     skos:prefLabel {lit(Term)} ;
     owl:deprecated true ;
     {if (!is.na(successor)) glue("dcterms:isReplacedBy ct:{successor} ;") else ""}
-    skos:changeNote {lit(paste0("Retired in version 5 (", reason, "). Facet was ", Facet, "."))} .
+    skos:changeNote {lit(paste0("Retired in version ", retired_in, " (", reason, "). Facet was ", Facet, "."))} .
 '))
 
 relation_defs <- read_csv("source/relation_definitions.csv", show_col_types = FALSE) |> filter(prop %in% relations$prop)
@@ -142,12 +146,12 @@ ontology_ttl <- c(prefixes, glue('
     rdfs:comment {lit("Small extension of SKOS: the typed relations between concepts that the adaptation and mitigation decision rules use, and the per-concept rule attributes. Everything else in the vocabulary is plain SKOS.")} .
 '),
   pmap_chr(relation_defs, \(prop, comment) glue('meliaf:{prop} a owl:ObjectProperty ; rdfs:label "{prop}"@en ; rdfs:comment {lit(comment)} .')),
-  glue('meliaf:adaptationTag a owl:DatatypeProperty ; rdfs:label "adaptation tag"@en ; rdfs:comment {lit("Adaptation-specific: the concept counts as adaptation on its own. Adaptation-conditional: it counts only through a qualifying relation to an adaptation-specific concept (see the concept scope note). n/a: not an adaptation term.")} .'),
-  glue('meliaf:mitigationTag a owl:DatatypeProperty ; rdfs:label "mitigation tag"@en ; rdfs:comment {lit("Same as the adaptation tag, for the mitigation rule.")} .'),
+  glue('meliaf:climateArea a owl:DatatypeProperty ; rdfs:label "climate area"@en ; rdfs:comment {lit("Which climate rule the concept belongs to: Adaptation, Mitigation, or Adaptation + Mitigation.")} .'),
+  glue('meliaf:taggingRole a owl:DatatypeProperty ; rdfs:label "tagging role"@en ; rdfs:comment {lit("Stand-alone: the concept counts on its own. Context-dependent: it counts only in the context given by its context rule (see the concept scope note). Replaces the version 5 adaptation and mitigation tags (specific / conditional).")} .'),
+  glue('meliaf:contextRule a owl:DatatypeProperty ; rdfs:label "context rule"@en ; rdfs:comment {lit("For a context-dependent concept: the context in which it counts.")} .'),
   glue('meliaf:pathwayStage a owl:DatatypeProperty ; rdfs:label "pathway stage"@en ; rdfs:comment {lit("Position in the results chain: Rationale, Intervention, Stakeholder, Output, Outcome, Impact, Cross-cutting, Uptake stage.")} .'),
-  glue('meliaf:climateScope a owl:DatatypeProperty ; rdfs:label "climate scope"@en ; rdfs:comment {lit("Adaptation, Mitigation, or Adaptation + Mitigation.")} .'),
   glue('meliaf:isHazard a owl:DatatypeProperty ; rdfs:label "is hazard"@en ; rdfs:comment {lit("True for the climate hazards that let conditional terms qualify.")} .'),
-  glue('meliaf:provenance a owl:DatatypeProperty ; rdfs:label "provenance"@en ; rdfs:comment {lit("Where the concept came from: Lexicon consensus, Domain expert, PRMS pilot, Restructure (v5). A concept may carry several.")} .')
+  glue('meliaf:provenance a owl:DatatypeProperty ; rdfs:label "provenance"@en ; rdfs:comment {lit("Where the concept came from: Lexicon consensus, Domain expert, PRMS pilot, Restructure (v5), Revision (v6). A concept may carry several.")} .')
 )
 
 dir.create("dist", showWarnings = FALSE)
@@ -169,13 +173,12 @@ context <- c(
        topConceptOf = iri_prop("skos:topConceptOf"), broader = iri_prop("skos:broader"), narrower = iri_prop("skos:narrower"),
        member = iri_prop("skos:member"), seeAlso = iri_prop("rdfs:seeAlso"), isReplacedBy = iri_prop("dcterms:isReplacedBy"),
        deprecated = list("@id" = "owl:deprecated", "@type" = "xsd:boolean"),
-       adaptationTag = plain("meliaf:adaptationTag"), mitigationTag = plain("meliaf:mitigationTag"), pathwayStage = plain("meliaf:pathwayStage"),
-       climateScope = plain("meliaf:climateScope"), provenance = plain("meliaf:provenance"),
+       climateArea = plain("meliaf:climateArea"), taggingRole = plain("meliaf:taggingRole"), contextRule = "meliaf:contextRule",
+       pathwayStage = plain("meliaf:pathwayStage"), provenance = plain("meliaf:provenance"),
        isHazard = list("@id" = "meliaf:isHazard", "@type" = "xsd:boolean")),
   set_names(map(relation_defs$prop, \(p) iri_prop(paste0("meliaf:", p))), relation_defs$prop)
 )
-concept_json <- function(id, term, synonyms, facet, parent_id, definition, source, urls, stage, scope, adaptation, condition,
-                         mitigation, m_condition, is_hazard, example, prov_class, provenance, ...) {
+concept_json <- function(id, term, synonyms, facet, parent_id, definition, source, urls, stage, area, role, rule, is_hazard, example, prov_class, provenance, ...) {
   rels <- relations |> filter(id == !!id)
   kids <- children$kids[match(id, children$parent_id)][[1]]
   compact(c(list(
@@ -184,9 +187,9 @@ concept_json <- function(id, term, synonyms, facet, parent_id, definition, sourc
     seeAlso = if (length(urls)) I(urls),
     topConceptOf = if (is.na(parent_id)) SCHEME, broader = if (!is.na(parent_id)) paste0("ct:", parent_id),
     narrower = if (length(kids)) I(paste0("ct:", kids)),
-    scopeNote = if (adaptation == "Adaptation-conditional") paste("Counts as adaptation when:", condition),
+    scopeNote = if (role == "Context-dependent") paste("Counts only in context:", rule),
     example = if (nzchar(example)) example,
-    adaptationTag = adaptation, mitigationTag = mitigation, pathwayStage = stage, climateScope = scope, isHazard = is_hazard,
+    climateArea = area, taggingRole = role, contextRule = if (nzchar(rule)) rule, pathwayStage = stage, isHazard = is_hazard,
     provenance = I(str_split_1(prov_class, "; ")), historyNote = paste("Provenance note in the master file:", provenance)),
     if (nrow(rels)) map(split(paste0("ct:", rels$target), rels$prop), I) else list()))
 }
@@ -197,9 +200,9 @@ graph <- c(
   pmap(facets, \(facet, facet_def, slug) list(id = paste0("ct:facet-", slug), type = "skos:Collection", prefLabel = facet,
                                               definition = facet_def, member = I(paste0("ct:", concepts$id[concepts$facet == facet])))),
   pmap(concepts, concept_json),
-  pmap(retired, \(ID, Term, Facet, successor, reason) compact(list(
+  pmap(retired, \(ID, Term, Facet, successor, reason, retired_in) compact(list(
     id = paste0("ct:", ID), type = "skos:Concept", inScheme = SCHEME, notation = ID, prefLabel = Term, deprecated = TRUE,
-    isReplacedBy = if (!is.na(successor)) paste0("ct:", successor), changeNote = paste0("Retired in version 5 (", reason, ")."))))
+    isReplacedBy = if (!is.na(successor)) paste0("ct:", successor), changeNote = paste0("Retired in version ", retired_in, " (", reason, ")."))))
 )
 write_json(list("@context" = context, "@graph" = graph), "dist/climate-taxonomy.jsonld", auto_unbox = TRUE, pretty = TRUE, null = "null")
 cat("Wrote dist/climate-taxonomy.jsonld\n")
@@ -207,26 +210,34 @@ cat("Wrote dist/climate-taxonomy.jsonld\n")
 # 4. Flat CSV and CHANGELOG ----------------------------------------------------------------------
 concepts |>
   transmute(id, iri = term_iri(id), term, synonyms = map_chr(synonyms, paste, collapse = "; "), facet, level, parent_id,
-            definition, definition_source = source, pathway_stage = stage, climate_scope = scope,
-            adaptation_tag = adaptation, adaptation_condition = condition, mitigation_tag = mitigation,
+            definition, definition_source = source, pathway_stage = stage,
+            climate_area = area, tagging_role = role, context_rule = rule,
             is_hazard, provenance = prov_class, status = "current", version = VERSION) |>
   bind_rows(retired |> transmute(id = ID, iri = term_iri(ID), term = Term, facet = Facet, status = "deprecated",
-                                 parent_id = successor, definition = paste("Retired:", reason), version = VERSION)) |>
+                                 parent_id = successor, definition = paste0("Retired in version ", retired_in, ": ", reason), version = VERSION)) |>
   write_csv("dist/climate-taxonomy.csv", na = "")
 
-tc <- read_csv("source/v4_to_v5_TERM_CHANGES.csv", show_col_types = FALSE)
-sc <- read_csv("source/v4_to_v5_SYNONYM_CHANGES.csv", show_col_types = FALSE)
-listed <- function(kind) tc |> filter(change == kind) |> transmute(line = glue("- `{ID}` {term} ({facet})")) |> pull(line)
+tc <- read_csv("source/v5_to_v6_TERM_CHANGES.csv", show_col_types = FALSE) |> mutate(ID = recode(ID), change = if_else(change == "ADDED (ID REUSED)", "ADDED", change))
+sc <- read_csv("source/v5_to_v6_SYNONYM_CHANGES.csv", show_col_types = FALSE)
+listed <- function(kind) tc |> filter(change %in% kind) |> distinct(ID, term, facet) |> transmute(line = glue("- `{ID}` {term} ({facet})")) |> pull(line)
+old_log <- read_lines("CHANGELOG.md")
+old_log <- old_log[seq(match(TRUE, str_starts(old_log, "## 5.0.0-draft")), length(old_log))]   # keep the version 5 entry below
 write_lines(c(
   glue("# Changelog\n\n## {VERSION} ({TODAY})\n"),
-  "First publication as a FAIR vocabulary (SKOS). Content is version 5 of the taxonomy, built 2026-09-04. Draft status.\n",
-  "## Version 5 compared with version 4\n",
-  glue("{nrow(concepts)} concepts (version 4 had 626). Changes recorded at term level:\n"),
+  glue("Content is version 6 of the taxonomy (master_v6.csv, revision of 16 October 2026). Draft status.\n"),
+  "Version 6 replaced the per-axis columns (climate scope, adaptation tag and condition, mitigation tag and condition) with three: climate area, tagging role (stand-alone or context-dependent) and context rule. The vocabulary publishes these as `meliaf:climateArea`, `meliaf:taggingRole` and `meliaf:contextRule`.\n",
+  "## Version 6 compared with version 5\n",
+  glue("{nrow(concepts)} concepts (version 5 had 739). Changes recorded at term level (a concept can appear under several):\n"),
   tc |> count(change) |> transmute(line = glue("- {change}: {n}")) |> pull(line),
   glue("\nSynonyms: {sum(sc$change == 'ADDED')} added, {sum(sc$change == 'REMOVED')} removed, {sum(sc$change == 'MOVED')} moved to another concept.\n"),
-  "### Added concepts\n", listed("ADDED"), "\n### Retired concepts (identifiers kept, marked deprecated)\n", listed("RETIRED"),
+  "### Added concepts\n", listed(c("ADDED", "ADDED (ID REUSED)")),
+  "\n### Concepts moved to a new identifier (old identifier kept, marked deprecated, pointing to the new one)\n", listed("MOVED (NEW ID)"),
+  "\n### Retired concepts\n", listed("RETIRED"),
   "\n### Renamed concepts\n", listed("RENAMED"),
-  "\nFull detail: `source/v4_to_v5_TERM_CHANGES.csv` and `source/v4_to_v5_SYNONYM_CHANGES.csv`."
+  "\n### Identifier correction\n",
+  pmap_chr(fix, \(id_in_master, published_id, term, reason) glue("- {term}: published as `{published_id}`, not `{id_in_master}` ({reason}).")),
+  "\nFull detail: `source/v5_to_v6_TERM_CHANGES.csv` and `source/v5_to_v6_SYNONYM_CHANGES.csv`.\n",
+  old_log
 ), "CHANGELOG.md")
 cat("Wrote dist/climate-taxonomy.csv and CHANGELOG.md\n")
 
@@ -238,7 +249,7 @@ PAGE <- read_file("templates/page.html")                       # the shell every
 page <- function(title, body, depth = "") glue(PAGE, .open = "<<", .close = ">>")
 
 dir.create("docs/terms", showWarnings = FALSE, recursive = TRUE)
-pwalk(concepts, function(id, term, synonyms, facet, parent_id, definition, source, urls, stage, scope, adaptation, condition, mitigation, m_condition, is_hazard, example, prov_class, provenance, ...) {
+pwalk(concepts, function(id, term, synonyms, facet, parent_id, definition, source, urls, stage, area, role, rule, is_hazard, example, prov_class, provenance, ...) {
   rels <- relations |> filter(id == !!id)
   kids <- children$kids[match(id, children$parent_id)][[1]]
   rel_html <- paste0("<span class=k>", rels$type, "</span> ", map_chr(rels$target, link), collapse = "<br>")
@@ -247,8 +258,8 @@ pwalk(concepts, function(id, term, synonyms, facet, parent_id, definition, sourc
     glue("<dt>Broader</dt><dd>{if (is.na(parent_id)) 'Top concept of the scheme' else link(parent_id)}</dd>"),
     glue("<dt>Narrower</dt><dd>{link(kids)}</dd>"),
     if (nrow(rels)) glue("<dt>Relations</dt><dd>{rel_html}</dd>"),
-    glue("<dt>Counts as adaptation</dt><dd>{if (adaptation == 'Adaptation-specific') 'Always (adaptation-specific).' else if (adaptation == 'Adaptation-conditional') h(condition) else 'Not an adaptation term.'}</dd>"),
-    if (mitigation != "n/a") glue("<dt>Mitigation</dt><dd>{h(mitigation)}{if (mitigation == 'Mitigation-conditional') paste0(': ', h(m_condition)) else ''}</dd>"),
+    glue("<dt>Climate area</dt><dd>{h(area)}</dd>"),
+    glue("<dt>Tagging role</dt><dd>{if (role == 'Stand-alone') 'Stand-alone: counts on its own.' else paste0('Context-dependent: counts only when ', h(rule))}</dd>"),
     if (nzchar(example)) glue("<dt>Example of use</dt><dd>{h(example)}</dd>"),
     glue("<dt>Provenance</dt><dd>{h(prov_class)}</dd>"),
     glue("<dt>Identifier</dt><dd><code>{id}</code> · <a href='{term_iri(id)}'>{term_iri(id)}</a><br><span class='src'>(planned permanent identifier: {future_iri(id)})</span></dd>")
@@ -257,12 +268,12 @@ pwalk(concepts, function(id, term, synonyms, facet, parent_id, definition, sourc
 <h1>{h(term)}</h1>
 <p class="def">{h(definition)}</p><p class="src">Definition source: {h(source)}{if (length(urls)) paste0(" · ", paste(glue("<a href=\\"{urls}\\">reference</a>"), collapse = ", ")) else ""}</p>
 <dl>{paste(rows, collapse = "\n")}</dl>
-<script type="application/ld+json">{toJSON(list("@context" = context, "@graph" = list(concept_json(id, term, synonyms, facet, parent_id, definition, source, urls, stage, scope, adaptation, condition, mitigation, m_condition, is_hazard, example, prov_class, provenance))), auto_unbox = TRUE, null = "null")}</script>')
+<script type="application/ld+json">{toJSON(list("@context" = context, "@graph" = list(concept_json(id, term, synonyms, facet, parent_id, definition, source, urls, stage, area, role, rule, is_hazard, example, prov_class, provenance))), auto_unbox = TRUE, null = "null")}</script>')
   write_file(page(term, body, "../"), glue("docs/terms/{id}.html"))
 })
-pwalk(retired, function(ID, Term, Facet, successor, reason) {
+pwalk(retired, function(ID, Term, Facet, successor, reason, retired_in) {
   body <- glue('<p class="eyebrow">{h(Facet)} · deprecated</p><h1>{h(Term)}</h1>
-<p class="def">This term was retired in version 5 ({h(reason)}). The identifier <code>{ID}</code> is kept so that older reporting stays readable, and will never be reused.</p>
+<p class="def">This term was retired in version {retired_in} ({h(reason)}). The identifier <code>{ID}</code> is kept so that older reporting stays readable, and will never be reused.</p>
 <dl><dt>Replaced by</dt><dd>{if (is.na(successor)) "No successor (concept dropped)" else link(successor)}</dd>
 <dt>Identifier</dt><dd><code>{ID}</code> · <a href="{term_iri(ID)}">{term_iri(ID)}</a><br><span class="src">(planned permanent identifier: {future_iri(ID)})</span></dd></dl>')
   write_file(page(paste(Term, "(retired)"), body, "../"), glue("docs/terms/{ID}.html"))

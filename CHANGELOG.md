@@ -1,5 +1,88 @@
 # Changelog
 
+## 6.0.0-draft (2026-11-09)
+Content is version 6 of the taxonomy (master_v6.csv, revision of 16 October 2026). Draft status.
+Version 6 replaced the per-axis columns (climate scope, adaptation tag and condition, mitigation tag and condition) with three: climate area, tagging role (stand-alone or context-dependent) and context rule. The vocabulary publishes these as `meliaf:climateArea`, `meliaf:taggingRole` and `meliaf:contextRule`.
+
+## Version 6 compared with version 5
+
+768 concepts (version 5 had 739). Changes recorded at term level (a concept can appear under several):
+- ADDED: 37
+- MOVED: 40
+- MOVED (NEW ID): 4
+- REDEFINED: 44
+- RENAMED: 9
+- RETIRED: 1
+Synonyms: 61 added, 86 removed, 24 moved to another concept.
+### Added concepts
+
+- `CCC_38` Climate adaptation (Cross-cutting concept)
+- `CRK_170` Climate-induced migration (Climate risk)
+- `IMP_006` Climate loss (Impact)
+- `INT_335` Bundled climate service (Intervention)
+- `INT_336` Climate-resilient breeding (Intervention)
+- `INT_337` Low-emission breeding (Intervention)
+- `INT_338` Planned relocation (Intervention)
+- `INT_339` Pastoral mobility (Intervention)
+- `INT_340` Anticipatory cash transfer (Intervention)
+- `INT_341` Climate-smart land management (Intervention)
+- `OTC_140` Youth inclusion (Outcome)
+- `OTC_141` Soil resilience (Outcome)
+- `OTC_142` Hydrological resilience (Outcome)
+- `OUT_136` Breeding network (Output)
+- `OUT_137` Climate-resilient variety (Output)
+- `OUT_138` Drought-tolerant variety (Output)
+- `OUT_139` Heat-tolerant variety (Output)
+- `OUT_140` Submergence-tolerant variety (Output)
+- `OUT_141` Salt-tolerant variety (Output)
+- `OUT_142` Climate-resilient breed (Output)
+- `OUT_143` Heat-tolerant breed (Output)
+- `OUT_144` Drought-tolerant breed (Output)
+- `OUT_145` Low-methane breed (Output)
+- `OUT_146` Climate-resilient fish strain (Output)
+- `OUT_147` Heat-tolerant fish strain (Output)
+- `OUT_148` Salinity-tolerant fish strain (Output)
+- `OUT_149` Hypoxia-tolerant fish strain (Output)
+- `STK_075` Green Climate Fund (Stakeholder)
+- `STK_076` Adaptation Fund (Stakeholder)
+- `STK_077` Fund for responding to Loss and Damage (Stakeholder)
+- `SYS_118` Climate-smart crop system (System)
+- `SYS_119` Climate-smart livestock system (System)
+- `SYS_120` Climate-smart aquaculture system (System)
+- `SYS_121` Climate-smart fishery (System)
+- `SYS_122` Climate-smart food system (System)
+- `TRT_11` Biological nitrification inhibition (Breeding trait)
+- `CCC_47` Climate mitigation (Cross-cutting concept)
+
+### Concepts moved to a new identifier (old identifier kept, marked deprecated, pointing to the new one)
+
+- `CCC_32` Youth inclusion (Outcome)
+- `INT_194` Climate-induced migration (Intervention)
+- `INT_281` Breeding network (Intervention)
+- `OUT_018` Bundled climate service (Intervention)
+
+### Retired concepts
+
+- `CDI_07` Nitrogen fixation (Climate driver)
+
+### Renamed concepts
+
+- `CRK_165` Sensitivity to climate (Climate risk)
+- `IMP_002` Avoided agronomic loss (Impact)
+- `IMP_003` Avoided welfare loss (Impact)
+- `INT_096` Climate forecasting (Intervention)
+- `INT_100` Early warning service (Intervention)
+- `INT_151` Curriculum development (Intervention)
+- `INT_160` Community of practice facilitation (Intervention)
+- `OUT_059` Climate vulnerability index (Output)
+- `OUT_060` Climate resilience index (Output)
+
+### Identifier correction
+
+- Climate mitigation: published as `CCC_47`, not `CCC_39` (master_v6 reuses CCC_39, which was retired in v5 (Nature-positive) and must never be reused; published under the next free CCC number until the master is corrected).
+
+Full detail: `source/v5_to_v6_TERM_CHANGES.csv` and `source/v5_to_v6_SYNONYM_CHANGES.csv`.
+
 ## 5.0.0-draft (2026-09-23)
 First publication as a FAIR vocabulary (SKOS). Content is version 5 of the taxonomy, built 2026-09-04. Draft status.
 

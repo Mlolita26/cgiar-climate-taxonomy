@@ -1,11 +1,11 @@
 # CGIAR Climate Adaptation and Mitigation Taxonomy
 
-A controlled vocabulary of 739 concepts for describing climate adaptation and mitigation in
+A controlled vocabulary of 768 concepts for describing climate adaptation and mitigation in
 agricultural research results: definitions with their sources, synonyms, typed relations, and
-the conditions under which a term counts as adaptation or mitigation. Developed by the CGIAR
+for each term its climate area, its tagging role (stand-alone or context-dependent) and the context in which it counts. Developed by the CGIAR
 MELIAF Climate Adaptation Activator.
 
-**Version 5.0.0-draft.** Published as a draft for the MELIAF build-shop (Rabat, October 2026).
+**Version 6.0.0-draft** (taxonomy version 6, revision of 16 October 2026). First published as a draft for the MELIAF build-shop (Rabat, October 2026); version 5 was the first release.
 
 - **Browse:** https://mlolita26.github.io/cgiar-climate-taxonomy/
 - **Download:** [Turtle](docs/dist/climate-taxonomy.ttl) · [JSON-LD](docs/dist/climate-taxonomy.jsonld) · [CSV](docs/dist/climate-taxonomy.csv)
@@ -35,14 +35,14 @@ a DOI, and registration in a vocabulary repository. See the self-assessment on t
 | --- | --- |
 | `build_fair.R` | The one script. Reads `source/`, writes `dist/` and `docs/`. Run: `Rscript build_fair.R` |
 | `qa/check_skos.R` | Checks the result (structure always; parsing too if `rdflib` is installed). Run: `Rscript qa/check_skos.R` |
-| `source/` | Copies of the version-5 taxonomy files. `SOURCES.md` says where each came from |
+| `source/` | Copies of the version-6 taxonomy files, the retired identifiers of versions 5 and 6, and `id_corrections.csv`. `SOURCES.md` says where each came from |
 | `dist/` | The vocabulary: `climate-taxonomy.ttl`, `.jsonld`, `.csv`, and `meliaf-relations.ttl` |
 | `docs/` | The website served by GitHub Pages: landing page and one page per term |
 | `templates/` | The two HTML templates the pages are made from (`page.html` shell, `index.html` landing page) |
 | `GOVERNANCE.md` | Who decides, how to propose a term, rules that never change |
 | `governance/decisions.csv` | Every decision on a term request: date, proposal, decision, reason |
 | `notes/` | Working notes, e.g. the governance rehearsal (one request run end to end) |
-| `CHANGELOG.md` | What changed between version 4 and 5 (generated) |
+| `CHANGELOG.md` | What changed in each version (generated; version 6 compared with 5 at the top) |
 | `LICENSE.md`, `CITATION.cff` | Licence and how to cite |
 | `brain/` | The taxonomy brain: its R build script and page template. The page is published at `docs/brain/` |
 | `review/` | The tagging review platform: the script that prepares the data and the Cloudflare worker that stores the reviews. The page is published at `docs/review/` |

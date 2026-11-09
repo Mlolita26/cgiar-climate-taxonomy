@@ -5,7 +5,8 @@
 
 library(dplyr); library(purrr); library(readr); library(stringr); library(jsonlite)
 
-raw      <- read_json("source/taxonomy_v5.json")
+raw      <- read_json("source/taxonomy_v6.json")
+fix      <- read_csv("source/id_corrections.csv", show_col_types = FALSE)
 ids      <- map_chr(raw$concepts, "id")
 parents  <- map_chr(raw$concepts, "parent_id", .default = NA_character_)
 labels   <- map_chr(raw$concepts, "term")
@@ -13,7 +14,10 @@ defs     <- map_chr(raw$concepts, "definition", .default = "")
 synonyms <- map(raw$concepts, \(c) as.character(unlist(c$synonyms)))
 facets   <- map_chr(raw$concepts, "facet")
 targets  <- unlist(map(raw$concepts, \(c) map_chr(c$relations, "target")))
-retired  <- read_csv("source/v5_retired_ids.csv", show_col_types = FALSE)
+retired  <- bind_rows(read_csv("source/v5_retired_ids.csv", show_col_types = FALSE), read_csv("source/v6_retired_ids.csv", show_col_types = FALSE))
+recode   <- function(x) { i <- match(x, fix$id_in_master); ifelse(is.na(i), x, fix$published_id[i]) }   # same correction as the build
+ids <- recode(ids); parents <- recode(parents); targets <- recode(targets)
+dangling <- setdiff(targets, ids)                    # relation targets missing from the master; the build leaves these relations out
 
 # walk up the parent chain from every concept; a cycle would never reach a top concept
 depth <- function(id, seen = character()) {
@@ -24,14 +28,15 @@ depth <- function(id, seen = character()) {
 
 checks <- tribble(
   ~check,                                                   ~ok,
-  "739 concepts",                                            length(ids) == 739,
+  "768 concepts",                                            length(ids) == 768,
   "ids are unique",                                          !anyDuplicated(ids),
   "every concept has a label",                               all(nzchar(labels)),
   "every concept has a definition",                          all(nzchar(defs)),
   "every parent exists",                                     all(parents[!is.na(parents)] %in% ids),
   "no parent is a retired id",                               !any(parents %in% retired$ID),
   "no cycles in the hierarchy",                              !any(is.na(map_int(ids, depth))),
-  "every relation target exists",                            all(targets %in% ids),
+  sprintf("relations to missing concepts are left out of the vocabulary (%s)", if (length(dangling)) paste(dangling, collapse = ", ") else "none"),
+                                                             !any(str_detect(read_file("dist/climate-taxonomy.ttl"), paste0("ct:", dangling, "\b"))) | !length(dangling),
   "every retired id's successor, where named, exists",       all(is.na(str_extract(retired$successor, "[A-Z]{2,4}_[0-9]+")) | str_extract(retired$successor, "[A-Z]{2,4}_[0-9]+") %in% ids),
   "no retired id is also a current id",                      !any(retired$ID %in% ids),
   "no synonym duplicates another concept's label",           !any(str_to_lower(unlist(synonyms)) %in% str_to_lower(labels)),
@@ -43,8 +48,8 @@ checks <- tribble(
 # JSON-LD: parse and count with jsonlite (always possible)
 jl <- read_json("dist/climate-taxonomy.jsonld")
 types <- map_chr(jl$`@graph`, \(n) n$type %||% n$`@type` %||% "")
-checks <- add_row(checks, check = "JSON-LD parses and has 739 current + retired concepts",
-                  ok = sum(types == "skos:Concept") == 739 + nrow(retired))
+checks <- add_row(checks, check = "JSON-LD parses and has 768 current + retired concepts",
+                  ok = sum(types == "skos:Concept") == 768 + nrow(retired))
 
 # Turtle: parse back with rdflib if available
 if (requireNamespace("rdflib", quietly = TRUE)) {
@@ -56,7 +61,7 @@ if (requireNamespace("rdflib", quietly = TRUE)) {
   scheme   <- rdflib::rdf_query(g, paste0("SELECT ?t ?l ?v WHERE { ?s a ", SKOS, "ConceptScheme> ; <http://purl.org/dc/terms/title> ?t ; <http://purl.org/dc/terms/license> ?l ; <http://www.w3.org/2002/07/owl#versionInfo> ?v }"))
   checks <- checks |>
     add_row(check = "Turtle parses (rdflib)", ok = TRUE) |>
-    add_row(check = "Turtle has 739 current + retired concepts", ok = n_distinct(concepts$c) == 739 + nrow(retired)) |>
+    add_row(check = "Turtle has 768 current + retired concepts", ok = n_distinct(concepts$c) == 768 + nrow(retired)) |>
     add_row(check = "every skos:broader points to a concept", ok = all(broader$o %in% concepts$c)) |>
     add_row(check = "scheme carries title, licence and version", ok = nrow(scheme) == 1)
 } else {

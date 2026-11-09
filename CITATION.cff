@@ -1,9 +1,9 @@
 cff-version: 1.2.0
-message: "If you use this vocabulary, please cite it as below. The identifier listed is a Zenodo Sandbox test DOI (prefix 10.5072); a permanent DOI will be issued with the first non-draft release."
+message: "If you use this vocabulary, please cite it as below. There is no permanent DOI yet; one will be issued with the first non-draft release. The identifier listed is the Zenodo Sandbox test deposit of the version 5 draft."
 type: dataset
 title: "CGIAR Climate Adaptation and Mitigation Taxonomy"
-version: "5.0.0-draft"
-date-released: "2026-09-23"
+version: "6.0.0-draft"
+date-released: "2026-11-09"
 license: CC-BY-4.0
 repository-code: "https://github.com/Mlolita26/cgiar-climate-taxonomy"
 url: "https://mlolita26.github.io/cgiar-climate-taxonomy/"
@@ -11,7 +11,7 @@ identifiers:
   - type: doi
     value: "10.5072/zenodo.607948"
     description: "Zenodo Sandbox test deposit of release v5.0.0-draft.1 (not a permanent DOI)"
-abstract: "A controlled vocabulary of 739 concepts for describing climate adaptation and mitigation in agricultural research results, with definitions, synonyms, typed relations and the conditions under which a term counts as adaptation or mitigation. Developed by the CGIAR MELIAF Climate Adaptation Activator."
+abstract: "A controlled vocabulary of 768 concepts for describing climate adaptation and mitigation in agricultural research results, with definitions, synonyms, typed relations, and for each term its climate area, its tagging role (stand-alone or context-dependent) and the context in which it counts. Developed by the CGIAR MELIAF Climate Adaptation Activator."
 keywords:
   - climate adaptation
   - climate mitigation
