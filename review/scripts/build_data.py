@@ -3,15 +3,15 @@
     python scripts/build_data.py --batch test-2025 --n 60
     python scripts/build_data.py --batch prms-2025-all --n 0      # 0 = every result in the tags file
 
-Writes data/taxonomy.json, data/batch-<batch>.json and updates data/batches.json.
+Writes docs/review/data/taxonomy.json, docs/review/data/batch-<batch>.json and updates docs/review/data/batches.json.
 Reviews are not here: they are stored by the worker (worker/).
 """
 import argparse, hashlib, json, os, random
 
 ROOT = r"C:\Users\mlolita\OneDrive - CGIAR\Nowak, Andreea (Alliance Bioversity-CIAT)'s files - MELIAF-Implementation"
-DEFAULT_TAGS = os.path.join(ROOT, r"Data\outputs\prms_2025_final\_working\prms_tags.jsonl")
-DEFAULT_TAX = os.path.join(ROOT, r"Taxonomy\Machine_readable_taxonomy\taxonomy_v4_plus.json")
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
+DEFAULT_TAGS = os.path.join(ROOT, r"Taxonomy\3_Tagging\outputs\2026-08 2025 marked - 4343 results - v4\_working\prms_tags.jsonl")
+DEFAULT_TAX = os.path.join(ROOT, r"Taxonomy\1_Versions\v4 - Aug 2026 - 2025 run\machine_readable\taxonomy_v4_plus.json")
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "docs", "review", "data")
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--batch", required=True)
@@ -67,4 +67,4 @@ stamp = lambda f: hashlib.sha1(open(os.path.join(OUT, f), "rb").read()).hexdiges
 batches.append({"id": a.batch, "name": a.name or a.batch, "taxonomy": tver, "n": len(results),
                 "v": stamp(f"batch-{a.batch}.json"), "tv": stamp("taxonomy.json")})
 json.dump(batches, open(bp, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-print(f"batch '{a.batch}': {len(results)} results · taxonomy {tver}: {len(terms)} terms -> data/")
+print(f"batch '{a.batch}': {len(results)} results · taxonomy {tver}: {len(terms)} terms -> docs/review/data/")

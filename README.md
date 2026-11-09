@@ -11,6 +11,11 @@ MELIAF Climate Adaptation Activator.
 - **Download:** [Turtle](docs/dist/climate-taxonomy.ttl) · [JSON-LD](docs/dist/climate-taxonomy.jsonld) · [CSV](docs/dist/climate-taxonomy.csv)
 - **Each term has its own page**, for example https://mlolita26.github.io/cgiar-climate-taxonomy/terms/CRK_102.html
 
+Two tools that use the taxonomy live in the same repository:
+
+- **Taxonomy brain:** https://mlolita26.github.io/cgiar-climate-taxonomy/brain/ . Type a text and see which words are taxonomy terms or synonyms, and whether the text tells a complete impact pathway.
+- **Tagging review:** https://mlolita26.github.io/cgiar-climate-taxonomy/review/ . Two reviewers check the AI tagging of each PRMS result.
+
 ## What "FAIR" means here, in plain words
 
 - **Findable:** every term has a stable identifier (`CRK_102`) and its own web address.
@@ -39,6 +44,9 @@ a DOI, and registration in a vocabulary repository. See the self-assessment on t
 | `notes/` | Working notes, e.g. the governance rehearsal (one request run end to end) |
 | `CHANGELOG.md` | What changed between version 4 and 5 (generated) |
 | `LICENSE.md`, `CITATION.cff` | Licence and how to cite |
+| `brain/` | The taxonomy brain: its R build script and page template. The page is published at `docs/brain/` |
+| `review/` | The tagging review platform: the script that prepares the data and the Cloudflare worker that stores the reviews. The page is published at `docs/review/` |
+| `.gitattributes` | Leaves `brain/` and `review/` out of release archives, so a release (and its DOI) holds only the taxonomy |
 
 ## Propose a term
 

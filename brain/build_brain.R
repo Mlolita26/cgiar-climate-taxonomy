@@ -110,7 +110,7 @@ meta <- list(
   page_built  = format(Sys.Date())
 )
 
-# 7. Put the data into the page template and write docs/index.html -----------------
+# 7. Put the data into the page template and write ../docs/brain/index.html (the published page) -----------------
 
 as_json <- function(x) toJSON(x, auto_unbox = TRUE, na = "null", null = "null")
 
@@ -128,9 +128,8 @@ page <- readr::read_file("template/brain.html") |>
   inject("__SAMPLES__",  as_json(samples))
 
 dir.create("docs", showWarnings = FALSE)
-readr::write_file(page, "docs/index.html")
-invisible(file.create("docs/.nojekyll"))   # tells GitHub Pages to serve the folder as-is
+readr::write_file(page, "../docs/brain/index.html")
 
-cat(sprintf("Wrote docs/index.html: %d concepts (%d specific, %d conditional), %d synonyms, %d relations (%.0f KB)\n",
+cat(sprintf("Wrote ../docs/brain/index.html: %d concepts (%d specific, %d conditional), %d synonyms, %d relations (%.0f KB)\n",
             meta$n_concepts, meta$n_specific, meta$n_conditional, meta$n_synonyms, meta$n_relations,
-            file.size("docs/index.html") / 1024))
+            file.size("../docs/brain/index.html") / 1024))

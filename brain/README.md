@@ -4,7 +4,10 @@ Type or paste a text. The page marks the words that are in the CGIAR climate ada
 taxonomy, tells you which ones are synonyms of an agreed term, and shows whether the text
 describes a complete impact pathway.
 
-**Live page:** https://mlolita26.github.io/climate-taxonomy-brain/
+**Live page:** https://mlolita26.github.io/cgiar-climate-taxonomy/brain/
+
+This folder is part of the climate taxonomy repository. Run the build from this folder; it writes
+the published page to `../docs/brain/index.html`.
 
 ## How it works, in plain words
 
@@ -33,7 +36,7 @@ context, is what the PRMS tagging pipeline adds on top.
 | `build_brain.R` | Reads the taxonomy, prepares the data and the rule parameters, writes the page. Run with `Rscript build_brain.R`. |
 | `data/taxonomy_v5.json` | The taxonomy (739 concepts). Replace it to use another taxonomy. |
 | `template/brain.html` | The page layout and the matching and counting code. |
-| `docs/index.html` | The built page, served by GitHub Pages. |
+| `../docs/brain/index.html` | The built page, served by GitHub Pages. |
 | `test_rule.js` | Runs the samples from the command line: `node test_rule.js`. |
 
 ## Data source
