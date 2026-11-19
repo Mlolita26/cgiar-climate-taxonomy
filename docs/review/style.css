@@ -248,12 +248,19 @@ details.hlp[open] > summary { background: var(--green); border-color: var(--gree
 details.hlp .hlp-b { display: block; margin: 6px 0 8px; padding: 8px 10px; border-left: 3px solid var(--green); border-radius: 4px; background: var(--green-lt);
   color: var(--ink); font-size: 12.5px; font-weight: 400; line-height: 1.5; text-transform: none; letter-spacing: normal; white-space: normal; text-align: left; }
 details.hlp .hlp-b a { white-space: nowrap; }
+table.drops b.hl-g { background: var(--hl-g); border-radius: 3px; padding: 0 2px; }
+table.drops th { text-align: left; font-weight: 600; color: var(--muted); font-size: 12.5px; }
+/* every "?" box floats over the page, opened on hover or click (v6.js) */
+details.hlp { position: relative; }
+details.hlp .hlp-b { position: absolute; z-index: 30; left: 0; top: 100%; width: 380px; max-width: calc(100vw - 32px); margin: 0;
+  border: 1px solid #BFDDD3; box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+@media (max-width: 600px) { details.hlp .hlp-b { position: fixed; left: 16px; right: 16px; top: auto; bottom: 16px; width: auto; max-height: 60vh; overflow: auto; } }
 details.hlp .hlp-t { display: table; border-collapse: collapse; margin: 6px 0; width: 100%; max-width: 460px; background: var(--card); }
 details.hlp .hlp-t th, details.hlp .hlp-t td { border: 1px solid var(--line); padding: 3px 6px; text-align: left; vertical-align: top; font-size: 12.5px; }
 details.hlp .hlp-t th { background: var(--bg); font-weight: 600; }
 details.hlp .hlp-t td:first-child { white-space: nowrap; font-weight: 600; }
 .nav details.hlp { position: relative; }
-.nav details.hlp .hlp-b { position: absolute; z-index: 20; left: 0; top: 22px; width: 340px; max-width: calc(100vw - 32px); margin: 0;
+.nav details.hlp .hlp-b { position: absolute; z-index: 20; left: 0; top: 100%; width: 340px; max-width: calc(100vw - 32px); margin: 0;
   border: 1px solid #BFDDD3; box-shadow: 0 8px 24px rgba(0,0,0,.12); }
 @media (max-width: 600px) { .nav details.hlp .hlp-b { position: fixed; left: 16px; right: 16px; top: auto; width: auto; } }
 

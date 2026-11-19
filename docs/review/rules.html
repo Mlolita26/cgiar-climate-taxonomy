@@ -220,8 +220,20 @@
 
 <section id="terms-not-kept">
 <h2>Words found in the text but not tagged</h2>
-<p>The term search found these words of the text in the taxonomy. The AI or the code decided they are not a tag in this text. The reason is shown: different meaning in this text; part of a name; too generic; broader term of a kept tag; wording not found in the text; refused by the second check; anchor without climate wording.</p>
-<p>"+ keep" makes the word your tag. Then say for which area it counts.</p>
+<p>Before the AI reads a text, a search marks every word that matches a taxonomy term or synonym. The AI then keeps some of these words as tags and leaves the others out. The code can also refuse a tag that fails a check. This section lists the words that were marked and then left out, with where they are in the text and why.</p>
+<div class="tbl"><table>
+  <tr><th>Reason shown</th><th>What happened</th></tr>
+  <tr><td>The AI decided this term does not apply here</td><td>The AI read the text and left the word out without a more specific reason.</td></tr>
+  <tr><td>Another meaning in this text</td><td>The word is used in another sense ("model" as an example to follow, not a computer model).</td></tr>
+  <tr><td>Part of a name</td><td>The word is inside the name of a programme, project, organisation, event or publication.</td></tr>
+  <tr><td>Too general</td><td>The word says nothing specific about the work ("works with sweet potato").</td></tr>
+  <tr><td>A narrower term is already tagged</td><td>Two terms match the same words; only the narrower one is kept ("Local government" rather than "Public institution").</td></tr>
+  <tr><td>Words not in the text</td><td>The AI quoted words that are not in the text word for word ("public sectors" when the text says something else). Every quote must be in the text, so the code refused the tag.</td></tr>
+  <tr><td>Second check</td><td>A second AI check said the term is not in the text.</td></tr>
+  <tr><td>Area not addressed</td><td>The term belongs to one area in the taxonomy and the text does not talk about that area.</td></tr>
+  <tr><td>No climate words in the anchor</td><td>The AI linked the term to a passage that holds no climate words.</td></tr>
+</table></div>
+<p>A word left out is not wrong in itself: most are general words that say nothing about climate. Use "+ keep" when one should be a tag, then say for which area it counts.</p>
 </section>
 
 <section id="findings">

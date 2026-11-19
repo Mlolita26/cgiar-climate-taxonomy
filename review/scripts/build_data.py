@@ -161,6 +161,31 @@ else:
                 best = mm.group(0)
         return best
 
+    def where_in(text, cid, words=""):
+        """where the concept is in the text: the AI's own words when it gave them, else the longest term or synonym
+        (an acronym such as GAP only in capitals, so it does not match 'gaps'), with about 60 characters on each side"""
+        text = text or ""
+        hit = None
+        if words:
+            mm = re.search(r"(?<!\w)" + re.escape(words) + r"(?!\w)", text, re.IGNORECASE)
+            if mm:
+                hit = (mm.start(), mm.end())
+        if hit is None:
+            for f in FORMS.get(str(cid), []):
+                f = str(f)
+                acronym = f.isupper() and len(f) <= 6
+                toks = [x for x in re.split(r"[\W_]+", f if acronym else f.lower()) if x]
+                if not toks:
+                    continue
+                rx = r"(?<!\w)" + (_SEP.join(re.escape(x) for x in toks) if acronym else _SEP.join(_tok_rx(x) for x in toks)) + r"(?!\w)"
+                mm = re.search(rx, text, 0 if acronym else re.IGNORECASE)
+                if mm and (hit is None or mm.end() - mm.start() > hit[1] - hit[0]):
+                    hit = (mm.start(), mm.end())
+        if hit is None:
+            return "", ""
+        a0, b0 = max(0, hit[0] - 60), min(len(text), hit[1] + 60)
+        return text[hit[0]:hit[1]], ("…" if a0 > 0 else "") + text[a0:b0] + ("…" if b0 < len(text) else "")
+
     # Terms found but not kept: prms_drops.jsonl, one line per result. Only refusals of a whole term whose concept is
     # not among the kept tags; refused anchors, links and statuses of kept tags are shown on the tags themselves.
     NOT_TERM = {"link_not_valid", "finding_excerpt_not_in_text"}
@@ -211,6 +236,10 @@ else:
                 seen_d[cid] = {"concept_id": cid, "concept_name": tname.get(cid, cid), "reasons": []}
                 dropped.append(seen_d[cid])
             seen_d[cid]["reasons"].append({"reason": d.get("reason") or "", "detail": d.get("detail") or ""})
+        full = (r.get("title_en") or r.get("title") or "") + " / " + (r.get("description_en") or r.get("description") or "")
+        for x in dropped:                            # where the words are in the text, for the reviewer
+            given = next((z["detail"] for z in x["reasons"] if z["reason"].startswith("not_kept:") and z["detail"]), "")
+            x["found_as"], x["context"] = where_in(full, x["concept_id"], given)
         res = {"id": uid, "title": r.get("title") or "", "description": r.get("description") or "",
                "marker": r.get("climate_marker") or "", "level": r.get("level") or "", "type": r.get("type") or "",
                "status": r.get("status") or "", "prompt": ver.get("prompt") or "", "translated": bool(r.get("translated")),

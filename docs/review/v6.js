@@ -161,7 +161,6 @@ const V6 = (() => {
         if ((r.measure === "agree" && ai.measure === "described") || r.measure === "missed") measure = "described";
         if (measure === "described") {
           if (!r.purpose) missing.push(`${AX[ax]}: answer the question on the purpose.`);
-          else if (r.purpose !== "not_stated" && !r.purpose_basis) missing.push(`${AX[ax]}: choose the test that shows the purpose.`);
           purpose = r.purpose || "not_stated";
         }
       }
@@ -203,10 +202,10 @@ const V6 = (() => {
         <tr><td>L3</td><td>describes a climate measure, and climate is the main purpose.</td></tr></table>`],
     "climate-information": ["climate information", "The taxonomy terms that count for this area: stand-alone terms, and context-dependent terms with a climate anchor in the text. If no term counts, the area holds no climate information. Change them in the tag table."],
     measure: ["climate measure", "An action the work carried out, produced, organised or recommends, in response to a climate problem of this area. A study that only describes a climate condition, an event attended or a general aim is not a measure. Keep the AI's answer, say why it is not a measure, or paste the passage of a measure the AI missed."],
-    purpose: ["purpose", "Whether the text presents climate as the main purpose of the work, an additional purpose, or does not say. Main needs one of the tests listed; additional needs the text to say so. The purpose counts only when a climate measure is described."],
+    purpose: ["purpose", "Whether the text presents climate as the main purpose of the work, an additional purpose, or does not say. The purpose counts only when a climate measure is described."],
     tags: ["AI tags", "Each taxonomy term the AI kept, with the words it was found as, its value for each area, its role in the text and whether the work is planned or done. Click ✓ to agree, change to correct a value, or ✗ to refuse the tag with a reason."],
     anchors: ["tag values", "Stand-alone: the term is climate information on its own. Anchored: a context-dependent term with a climate anchor in the text, shown in quotes. No anchor: a context-dependent term without a climate anchor, so it does not count. Not relevant: the term does not concern this area."],
-    "terms-not-kept": ["terms found but not kept", "Terms the search found in the text that the AI or the checks did not keep, with the reason. Click + keep when a term should count, then tick under Add a term the area for which it counts."],
+    "terms-not-kept": ["words found but not tagged", "Before the AI reads the text, a search marks every word that matches a taxonomy term or synonym. The AI then keeps some as tags and leaves others out; the code can also refuse one. These are the ones left out, with where they are in the text and why. If one should be a tag, click + keep."],
     findings: ["AI taxonomy findings", "Possible gaps or errors in the taxonomy that the AI recorded, such as a climate phrase with no matching term. Accept, reject or leave each one for later. These answers go to the taxonomy team and do not change the outcome of your review."],
     pathway: ["climate pathway", "The parts of the climate pathway the AI recorded for each area: reason, where, who, what was done, what came out, the links between them, and whether the work is planned or done. Open it when useful and note any part to correct."],
     flags: ["flags", "Points the tagging script asks a person to look at first, for example an area that rests on anchors only or an answer changed by the second check. A flag is not an error."],
@@ -214,6 +213,21 @@ const V6 = (() => {
     outcome: ["outcome of the review", "Worked out from your answers. Wrong when a level or the marker answer differs from the AI's; minor gap when only tags, terms, the pathway or the purpose differ; captured well when nothing differs."],
     proposals: ["proposed terms", "Wording that is not in the taxonomy, proposed as a new term or as a synonym of an existing term. Proposals go to the people who maintain the taxonomy."],
   };
+  // "?" boxes open on hover where the screen has a mouse; a click keeps one open; on touch screens a tap opens it.
+  if (typeof window !== "undefined" && typeof document !== "undefined" && !window.__hlpHover) {
+    window.__hlpHover = true;
+    const canHover = !!(window.matchMedia && window.matchMedia("(hover: hover)").matches);
+    const place = d => { const b = d.querySelector(".hlp-b"); if (!b) return; b.style.left = ""; b.style.right = "";
+      const r = b.getBoundingClientRect(); if (r.right > window.innerWidth - 8) { b.style.left = "auto"; b.style.right = "0"; } };
+    const hlpOf = el => (el && el.closest) ? el.closest("details.hlp") : null;
+    document.addEventListener("mouseover", e => { if (!canHover) return; const d = hlpOf(e.target);
+      if (d && !d.open) { d.dataset.hover = "1"; d.open = true; place(d); } });
+    document.addEventListener("mouseout", e => { if (!canHover) return; const d = hlpOf(e.target);
+      if (d && d.dataset.hover === "1" && !d.contains(e.relatedTarget)) { delete d.dataset.hover; d.open = false; } });
+    document.addEventListener("click", e => { const s = e.target.closest && e.target.closest("details.hlp > summary");
+      if (s && s.parentElement.dataset.hover === "1") { e.preventDefault(); delete s.parentElement.dataset.hover; } }, true);
+    document.addEventListener("toggle", e => { if (e.target.matches && e.target.matches("details.hlp") && e.target.open) place(e.target); }, true);
+  }
   const help = key => { const h = HELP[key] || [key, ""];
     // h[2]: an optional table, fixed text written in this file (not data), shown under the explanation
     return `<details class="hlp"><summary aria-label="Explain: ${esc(h[0])}" title="What is this?">?</summary><span class="hlp-b">${esc(h[1])}${h[2] || ""} <a href="rules.html#${esc(key)}" target="_blank" rel="noopener">More information</a></span></details>`; };
@@ -355,11 +369,10 @@ const V6 = (() => {
           ${r.measure === "not_measure" ? `<select data-k="measure_reason" data-ax="${ax}" ${off ? "disabled" : ""}><option value="">why not…</option>${NOT_MEASURE.map(([v, l]) => opt(v, l, r.measure_reason === v)).join("")}</select>` : ""}</div>
         ${r.measure === "missed" ? `<input class="wide" data-k="measure_quote" data-ax="${ax}" placeholder="paste the passage that describes the measure" value="${esc(r.measure_quote || "")}" ${off ? "disabled" : ""}>` : ""}</div>`;
       const needP = me.A[ax].measure === "described", aiP = ai.purpose || "not_stated", offP = off || !needP;
-      const tests = PURPOSE_TESTS[r.purpose] || [];
+      // only main / additional / not stated is shown and asked (Lolita, 19 Nov 2026): no test names, no test to choose
       h += `<div class="q1 ${offP ? "off" : ""}"><div class="qh">Purpose ${help("purpose")} <span class="muted small">main, additional or not stated</span></div>
-        <div class="small"><span class="muted">AI:</span> ${esc(w(aiP))}${aiP !== "not_stated" && ai.purpose_basis && ai.purpose_basis !== "none" ? `, by the test “${esc(w(ai.purpose_basis))}”` : ""}${ai.purpose_quote ? `: “${esc(cut(ai.purpose_quote, 220))}”` : ""}${!aiDesc && aiP !== "not_stated" ? ` <span class="muted">(counts only with a climate measure)</span>` : ""}</div>
-        <div class="decide"><span class="segs">${["main", "additional", "not_stated"].map(v => segD("p-" + ax, v, w(v) + (v === aiP ? ` <small>AI</small>` : ""), r.purpose === v, "ok", offP)).join("")}</span>
-          ${tests.length ? `<select data-k="purpose_basis" data-ax="${ax}" ${offP ? "disabled" : ""}><option value="">by the test…</option>${tests.map(([v, l]) => opt(v, l, r.purpose_basis === v)).join("")}</select>` : ""}</div>
+        <div class="small"><span class="muted">AI:</span> ${esc(w(aiP))}</div>
+        <div class="decide"><span class="segs">${["main", "additional", "not_stated"].map(v => segD("p-" + ax, v, w(v) + (v === aiP ? ` <small>AI</small>` : ""), r.purpose === v, "ok", offP)).join("")}</span></div>
         ${offP && !off ? `<div class="muted small">${r.measure ? "The purpose counts only when a climate measure is described." : "Answer the question on the climate measure first."}</div>` : ""}</div>`;
       if (off) h += `<p class="muted small">After your changes no term counts for ${ax}: level L0.</p>`;
     }
@@ -431,13 +444,33 @@ const V6 = (() => {
       <div class="hint small pad">✓ agree, change to correct a value, ✗ to refuse a tag (a reason is needed).</div>`;
   }
 
+  // why a word found by the term search is not a tag, as a full sentence (reason codes of prms_drops.jsonl)
+  function whyNotTagged(z) {
+    const d = String(z.detail || ""), q = d ? `“${esc(cut(d, 120))}”` : "";
+    switch (z.reason) {
+      case "not_kept:other": return "The AI read the text and decided this term does not apply here.";
+      case "not_kept:different_meaning": return "The AI decided the word has another meaning in this text than the taxonomy term.";
+      case "not_kept:part_of_a_name": return "The words are part of a name (a programme, project, organisation, event or publication), so they are not climate information about the work.";
+      case "not_kept:too_generic": return "The AI found the word too general to say anything about this work.";
+      case "broader_term_of_a_kept_tag": return `A narrower term on the same words is already tagged${d ? `: ${esc(d)}` : ""}. Only the narrower term is kept.`;
+      case "excerpt_not_in_text": return `The AI wanted to tag this term with the words ${q}, but these words are not in the text word for word. Every quote must be in the text, so the code refused the tag.`;
+      case "second_check:not_present": return `A second AI check said the term is not in the text${d ? `: ${esc(cut(d, 140))}` : "."}`;
+      case "area_not_addressed_by_the_text": return `The term belongs to ${esc(d || "an area")} in the taxonomy, and the text does not talk about that area.`;
+      case "anchor_without_climate_information": return "The AI linked it to a passage that holds no climate words, so the code did not keep it.";
+      default: return esc(dropWord(z.reason)) + (d ? `: ${esc(cut(d, 140))}` : "");
+    }
+  }
   function renderDropped() {
     const res = S.cur, R = S.rev, l = res.dropped || [];
+    const ctx = x => { if (!x.context) return `<span class="muted">not found in the text as a taxonomy term</span>`;
+      const c = x.context, w = x.found_as || "", i = w ? c.toLowerCase().indexOf(w.toLowerCase()) : -1;
+      return i < 0 ? esc(c) : esc(c.slice(0, i)) + `<b class="hl-g">${esc(c.slice(i, i + w.length))}</b>` + esc(c.slice(i + w.length)); };
     $("#v6-dropped").innerHTML = `<h3>Words found in the text but not tagged <span class="muted">${l.length}</span> ${help("terms-not-kept")}</h3>
-      <p class="hint small">The term search found these words; the AI or the code decided they are not a tag here. + keep adds one as your tag.</p>` + (l.length
-      ? `<table class="tags drops"><tbody>${l.map(x => { const kept = R.added_terms.includes(x.concept_id);
+      <p class="hint small">Before the AI reads the text, a search marks every word that matches a taxonomy term or synonym. These words were marked, then left out. Each row says where the words are and why they are not a tag. If one should be a tag, click + keep.</p>` + (l.length
+      ? `<table class="tags drops"><thead><tr><th>Term</th><th>Where in the text</th><th>Why it is not a tag</th><th></th></tr></thead><tbody>${l.map(x => { const kept = R.added_terms.includes(x.concept_id);
           return `<tr><td><b>${esc(x.concept_name)}</b><div class="mono muted">${esc(x.concept_id)}${(S.terms[x.concept_id] || {}).facet ? " · " + esc(S.terms[x.concept_id].facet) : ""}</div></td>
-            <td class="small">${(x.reasons || []).map(z => `${esc(dropWord(z.reason))}${z.detail ? `: <span class="muted">${esc(cut(z.detail, 140))}</span>` : ""}`).join("<br>")}</td>
+            <td class="small">${ctx(x)}</td>
+            <td class="small">${(x.reasons || []).map(whyNotTagged).join("<br>")}</td>
             <td class="nowrap">${kept ? `<span class="small c-yes">kept by you</span>` : `<button class="add" data-keep="${esc(x.concept_id)}">+ keep</button>`}</td></tr>`; }).join("")}</tbody></table>
          <div class="hint small">A word you keep appears under Add a term; tick there the area for which it counts.</div>`
       : `<p class="muted small">None.</p>`);
@@ -593,7 +626,7 @@ const V6 = (() => {
     const r = a.areas[ax];
     if (c.A[ax].measure !== "described") return "";
     if (!r.purpose) return "";
-    return w(r.purpose) + (r.purpose !== "not_stated" && r.purpose_basis ? ` (${label(PURPOSE_TESTS[r.purpose] || [], r.purpose_basis)})` : "");
+    return w(r.purpose);
   }
   function tagText(t, d) {
     if (!tagChanged(t, d)) return "agree";
@@ -601,7 +634,7 @@ const V6 = (() => {
     return "changed: " + TAG_FIELDS.filter(f => d[f] != null && d[f] !== t[f]).map(f => `${FIELD_WORDS[f]} ${w(t[f]) || "none"} → ${w(d[f]) || "none"}`).join("; ") + (d.note ? ` (${d.note})` : "");
   }
   const aiMeasure = (res, ax) => { const a = res[ax] || {}; return !a.information ? "" : a.measure === "described" ? `“${a.measure_quote || ""}”${a.measure_kind ? " (" + w(a.measure_kind) + ")" : ""}` : "no measure"; };
-  const aiPurpose = (res, ax) => { const a = res[ax] || {}; return !a.information ? "" : w(a.purpose || "not_stated") + (a.purpose && a.purpose !== "not_stated" && a.purpose_basis && a.purpose_basis !== "none" ? ` (${w(a.purpose_basis)})` : ""); };
+  const aiPurpose = (res, ax) => { const a = res[ax] || {}; return !a.information ? "" : w(a.purpose || "not_stated"); };
   const proposalText = p => p.kind === "new" ? `new term: ${p.label}${p.facet ? " (" + p.facet + ")" : ""}` : `synonym: ${p.label} -> ${(S.terms[p.of_id] || {}).term || p.of_id}`;
   const addedHow = (a, id) => { const c = (a.added_counts || {})[id] || {}, f = [c.adaptation ? "adaptation" : "", c.mitigation ? "mitigation" : ""].filter(Boolean).join(" and ");
     return f ? `counts for ${f}` : "does not count"; };
