@@ -142,6 +142,8 @@ table.cmp tr.sec th { background: #FAFCFB; font-size: 12px; color: var(--muted);
 /* guided tour */
 .helpbtn { margin-left: auto; border-radius: 999px; padding: 5px 12px; color: var(--green-dk); border-color: #BFDDD3; }
 .helpbtn + #who { margin-left: 0; }
+a.helpbtn { border: 1px solid #BFDDD3; text-decoration: none; }
+#rules.helpbtn { margin-left: 0; }
 .tour { position: fixed; inset: 0; z-index: 100; opacity: 0; transition: opacity .3s ease; }
 .tour.in { opacity: 1; } .tour.out { opacity: 0; }
 .tour-hole { position: fixed; border-radius: 10px; box-shadow: 0 0 0 9999px rgba(16, 32, 27, .55), 0 0 0 3px rgba(255,255,255,.9);
@@ -225,11 +227,42 @@ input.wide { width: 100%; margin-top: 6px; }
 .seg.ch input:checked + span { background: #B7791F; color: #fff; }
 .seg span small { font-size: 10.5px; opacity: .75; margin-left: 3px; }
 
-#v6-path details summary { cursor: pointer; list-style: none; }
-#v6-path details summary::-webkit-details-marker { display: none; }
-#v6-path details summary::before { content: "▸ "; color: var(--faint); }
-#v6-path details[open] summary::before { content: "▾ "; }
-#v6-path summary h3 { display: inline; margin: 0; }
+#v6-pathway > summary, #v6-gives > summary { cursor: pointer; list-style: none; color: var(--green-dk); }
+#v6-pathway > summary::-webkit-details-marker, #v6-gives > summary::-webkit-details-marker { display: none; }
+#v6-pathway > summary::before, #v6-gives > summary::before { content: "▸ "; color: var(--faint); }
+#v6-pathway[open] > summary::before, #v6-gives[open] > summary::before { content: "▾ "; }
+#v6-gives > summary { font-weight: 600; }
+#v6-gives[open] { background: #FAFCFB; }
+.intro p { margin: 0 0 6px; }
+.intro .flags { margin-top: 4px; }
+
+/* "?" toggles: a short explanation that opens in place, with a link to rules.html */
+details.hlp { display: inline-block; vertical-align: baseline; max-width: 100%; margin-left: 2px; text-transform: none; letter-spacing: normal; font-weight: 400; }
+details.hlp > summary { display: inline-flex; align-items: center; justify-content: center; width: 17px; height: 17px; border-radius: 50%;
+  border: 1px solid #BFDDD3; background: var(--card); color: var(--green-dk); font-size: 11px; font-weight: 700; line-height: 1; cursor: pointer;
+  list-style: none; vertical-align: 1px; user-select: none; }
+details.hlp > summary::-webkit-details-marker { display: none; }
+details.hlp > summary:hover { background: var(--green-lt); }
+details.hlp > summary:focus-visible { outline: 2px solid var(--green-dk); outline-offset: 1px; }
+details.hlp[open] > summary { background: var(--green); border-color: var(--green); color: #fff; }
+details.hlp .hlp-b { display: block; margin: 6px 0 8px; padding: 8px 10px; border-left: 3px solid var(--green); border-radius: 4px; background: var(--green-lt);
+  color: var(--ink); font-size: 12.5px; font-weight: 400; line-height: 1.5; text-transform: none; letter-spacing: normal; white-space: normal; text-align: left; }
+details.hlp .hlp-b a { white-space: nowrap; }
+details.hlp .hlp-t { display: table; border-collapse: collapse; margin: 6px 0; width: 100%; max-width: 460px; background: var(--card); }
+details.hlp .hlp-t th, details.hlp .hlp-t td { border: 1px solid var(--line); padding: 3px 6px; text-align: left; vertical-align: top; font-size: 12.5px; }
+details.hlp .hlp-t th { background: var(--bg); font-weight: 600; }
+details.hlp .hlp-t td:first-child { white-space: nowrap; font-weight: 600; }
+.nav details.hlp { position: relative; }
+.nav details.hlp .hlp-b { position: absolute; z-index: 20; left: 0; top: 22px; width: 340px; max-width: calc(100vw - 32px); margin: 0;
+  border: 1px solid #BFDDD3; box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+@media (max-width: 600px) { .nav details.hlp .hlp-b { position: fixed; left: 16px; right: 16px; top: auto; width: auto; } }
+
+/* tag groups */
+h4.grp { margin: 14px 0 6px; padding: 0 16px; font-size: 13px; color: var(--ink); }
+table.v6t.nocount td:first-child a { color: var(--muted); }
+table.v6t.nocount td b { background: var(--hl-g); }
+tr.why td { padding-top: 0; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--rule); }
+table.v6t tr:has(+ tr.why) td { border-bottom: 0; }
 table.pway { margin-top: 8px; }
 table.pway th { width: 110px; font-weight: 600; color: var(--muted); }
 .pnote { display: block; margin-top: 8px; color: var(--muted); }

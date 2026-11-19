@@ -192,8 +192,34 @@ const V6 = (() => {
     return x.adaptation === y.adaptation && x.mitigation === y.mitigation && x.marker === y.marker;
   }
 
+  // ---------------------------------------------------------------- "?" toggles: a short explanation and a link to rules.html
+  const HELP = {
+    marker: ["PRMS climate marker", "The climate marker recorded in PRMS for this result: Principal (2), Significant (1) or Not targeted (0). It is one marker for adaptation and mitigation together. The review does not change it; the text is compared with it."],
+    levels: ["level", "The AI's level for this area. You do not choose a level: it follows from your answers on the tags, the climate measure and the purpose. It is a step in the comparison with the PRMS marker, not a score of the work.",
+      `<table class="hlp-t"><tr><th>Level</th><th>The text</th></tr>
+        <tr><td>L0</td><td>holds no climate information for this area: no tag counts.</td></tr>
+        <tr><td>L1</td><td>mentions climate (a hazard, climate change, emissions) but describes no climate measure.</td></tr>
+        <tr><td>L2</td><td>describes a climate measure; climate is an additional purpose, or the purpose is not stated.</td></tr>
+        <tr><td>L3</td><td>describes a climate measure, and climate is the main purpose.</td></tr></table>`],
+    "climate-information": ["climate information", "The taxonomy terms that count for this area: stand-alone terms, and context-dependent terms with a climate anchor in the text. If no term counts, the area holds no climate information. Change them in the tag table."],
+    measure: ["climate measure", "An action the work carried out, produced, organised or recommends, in response to a climate problem of this area. A study that only describes a climate condition, an event attended or a general aim is not a measure. Keep the AI's answer, say why it is not a measure, or paste the passage of a measure the AI missed."],
+    purpose: ["purpose", "Whether the text presents climate as the main purpose of the work, an additional purpose, or does not say. Main needs one of the tests listed; additional needs the text to say so. The purpose counts only when a climate measure is described."],
+    tags: ["AI tags", "Each taxonomy term the AI kept, with the words it was found as, its value for each area, its role in the text and whether the work is planned or done. Click ✓ to agree, change to correct a value, or ✗ to refuse the tag with a reason."],
+    anchors: ["tag values", "Stand-alone: the term is climate information on its own. Anchored: a context-dependent term with a climate anchor in the text, shown in quotes. No anchor: a context-dependent term without a climate anchor, so it does not count. Not relevant: the term does not concern this area."],
+    "terms-not-kept": ["terms found but not kept", "Terms the search found in the text that the AI or the checks did not keep, with the reason. Click + keep when a term should count, then tick under Add a term the area for which it counts."],
+    findings: ["AI taxonomy findings", "Possible gaps or errors in the taxonomy that the AI recorded, such as a climate phrase with no matching term. Accept, reject or leave each one for later. These answers go to the taxonomy team and do not change the outcome of your review."],
+    pathway: ["climate pathway", "The parts of the climate pathway the AI recorded for each area: reason, where, who, what was done, what came out, the links between them, and whether the work is planned or done. Open it when useful and note any part to correct."],
+    flags: ["flags", "Points the tagging script asks a person to look at first, for example an area that rests on anchors only or an answer changed by the second check. A flag is not an error."],
+    "marker-answer": ["marker answer", "The comparison of the PRMS marker with the stronger area: aligned, marker higher, marker lower, cannot determine (with its reason) or no comparison. It is worked out from the levels with the table of the tagging script."],
+    outcome: ["outcome of the review", "Worked out from your answers. Wrong when a level or the marker answer differs from the AI's; minor gap when only tags, terms, the pathway or the purpose differ; captured well when nothing differs."],
+    proposals: ["proposed terms", "Wording that is not in the taxonomy, proposed as a new term or as a synonym of an existing term. Proposals go to the people who maintain the taxonomy."],
+  };
+  const help = key => { const h = HELP[key] || [key, ""];
+    // h[2]: an optional table, fixed text written in this file (not data), shown under the explanation
+    return `<details class="hlp"><summary aria-label="Explain: ${esc(h[0])}" title="What is this?">?</summary><span class="hlp-b">${esc(h[1])}${h[2] || ""} <a href="rules.html#${esc(key)}" target="_blank" rel="noopener">More information</a></span></details>`; };
+
   // ---------------------------------------------------------------- small pieces of display
-  const lvPill = (lv, purpose) => lv ? `<span class="lv lv-${esc(lv)}" title="${esc(levelWords(lv, purpose))}">${esc(lv)}</span>` : "";
+  const lvPill =(lv, purpose) => lv ? `<span class="lv lv-${esc(lv)}" title="${esc(levelWords(lv, purpose))}">${esc(lv)}</span>` : "";
   const levelCell = (lv, purpose) => `${lvPill(lv, purpose)} <span class="small">${esc(levelWords(lv, purpose))}</span>`;
   const markerCell = (o, d) => o ? `<span class="oc oc-${esc(o.replace(/ /g, "-"))}">${esc(outcomeLabel(o, d))}</span>` : "";
   const storeNotice = () => S.storeOk === false ? `<div class="notice bad">The review store does not take reviews of this batch yet (the worker is older than the page). You can read the results; nothing can be saved until the worker is updated.</div>` : "";
@@ -265,7 +291,9 @@ const V6 = (() => {
     const res = S.cur, R = S.rev, submitted = S.mine[res.id] && S.mine[res.id].submitted;
     $("#main").innerHTML = navBar(res) + storeNotice() + (submitted ? `<div class="notice">Submitted. You can still change it until the second reviewer submits.</div>` : "")
     + `<div class="cols">${textBlock(res, R.added_terms, true)}<div class="side v6">
-      <section class="card" id="v6-levels"></section>
+      <section class="card intro" id="v6-intro"><p><b>Check each answer below.</b> The answers start as the AI's: change only what is wrong, then submit.
+        <a href="rules.html#what-to-do" target="_blank" rel="noopener">How to review</a></p>
+        <div class="flags small" id="v6-flags"><b>Flags</b> ${help("flags")} ${(res.review_flags || []).length ? res.review_flags.map(f => `<span class="flag">${esc(f)}</span>`).join("") : `<span class="muted">none</span>`}</div></section>
       ${AREAS.map(ax => `<section class="card area" id="v6-area-${ax}"></section>`).join("")}
       <section class="card" id="v6-path">${pathwayHtml(res)}</section>
       <section class="card flush" id="v6-tags"></section>
@@ -277,32 +305,30 @@ const V6 = (() => {
         <a href="#" id="brw" class="small">Browse the taxonomy</a>
         <div id="tree" class="tree" hidden></div></section>
       <section class="card" id="v6-findings"></section>
-      <section class="card" id="v6-props"><h3>Proposed new terms and synonyms</h3><div id="props" class="chips"></div></section>
+      <section class="card" id="v6-props"><h3>Proposed new terms and synonyms ${help("proposals")}</h3><div id="props" class="chips"></div></section>
       <section class="card" id="v6-comment"><h3>Comment</h3><textarea id="cm" placeholder="Anything the others should know">${esc(R.comment || "")}</textarea></section>
+      <details class="card gives" id="v6-gives"><summary>What your answers give</summary><div id="v6-gives-b"></div></details>
       <div class="actions"><span id="msg" class="small"></span><button id="save">Save draft</button><button class="primary" id="sub">Submit</button></div>
     </div></div>`;
-    renderLevels(); AREAS.forEach(renderArea); renderTags(); renderDropped(); renderFindings();
+    const mk = $(".nav .meta span");                   // the PRMS marker in the header line, with its "?"
+    if (mk) mk.insertAdjacentHTML("beforeend", " " + help("marker"));
+    renderGives(); AREAS.forEach(renderArea); renderTags(); renderDropped(); renderFindings();
     wire();
   }
 
-  function renderLevels() {
-    const res = S.cur, R = S.rev, ai = aiResult(res), me = reviewResult(res, R);
-    const pend = `<span class="muted small">answer the questions below</span>`;
+  // folded near Submit: the levels, marker answer and outcome that follow from the answers (computed, not answered)
+  function renderGives() {
+    const res = S.cur, R = S.rev, ai = aiResult(res), me = reviewResult(res, R), box = $("#v6-gives-b");
+    if (!box) return;
     const d = (a, b) => me.complete && a !== b ? "diff" : "";
-    const flags = res.review_flags || [];
-    const areaWord = a => a === "none" ? "neither area" : a === "both" ? "both areas" : a;
-    $("#v6-levels").innerHTML = `<h3>Levels and marker answer</h3>
-      <table class="lvl"><thead><tr><th></th><th>AI</th><th>You</th></tr></thead><tbody>
-      ${AREAS.map(ax => `<tr><th>${AX[ax]}</th><td>${levelCell(ai[ax], ai.purpose[ax])}</td><td class="${d(ai[ax], me[ax])}">${me.complete ? levelCell(me[ax], me.purpose[ax]) : pend}</td></tr>`).join("")}
-      <tr><th>Marker answer</th><td>${markerCell(ai.marker, ai.detail)}</td><td class="${d(ai.marker, me.marker)}">${me.complete ? markerCell(me.marker, me.detail) : pend}</td></tr>
+    const pend = `<span class="muted small">answer the open questions</span>`;
+    box.innerHTML = `<p class="small muted">Worked out from your answers with the table of the tagging script. You do not set these.</p>
+      <table class="lvl"><thead><tr><th></th><th>AI</th><th>Your answers</th></tr></thead><tbody>
+      ${AREAS.map(ax => `<tr><th>${AX[ax]} ${ax === "adaptation" ? help("levels") : ""}</th><td>${levelCell(ai[ax], ai.purpose[ax])}</td><td class="${d(ai[ax], me[ax])}">${me.complete ? levelCell(me[ax], me.purpose[ax]) : pend}</td></tr>`).join("")}
+      <tr><th>Marker answer ${help("marker-answer")}</th><td>${markerCell(ai.marker, ai.detail)}</td><td class="${d(ai.marker, me.marker)}">${me.complete ? markerCell(me.marker, me.detail) : pend}</td></tr>
       </tbody></table>
-      <p class="small muted">PRMS marker: ${esc(res.marker || "none")}. ${ai.area === "none" && me.complete && me.area === "none" ? "Neither area holds climate information."
-        : `It is compared with the stronger area (AI: ${esc(areaWord(ai.area))}${me.complete ? `; you: ${esc(areaWord(me.area))}` : ""}).`}</p>
-      <p class="small"><b>AI:</b> ${esc(ai.reason)}${me.complete && me.reason !== ai.reason ? `<br><b>You:</b> ${esc(me.reason)}` : ""}</p>
-      ${me.complete ? `<p class="outcome">Outcome of your review: <span class="rv rv-${esc(me.review.replace(/ /g, "-"))}">${esc(me.review)}</span></p>`
-        : `<ul class="missing small">${me.missing.slice(0, 4).map(x => `<li>${esc(x)}</li>`).join("")}${me.missing.length > 4 ? `<li>and ${me.missing.length - 4} more</li>` : ""}</ul>`}
-      <p class="small muted">Worked out from your answers with the table of the tagging script. Outcome of the review: wrong when a level or the marker answer differs from the AI's; minor gap when only tags, terms, the pathway or the purpose differ; captured well when nothing differs.</p>
-      <div class="flags small" id="v6-flags"><b>Flags</b> ${flags.length ? flags.map(f => `<span class="flag">${esc(f)}</span>`).join("") : `<span class="muted">none</span>`}</div>`;
+      ${me.complete ? `<p class="small">${esc(me.reason)}</p><div class="outcome">Outcome of your review: <span class="rv rv-${esc(me.review.replace(/ /g, "-"))}">${esc(me.review)}</span> ${help("outcome")}</div>`
+        : `<ul class="missing small">${me.missing.slice(0, 4).map(x => `<li>${esc(x)}</li>`).join("")}${me.missing.length > 4 ? `<li>and ${me.missing.length - 4} more</li>` : ""}</ul>`}`;
   }
 
   function renderArea(ax) {
@@ -312,8 +338,8 @@ const V6 = (() => {
     const termList = l => l.length ? l.map(x => `${esc(x.name)} <span class="muted">(${esc(w(x.how))})</span>`).join(", ") : `<span class="muted">none</span>`;
     const same = aiTerms.length === myTerms.length && aiTerms.every((x, i) => x.id === myTerms[i].id && x.how === myTerms[i].how);
     const aiLv = ai.level || "L0";
-    let h = `<div class="ah"><span class="ax">${AX[ax]}</span><span class="small muted">AI</span> ${levelCell(aiLv, ai.purpose)}</div>
-      <div class="q1"><div class="qh">Climate information <span class="muted small">terms that count for ${ax}</span></div>
+    let h = `<div class="ah"><span class="ax">${AX[ax]}</span><span class="small muted">AI</span> ${levelCell(aiLv, ai.purpose)} ${help("levels")}</div>
+      <div class="q1"><div class="qh">Climate information ${help("climate-information")} <span class="muted small">terms that count for ${ax}</span></div>
         <div class="small">${termList(aiTerms)}</div>
         ${same ? "" : `<div class="small you">With your changes: ${termList(myTerms)}</div>`}
         <div class="muted small">Change them in the tag table below.</div></div>`;
@@ -322,7 +348,7 @@ const V6 = (() => {
     } else {
       const off = !info, aiDesc = ai.measure === "described";
       const opts = aiDesc ? [["agree", "Agree", "ok"], ["not_measure", "Not a measure", "ko"]] : [["agree", "Agree: no measure", "ok"], ["missed", "Measure missed", "ko"]];
-      h += `<div class="q1 ${off ? "off" : ""}"><div class="qh">Climate measure</div>
+      h += `<div class="q1 ${off ? "off" : ""}"><div class="qh">Climate measure ${help("measure")}</div>
         <div class="small"><span class="muted">AI:</span> ${aiDesc ? `“${esc(ai.measure_quote || "")}”${ai.measure_kind ? ` <span class="muted">(${esc(w(ai.measure_kind))})</span>` : ""}` : `<span class="muted">no climate measure described</span>`}</div>
         ${ai.objective && ai.objective !== "not_described" ? `<div class="small muted">Objective: ${esc(w(ai.objective))}${ai.objective_quote ? `, “${esc(ai.objective_quote)}”` : ""}</div>` : ""}
         <div class="decide"><span class="segs">${opts.map(([v, l, c]) => segD("m-" + ax, v, l, r.measure === v, c, off)).join("")}</span>
@@ -330,14 +356,13 @@ const V6 = (() => {
         ${r.measure === "missed" ? `<input class="wide" data-k="measure_quote" data-ax="${ax}" placeholder="paste the passage that describes the measure" value="${esc(r.measure_quote || "")}" ${off ? "disabled" : ""}>` : ""}</div>`;
       const needP = me.A[ax].measure === "described", aiP = ai.purpose || "not_stated", offP = off || !needP;
       const tests = PURPOSE_TESTS[r.purpose] || [];
-      h += `<div class="q1 ${offP ? "off" : ""}"><div class="qh">Purpose <span class="muted small">main, additional or not stated</span></div>
+      h += `<div class="q1 ${offP ? "off" : ""}"><div class="qh">Purpose ${help("purpose")} <span class="muted small">main, additional or not stated</span></div>
         <div class="small"><span class="muted">AI:</span> ${esc(w(aiP))}${aiP !== "not_stated" && ai.purpose_basis && ai.purpose_basis !== "none" ? `, by the test “${esc(w(ai.purpose_basis))}”` : ""}${ai.purpose_quote ? `: “${esc(cut(ai.purpose_quote, 220))}”` : ""}${!aiDesc && aiP !== "not_stated" ? ` <span class="muted">(counts only with a climate measure)</span>` : ""}</div>
         <div class="decide"><span class="segs">${["main", "additional", "not_stated"].map(v => segD("p-" + ax, v, w(v) + (v === aiP ? ` <small>AI</small>` : ""), r.purpose === v, "ok", offP)).join("")}</span>
           ${tests.length ? `<select data-k="purpose_basis" data-ax="${ax}" ${offP ? "disabled" : ""}><option value="">by the test…</option>${tests.map(([v, l]) => opt(v, l, r.purpose_basis === v)).join("")}</select>` : ""}</div>
         ${offP && !off ? `<div class="muted small">${r.measure ? "The purpose counts only when a climate measure is described." : "Answer the question on the climate measure first."}</div>` : ""}</div>`;
       if (off) h += `<p class="muted small">After your changes no term counts for ${ax}: level L0.</p>`;
     }
-    h += `<div class="mine small">Your level: ${me.complete ? levelCell(me[ax], me.purpose[ax]) : `<span class="muted">answer the questions</span>`}</div>`;
     $("#v6-area-" + ax).innerHTML = h;
   }
 
@@ -349,7 +374,8 @@ const V6 = (() => {
     const cit = res.countries_in_text && res.countries_in_text !== res.geography ? `<div class="small muted">Countries named in the text: ${esc(res.countries_in_text)}</div>` : "";
     const type = a => (a.intervention_type || []).length ? `<div class="small muted">Type: ${(a.intervention_type || []).map(esc).join("; ")}</div>` : "";
     const st = x => x ? esc(x) : `<span class="muted">not described</span>`;
-    return `<details id="v6-pathway"><summary><h3>Climate pathway</h3> <span class="muted small">reason, where, who, what was done, what came out, links, planned or done</span></summary>
+    return `<h3>Climate pathway ${help("pathway")}</h3>
+      <details id="v6-pathway"><summary class="small">Show the pathway: reason, where, who, what was done, what came out, links, planned or done</summary>
       <table class="pway small"><thead><tr><th></th><th>Adaptation</th><th>Mitigation</th></tr></thead><tbody>
       <tr><th>Reason</th><td>${L(A.rationale)}</td><td>${L(M.rationale)}</td></tr>
       <tr><th>Where</th><td colspan="2">${geo}${cit}</td></tr>
@@ -369,8 +395,8 @@ const V6 = (() => {
       ${role && role !== "n/a" && role !== w(v) ? `<div class="muted">${esc(role)}</div>` : ""}
       ${v === "anchored" && q ? `<div class="q" title="${esc(q)}">“${esc(cut(q, 110))}”</div>` : ""}`;
   }
-  function tagRow(t, d) {
-    const id = t.concept_id, cls = [d.d === "refuse" ? "disagree" : "", d.d === "change" ? "changed" : "", isCounted(t) ? "" : "grey"].join(" ");
+  function tagRow(t, d, extra = "") {
+    const id = t.concept_id, cls = [d.d === "refuse" ? "disagree" : "", d.d === "change" ? "changed" : ""].join(" ");
     const shown = (f, v) => { const mine = d.d === "change" && d[f] != null && d[f] !== v ? d[f] : null; return esc(w(v)) + (mine ? ` → <span class="you">${esc(w(mine))}</span>` : ""); };
     const sel = (f, opts) => `<select data-k="tag-${f}" data-id="${esc(id)}">${[...new Set([t[f], ...opts])].filter(x => x != null && x !== "").map(o => opt(o, w(o), (d[f] != null ? d[f] : t[f]) === o)).join("")}</select>`;
     const sub = d.d === "change" ? `<tr class="sub"><td colspan="7"><div class="subf">
@@ -383,30 +409,43 @@ const V6 = (() => {
       <td class="small">${foundAs(t)}</td><td class="small">${areaCell(t, "adaptation", d)}</td><td class="small">${areaCell(t, "mitigation", d)}</td>
       <td class="small">${shown("pathway_role", t.pathway_role)}</td>
       <td class="small">${t.status === "not_applicable" && !(d.d === "change" && d.status && d.status !== t.status) ? `<span class="muted">not applicable</span>` : shown("status", t.status)}${t.status_quote ? `<div class="q" title="${esc(t.status_quote)}">“${esc(cut(t.status_quote, 80))}”</div>` : ""}</td>
-      <td class="nowrap"><span class="segs sm">${segD("d-" + id, "agree", "✓", d.d === "agree", "ok")}${segD("d-" + id, "change", "change", d.d === "change", "ch")}${segD("d-" + id, "refuse", "✗", d.d === "refuse", "ko")}</span></td></tr>${sub}`;
+      <td class="nowrap"><span class="segs sm">${segD("d-" + id, "agree", "✓", d.d === "agree", "ok")}${segD("d-" + id, "change", "change", d.d === "change", "ch")}${segD("d-" + id, "refuse", "✗", d.d === "refuse", "ko")}</span></td></tr>${extra}${sub}`;
   }
+  // why a tag does not count, in plain words, from its values (the reviewer's when changed)
+  const whyNot = (t, ax, v) => v === "no_anchor" ? "no anchor (no link to climate in the text)"
+    : v === "not_relevant" ? (!t["role_" + ax] || t["role_" + ax] === "n/a" ? `not relevant (the taxonomy gives this term no ${ax} role)` : `not relevant (the text does not use it for ${ax})`)
+    : w(v);
+  // two groups: tags that count (an area is stand-alone or anchored) and tags that do not; a tag moves when a value changes
   function renderTags() {
-    const res = S.cur, R = S.rev, tags = (res.tags || []).slice().sort((a, b) => isCounted(b) - isCounted(a));
-    $("#v6-tags").innerHTML = `<h3 class="pad">AI tags <span class="muted">${tags.length}</span></h3>
-      <table class="tags v6t"><thead><tr><th>Term</th><th>Found as</th><th>Adaptation</th><th>Mitigation</th><th>Role in the text</th><th>Planned or done</th><th></th></tr></thead><tbody>
-      ${tags.map(t => tagRow(t, dec(R, t))).join("") || `<tr><td colspan="7" class="muted">No tag.</td></tr>`}</tbody></table>
+    const res = S.cur, R = S.rev, all = res.tags || [];
+    const counting = t => counts(val(R, t, "adaptation")) || counts(val(R, t, "mitigation"));
+    const yes = all.filter(counting), no = all.filter(t => !counting(t));
+    const head = `<thead><tr><th>Term</th><th>Found as</th><th>Adaptation</th><th>Mitigation</th><th>Role in the text</th><th>Planned or done</th><th></th></tr></thead>`;
+    const why = t => `<tr class="why"><td colspan="7">Why it does not count: ${AREAS.map(ax => `${ax}: ${esc(whyNot(t, ax, val(R, t, ax)))}`).join("; ")}</td></tr>`;
+    $("#v6-tags").innerHTML = `<h3 class="pad">AI tags <span class="muted">${all.length}</span></h3>
+      <div class="hint small pad">A tag counts only when an area says stand-alone or anchored ${help("anchors")}. No anchor or not relevant: the term is tagged but is not climate information. ${help("tags")}</div>
+      <h4 class="pad grp">Tags that count as climate information <span class="muted">${yes.length}</span></h4>
+      <table class="tags v6t">${head}<tbody>${yes.map(t => tagRow(t, dec(R, t))).join("") || `<tr><td colspan="7" class="muted">None.</td></tr>`}</tbody></table>
+      <h4 class="pad grp">Tags that do not count <span class="muted">${no.length}</span></h4>
+      <table class="tags v6t nocount">${head}<tbody>${no.map(t => tagRow(t, dec(R, t), why(t))).join("") || `<tr><td colspan="7" class="muted">None.</td></tr>`}</tbody></table>
       <div class="hint small pad">✓ agree, change to correct a value, ✗ to refuse a tag (a reason is needed).</div>`;
   }
 
   function renderDropped() {
     const res = S.cur, R = S.rev, l = res.dropped || [];
-    $("#v6-dropped").innerHTML = `<h3>Terms found but not kept <span class="muted">${l.length}</span></h3>` + (l.length
+    $("#v6-dropped").innerHTML = `<h3>Words found in the text but not tagged <span class="muted">${l.length}</span> ${help("terms-not-kept")}</h3>
+      <p class="hint small">The term search found these words; the AI or the code decided they are not a tag here. + keep adds one as your tag.</p>` + (l.length
       ? `<table class="tags drops"><tbody>${l.map(x => { const kept = R.added_terms.includes(x.concept_id);
           return `<tr><td><b>${esc(x.concept_name)}</b><div class="mono muted">${esc(x.concept_id)}${(S.terms[x.concept_id] || {}).facet ? " · " + esc(S.terms[x.concept_id].facet) : ""}</div></td>
             <td class="small">${(x.reasons || []).map(z => `${esc(dropWord(z.reason))}${z.detail ? `: <span class="muted">${esc(cut(z.detail, 140))}</span>` : ""}`).join("<br>")}</td>
             <td class="nowrap">${kept ? `<span class="small c-yes">kept by you</span>` : `<button class="add" data-keep="${esc(x.concept_id)}">+ keep</button>`}</td></tr>`; }).join("")}</tbody></table>
-         <div class="hint small">+ keep adds the term to your terms under Add a term; say there for which area it counts.</div>`
+         <div class="hint small">A word you keep appears under Add a term; tick there the area for which it counts.</div>`
       : `<p class="muted small">None.</p>`);
   }
 
   function renderFindings() {
     const res = S.cur, R = S.rev, l = res.findings || [];
-    $("#v6-findings").innerHTML = `<h3>AI taxonomy findings <span class="muted">${l.length}</span></h3>` + (l.length ? l.map((f, i) => {
+    $("#v6-findings").innerHTML = `<h3>AI taxonomy findings <span class="muted">${l.length}</span> ${help("findings")}</h3>` + (l.length ? l.map((f, i) => {
       const d = R.findings[fkey(f)] || "";
       return `<div class="finding"><div><b>${esc(w(f.finding_type))}</b>${f.phrase ? ` “${esc(f.phrase)}”` : ""}${f.concept_name ? ` <span class="muted">term: ${esc(f.concept_name)}</span>` : ""}</div>
         <div class="small">${esc(w(f.proposed_action))}${f.proposed_label ? `: ${esc(f.proposed_label)}` : ""}${f.proposed_value ? ` (${esc(f.proposed_value)})` : ""}${f.facet ? ` <span class="muted">· ${esc(f.facet)}</span>` : ""}${f.area ? ` <span class="muted">· ${esc(f.area)}</span>` : ""}</div>
@@ -432,7 +471,7 @@ const V6 = (() => {
       : `<span class="muted small">None. Search for a term; if it is not in the taxonomy you can propose it.</span>`;
   }
 
-  function refreshAll() { renderLevels(); AREAS.forEach(renderArea); }
+  function refreshAll() { renderGives(); AREAS.forEach(renderArea); }
   function refreshText() {
     const box = $(".text"), y = box.scrollTop;
     box.outerHTML = textBlock(S.cur, S.rev.added_terms, true); $(".text").scrollTop = y; wireMarks();
@@ -463,8 +502,8 @@ const V6 = (() => {
     });
     side.addEventListener("input", e => {
       const el = e.target, k = el.dataset.k || "";
-      if (k === "measure_quote") { R.areas[el.dataset.ax].measure_quote = el.value; renderLevels(); }
-      else if (k === "pathway_note") { R.pathway_note = el.value; renderLevels(); }
+      if (k === "measure_quote") { R.areas[el.dataset.ax].measure_quote = el.value; renderGives(); }
+      else if (k === "pathway_note") { R.pathway_note = el.value; renderGives(); }
       else if (k === "tag-note") R.tags[el.dataset.id].note = el.value;
     });
     side.addEventListener("click", e => {
@@ -579,9 +618,9 @@ const V6 = (() => {
     $("#main").innerHTML = navBar(res) + `<div class="notice ${ag ? "good" : ""}">${ag ? "The two reviewers agree on the levels and the marker answer." : "The two reviewers differ on a level or on the marker answer. Differences are marked in red."}</div>
     <div class="cols">${textBlock(res, addedAll)}<div class="side"><section class="card flush">
       <table class="cmp"><thead><tr><th></th><th>AI</th><th>${esc(v[0].reviewer)}</th><th>${esc(v[1].reviewer)}</th></tr></thead><tbody>
-      ${AREAS.map(ax => row(AX[ax] + " level", levelCell(ai[ax], ai.purpose[ax]), C.map(c => levelCell(c[ax], c.purpose[ax])), C.map(c => c[ax]))).join("")}
-      ${row("Marker answer", markerCell(ai.marker, ai.detail), C.map(c => markerCell(c.marker, c.detail)), C.map(c => c.marker))}
-      ${row("Outcome of the review", "", C.map(c => esc(c.review || "incomplete")))}
+      ${AREAS.map(ax => row(AX[ax] + " level" + (ax === "adaptation" ? " " + help("levels") : ""), levelCell(ai[ax], ai.purpose[ax]), C.map(c => levelCell(c[ax], c.purpose[ax])), C.map(c => c[ax]))).join("")}
+      ${row("Marker answer " + help("marker-answer"), markerCell(ai.marker, ai.detail), C.map(c => markerCell(c.marker, c.detail)), C.map(c => c.marker))}
+      ${row("Outcome of the review " + help("outcome"), "", C.map(c => esc(c.review || "incomplete")))}
       ${AREAS.map(ax => sec(AX[ax]) + row("Climate measure", esc(aiMeasure(res, ax)), A.map(a => esc(measureText(res, a, ax))))
         + row("Purpose", esc(aiPurpose(res, ax)), A.map((a, i) => esc(purposeText(res, a, ax, C[i]) || "not needed")))).join("")}
       ${sec("AI tags")}
@@ -595,6 +634,7 @@ const V6 = (() => {
       ${row("Proposals", "", A.map(a => (a.proposals || []).map(p => esc(proposalText(p))).join("<br>") || "none"))}
       ${row("Comment", "", A.map(a => esc(a.comment || "none")))}
       </tbody></table></section></div></div>`;
+    const mk = $(".nav .meta span"); if (mk) mk.insertAdjacentHTML("beforeend", " " + help("marker"));
     wireMarks();
   }
 

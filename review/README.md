@@ -13,6 +13,7 @@ This folder is part of the climate taxonomy repository. The page itself is publi
 |---|---|
 | `../docs/review/index.html`, `app.js`, `tour.js`, `style.css` | The page and its guided tour. No build step |
 | `../docs/review/v6.js` | The review form for batches under the CGIAR tagging standard (form v6) |
+| `../docs/review/rules.html` | The rules of the v6 form, linked from the header (Rules) and from each "?" toggle of the form |
 | `../docs/review/config.js` | Address of the worker |
 | `../docs/review/data/` | One taxonomy file per taxonomy version (`taxonomy-v4.json`, `taxonomy-v6.json`), the batches of tagged results and `batches.json` (static) |
 | `scripts/build_data.py` | Writes `../docs/review/data/` from a tagging run |
@@ -32,6 +33,15 @@ shows the form the batch needs; switching batch in the list at the top loads the
 |---|---|---|---|
 | v4 | records of the v4 decision rules (August 2026 run), e.g. `test-2025` | agree or disagree with the AI verdict (Full, Partial, Minimal, None) per area; agree or disagree with each tag; terms added; proposals | table `reviews` |
 | v6 | records of the CGIAR tagging standard with taxonomy v6 (script `PRMS_Tagging.Rmd`, r11 and later), e.g. `pilot-2025-v6` | per area: the climate measure (agree, not a measure with a reason, or measure missed with the passage) and the purpose (main, additional or not stated, with the test); each tag (agree, change a value, or refuse with a reason); terms found but not kept to keep; terms added and for which area they count; the AI's taxonomy findings (accept, reject, later); pathway parts to correct; proposals | table `reviews_v6` |
+
+The v6 result view shows only what the reviewer acts on, under one line saying what to do: the answers start as
+the AI's, and the reviewer changes only what is wrong. The tags are in two groups, tags that count (an area is
+stand-alone or anchored) and tags that do not count (each with the reason in words); words the term search found
+but the AI or the code did not tag are listed apart. Each question and value has a "?" toggle with a short
+explanation and a link to its section of `rules.html` (anchors: what-to-do, climate-information, anchors, tags,
+measure, purpose, levels, marker, marker-answer, pathway, terms-not-kept, findings, proposals, outcome, agreement,
+flags). The levels, marker answer and outcome that follow from the answers are folded near Submit ("What your
+answers give").
 
 In the v6 form the reviewer never chooses a level. The page works out the level of each area (L0 to L3)
 and the marker answer (aligned, marker higher, marker lower, cannot determine with its reason, no

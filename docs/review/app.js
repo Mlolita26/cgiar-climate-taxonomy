@@ -55,12 +55,13 @@ async function boot() {
   sel.innerHTML = S.batches.map(b => `<option value="${esc(b.id)}">${esc(b.name || b.id)} · ${b.n}</option>`).join("");
   sel.value = S.batch;
   sel.onchange = async () => { S.batch = sel.value; try { localStorage.setItem("rv_batch", S.batch); } catch (e) {} pageMsg("Loading…");
-    const nb = S.batches.find(b => b.id === S.batch) || {}; S.form = nb.form || "v4"; loadTerms(nb);
+    const nb = S.batches.find(b => b.id === S.batch) || {}; S.form = nb.form || "v4"; loadTerms(nb); $("#rules").hidden = S.form !== "v6";
     await loadBatch(true); location.hash = "#/list/todo"; route(); };
   whoBar();
   window.onhashchange = route;
   route();
   $("#help").hidden = false; $("#help").onclick = () => Tour.start();
+  $("#rules").hidden = S.form !== "v6";                     // rules.html explains the v6 form
   Tour.maybeStart();
 }
 

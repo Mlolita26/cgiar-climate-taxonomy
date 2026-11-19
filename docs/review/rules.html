@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tagging rules</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { --green: #008C6B; --green-dk: #06604B; --green-lt: #E3F3EE; --ink: #1F2A26; --muted: #5B6B65;
+          --line: #DCE4E0; --bg: #F5F8F7; --card: #FFFFFF; --amber-lt: #FFF4D6; }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: 16px; }
+  body { margin: 0; font: 15px/1.6 "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; color: var(--ink); background: var(--bg); }
+  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 24px; margin: 0 0 4px; color: var(--green-dk); }
+  h2 { font-size: 18px; margin: 0 0 8px; color: var(--green-dk); }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; margin: 16px 0; }
+  section:target { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-lt); }
+  p, ul, ol { margin: 0 0 10px; } li { margin: 2px 0; }
+  a { color: var(--green-dk); }
+  .muted { color: var(--muted); } .small { font-size: 13px; }
+  .toc { columns: 2; column-gap: 24px; padding-left: 18px; }
+  @media (max-width: 560px) { .toc { columns: 1; } }
+  .tbl { overflow-x: auto; margin: 0 0 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: var(--bg); font-weight: 600; }
+  .ex { background: var(--amber-lt); border-radius: 6px; padding: 8px 10px; font-size: 14px; }
+  code { font-family: Consolas, "SFMono-Regular", Menlo, monospace; font-size: 13px; background: var(--bg); padding: 0 4px; border-radius: 4px; }
+  .top { font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+<h1>Tagging rules</h1>
+<p class="muted">The rules used to tag PRMS results and to review the tagging. They follow the CGIAR Standard for Tagging Climate-Related Work (10 November 2026), with taxonomy v6 and the choices made for the pilot of November 2026. Each section can be opened directly from the "More information" links in the review page.</p>
+<ul class="toc">
+  <li><a href="#what-to-do">How to review a result</a></li>
+  <li><a href="#climate-information">Climate information</a></li>
+  <li><a href="#tags">Tags: count, do not count, not tagged</a></li>
+  <li><a href="#anchors">Stand-alone, anchored, no anchor, not relevant</a></li>
+  <li><a href="#measure">Climate measure</a></li>
+  <li><a href="#purpose">Purpose</a></li>
+  <li><a href="#levels">Levels L0 to L3</a></li>
+  <li><a href="#marker">PRMS climate marker</a></li>
+  <li><a href="#marker-answer">Marker answer</a></li>
+  <li><a href="#pathway">Climate pathway</a></li>
+  <li><a href="#terms-not-kept">Words found but not tagged</a></li>
+  <li><a href="#findings">AI taxonomy findings</a></li>
+  <li><a href="#proposals">Proposing a term or a synonym</a></li>
+  <li><a href="#outcome">Outcome of the review</a></li>
+  <li><a href="#agreement">Two reviewers</a></li>
+  <li><a href="#flags">Flags</a></li>
+</ul>
+
+<section id="what-to-do">
+<h2>How to review a result</h2>
+<ol>
+  <li>Read the title and the description.</li>
+  <li>Check each tag: ✓ if it is right, "change" to correct a value, ✗ to refuse it (a reason is needed).</li>
+  <li>Add a term the AI missed: select the words in the text, or search the taxonomy. Say for which area it counts.</li>
+  <li>In each area card, check the climate measure and the purpose. The answers start as the AI's: change only what is wrong.</li>
+  <li>Look at the words found but not tagged. Use "+ keep" if one should be a tag.</li>
+  <li>For each AI taxonomy finding, choose accept, reject or later.</li>
+  <li>Propose a new term or synonym if the taxonomy lacks one. Add a comment if needed.</li>
+  <li>Save a draft or submit. A submitted review can still be changed until the second reviewer submits.</li>
+</ol>
+<p>The reviewer never chooses a level or a marker answer. The page works them out from the answers, with the same table as the tagging script.</p>
+</section>
+
+<section id="climate-information">
+<h2>Climate information</h2>
+<ul>
+  <li>Adaptation and mitigation are judged separately.</li>
+  <li>A text holds climate information for an area when at least one tag counts for that area.</li>
+  <li>A stand-alone term counts on its own (drought, early warning, greenhouse gas emissions).</li>
+  <li>A context-dependent term (irrigation, rice, training) counts only when the text links it to climate. That link is the anchor.</li>
+  <li>A term of both areas counts only for the area the text talks about.</li>
+  <li>A climate word inside a name (a programme, project, organisation, fund or event) is not climate information. A name cannot be an anchor.</li>
+  <li>"Climate" used as a label ("climate action", "for climate") is not climate information on its own.</li>
+  <li>Climate words used in another sense ("global warming potential" of a chemical, "climatically favourable areas") do not count.</li>
+  <li>Deforestation counts for mitigation only with carbon or emission wording.</li>
+  <li>CIS and CSA count as climate information services and climate-smart agriculture when the text spells them out.</li>
+</ul>
+<p class="ex">"Training on drought-tolerant maize": drought is stand-alone and counts for adaptation; maize and training are anchored by drought.</p>
+</section>
+
+<section id="tags">
+<h2>Tags: count, do not count, not tagged</h2>
+<p>A word of the text can be in one of three states.</p>
+<div class="tbl"><table>
+  <tr><th>State</th><th>What it means</th><th>Where it is on the page</th></tr>
+  <tr><td>Tag that counts</td><td>The term is tagged, and at least one area says stand-alone or anchored. It is climate information.</td><td>Tags that count as climate information</td></tr>
+  <tr><td>Tag that does not count</td><td>The term is tagged, but every area says no anchor or not relevant. It is kept as a general tag. It is not climate information.</td><td>Tags that do not count</td></tr>
+  <tr><td>Not tagged</td><td>The term search found the words in the text, but the AI or the code decided they are not a tag here (other meaning, part of a name, too generic).</td><td>Words found in the text but not tagged</td></tr>
+</table></div>
+<p class="ex">Example, the mechanized direct seeding report from Vietnam. <b>Rice</b> is tagged but does not count: for adaptation it has no anchor (pests and lodging are not climate hazards); for mitigation it is not relevant, because taxonomy v6 gives Rice no mitigation role, although the text speaks of low-emission rice. Mitigation is still found through other tags (Greenhouse gas emissions, Low-emission development, and Direct seeding and Fertilizer anchored by the carbon footprint passage), so the result is L2 for mitigation. <b>Methodology</b> is not tagged: the search found the word, and the AI did not keep it.</p>
+<p>Rice not counting for mitigation is a gap in taxonomy v6, not a choice of the reviewer: systems that emit or store carbon (rice, cattle, livestock systems) have no mitigation role in v6, so the mitigation pathway has no "who or what". This is question B5 for the taxonomy team. The review page offers only the values the taxonomy allows, so Rice cannot be set to count for mitigation. A reviewer who thinks the taxonomy should give a term a role in an area writes it in the comment.</p>
+<p>Checking a tag:</p>
+<ul>
+  <li>✓ agree.</li>
+  <li>change: set another value for an area, another role in the text, or another status.</li>
+  <li>✗ refuse, with a reason: different meaning in this text; part of a name; too generic; not about this work; other.</li>
+</ul>
+<p>Columns of the tag table:</p>
+<ul>
+  <li><b>Found as</b>: the words of the text where the term was found; the taxonomy term or synonym is highlighted.</li>
+  <li><b>Adaptation, Mitigation</b>: the value for each area (next section), with the anchor passage when there is one.</li>
+  <li><b>Role in the text</b>: climate reason (rationale); system or population (who or what is affected or targeted); intervention (what the work did); result (output, outcome, impact, or level not clear); none.</li>
+  <li><b>Planned or done</b>: planned; carried out or reported; unclear. An aim or a recommendation is planned.</li>
+</ul>
+</section>
+
+<section id="anchors">
+<h2>Stand-alone, anchored, no anchor, not relevant</h2>
+<p>Each tag has one value per area. The taxonomy decides which values are possible: a stand-alone term is stand-alone or not relevant; a context-dependent term is anchored, no anchor or not relevant.</p>
+<div class="tbl"><table>
+  <tr><th>Value</th><th>Counts?</th><th>Meaning</th></tr>
+  <tr><td>stand-alone</td><td>yes</td><td>The term is climate-related by its own meaning.</td></tr>
+  <tr><td>anchored</td><td>yes</td><td>A context-dependent term that the text links to climate. The anchor passage is shown.</td></tr>
+  <tr><td>no anchor</td><td>no</td><td>A context-dependent term with no link to climate in the text.</td></tr>
+  <tr><td>not relevant</td><td>no</td><td>The taxonomy gives the term no role in this area, or the text does not use it for this area.</td></tr>
+</table></div>
+<p>The anchor:</p>
+<ul>
+  <li>An anchor is a passage that ties the term to climate: a hazard, climate change, a climate aim, emissions or carbon.</li>
+  <li>The link can run into the next sentence. "Climate change" in general can be the anchor.</li>
+  <li>For people and results, the anchor holds when the term's own sentence has climate words, when the term is tied to a climate measure, or when the sentence says what followed ("As a result, ...").</li>
+  <li>A name cannot be an anchor.</li>
+</ul>
+</section>
+
+<section id="measure">
+<h2>Climate measure</h2>
+<p>A climate measure is something this work did or produced that responds to a climate problem, or that reduces, stores or measures emissions.</p>
+<ul>
+  <li>Research, policy, tools and training count when they serve the climate response.</li>
+  <li>A measure that the text recommends counts, with status planned.</li>
+  <li>A workshop or training that the work organised on a climate subject counts.</li>
+</ul>
+<p>Not a measure:</p>
+<ul>
+  <li>a study that describes a climate condition and does not serve the response;</li>
+  <li>an event attended or a topic discussed;</li>
+  <li>a subject or a setting, not an action;</li>
+  <li>a general statement or aim;</li>
+  <li>an action that does not respond to a climate problem.</li>
+</ul>
+<p>Answers in the review: agree; not a measure (with the reason); measure missed (paste the passage). When the AI found no measure: agree, no measure; or measure missed.</p>
+</section>
+
+<section id="purpose">
+<h2>Purpose</h2>
+<p>Asked only when there is a climate measure. Climate is the main purpose, an additional purpose, or not stated. Four tests, in this order:</p>
+<ol>
+  <li>The text says it: main, primary, principal, central, core, fundamental (main); also, in addition, additional, co-benefit, secondary (additional).</li>
+  <li>The title names the climate aim, the measure or the hazard, and no other main aim is named. Another main aim is one in the title, or one the description presents as main with a word such as main, primary or central. Words on how or for whom the work is done (women-led, inclusive) are not another aim. Result: main.</li>
+  <li>The text calls the other benefits co-benefits of the climate measure. Result: main.</li>
+  <li>Otherwise: not stated.</li>
+</ol>
+<p class="ex">"The programme's primary objective is to raise rural incomes. As an additional objective, it delivers heat-stress advisories." Measure: the heat-stress advisories. Purpose: additional.</p>
+</section>
+
+<section id="levels">
+<h2>Levels L0 to L3</h2>
+<p>Each area gets a level. The level is a step in the comparison with the marker. It is not a score of the work.</p>
+<div class="tbl"><table>
+  <tr><th>Level</th><th>The text</th></tr>
+  <tr><td>L0</td><td>holds no climate information for the area.</td></tr>
+  <tr><td>L1</td><td>mentions climate (a hazard, climate change) but describes no climate measure.</td></tr>
+  <tr><td>L2</td><td>describes a climate measure; climate is an additional purpose, or the purpose is not stated.</td></tr>
+  <tr><td>L3</td><td>describes a climate measure, and climate is the main purpose.</td></tr>
+</table></div>
+<p>The level comes from three answers: does a tag count, is there a climate measure, what is the purpose.</p>
+</section>
+
+<section id="marker">
+<h2>PRMS climate marker</h2>
+<p>The marker recorded in PRMS for the result, on the OECD-DAC scale:</p>
+<ul>
+  <li><b>(2) Principal</b>: climate is fundamental to the design or motivation of the work.</li>
+  <li><b>(1) Significant</b>: climate is an important but additional purpose.</li>
+  <li><b>(0) Not targeted</b>: the work does not target climate.</li>
+  <li><b>Not provided</b>: no marker. A missing marker is never read as 0.</li>
+</ul>
+<p>PRMS has one marker for adaptation and mitigation together. It is compared with the stronger of the two areas. Only the text is compared: the evidence for a marker may sit in other documents. The marker is never changed.</p>
+</section>
+
+<section id="marker-answer">
+<h2>Marker answer</h2>
+<div class="tbl"><table>
+  <tr><th>PRMS marker</th><th>L0</th><th>L1</th><th>L2</th><th>L3</th></tr>
+  <tr><td>Principal</td><td>cannot determine: no climate information</td><td>marker higher</td><td>cannot determine: main purpose not stated (marker higher when climate is an additional purpose)</td><td>aligned</td></tr>
+  <tr><td>Significant</td><td>cannot determine: no climate information</td><td>cannot determine: climate context only</td><td>aligned</td><td>marker lower</td></tr>
+  <tr><td>Not targeted</td><td>aligned</td><td>aligned</td><td>marker lower</td><td>marker lower</td></tr>
+  <tr><td>Not provided</td><td colspan="4">no comparison</td></tr>
+</table></div>
+<ul>
+  <li><b>aligned</b>: the text is consistent with the marker. For Not targeted, it means only that no conflict is apparent in the text.</li>
+  <li><b>marker higher</b>: the marker may not be reflected in the text.</li>
+  <li><b>marker lower</b>: the text describes more than the marker says.</li>
+  <li><b>cannot determine</b>: the text gives too little to judge (Rule 9 of the standard). The reason follows the answer.</li>
+  <li><b>no comparison</b>: PRMS records no marker, or the text is empty.</li>
+</ul>
+<p>An answer is a signal for review. It is not a finding that the marker is wrong.</p>
+</section>
+
+<section id="pathway">
+<h2>Climate pathway</h2>
+<p>The climate story of the text, in five parts, for each area. A missing part means the text does not describe it. It does not mean the work lacks it.</p>
+<ul>
+  <li><b>Climate reason</b>: the hazard or climate problem.</li>
+  <li><b>Where</b>: from the Countries field in PRMS; from the text when the field is empty.</li>
+  <li><b>Who or what</b>: the system or population affected or targeted. An organisation that delivers the work is not the "who".</li>
+  <li><b>What was done</b>: the intervention.</li>
+  <li><b>What came out</b>: the result, as output, outcome or impact.</li>
+</ul>
+<p>Two links are recorded when the text gives them: from the climate reason to what was done, and from what was done to what came out (stated, or clear from context). Each part is planned, or carried out or reported. To correct a part, write it in "pathway parts to correct".</p>
+</section>
+
+<section id="terms-not-kept">
+<h2>Words found in the text but not tagged</h2>
+<p>The term search found these words of the text in the taxonomy. The AI or the code decided they are not a tag in this text. The reason is shown: different meaning in this text; part of a name; too generic; broader term of a kept tag; wording not found in the text; refused by the second check; anchor without climate wording.</p>
+<p>"+ keep" makes the word your tag. Then say for which area it counts.</p>
+</section>
+
+<section id="findings">
+<h2>AI taxonomy findings</h2>
+<p>What the text shows about the taxonomy. Four kinds:</p>
+<ul>
+  <li>a climate phrase with no matching term;</li>
+  <li>a term matched in a different sense;</li>
+  <li>a term that may sit in the wrong class;</li>
+  <li>a new kind of anchor.</li>
+</ul>
+<p>Accept: the taxonomy team should look at it. Reject: not a real gap. Later: no view (the default).</p>
+</section>
+
+<section id="proposals">
+<h2>Proposing a term or a synonym</h2>
+<p>A synonym is another wording of an existing term. A new term is a concept the taxonomy lacks. Give the label, the facet, the existing term for a synonym, and a note. A person decides. Nothing enters the taxonomy by itself.</p>
+</section>
+
+<section id="outcome">
+<h2>Outcome of the review</h2>
+<p>Worked out from the answers:</p>
+<ul>
+  <li><b>wrong</b>: a level or the marker answer differs from the AI's;</li>
+  <li><b>minor gap</b>: only tags, terms, the pathway or the purpose differ;</li>
+  <li><b>captured well</b>: nothing differs.</li>
+</ul>
+<p>Taxonomy findings and proposals do not change the outcome.</p>
+</section>
+
+<section id="agreement">
+<h2>Two reviewers</h2>
+<ul>
+  <li>Each result is reviewed by two people.</li>
+  <li>A reviewer sees the other review only when both are submitted.</li>
+  <li>Once both are submitted, the two reviews are locked.</li>
+  <li>The two reviewers agree when their levels and marker answer match. Lists: to review, waiting for the second review, done and agree, done and disagree.</li>
+</ul>
+</section>
+
+<section id="flags">
+<h2>Flags</h2>
+<p>Reasons for a person to look at the result first. A flag is not an error.</p>
+<div class="tbl"><table id="flag-list">
+  <tr><th>Flag</th><th>Meaning</th></tr>
+  <tr><td>second check changed an answer</td><td>A second AI call reviewed the tags, anchors, measure and purpose, and changed at least one answer.</td></tr>
+  <tr><td>the reading and the check reading differ</td><td>Two separate AI readings of the text disagree on what the work did or on its aims.</td></tr>
+  <tr><td>(area) intervention tag but no measure described</td><td>A tag counts as an intervention for the area, but no climate measure was found.</td></tr>
+  <tr><td>(area) one passage anchors four or more terms</td><td>One climate passage is the anchor of many terms. Check that each term is really linked to it.</td></tr>
+  <tr><td>(area) rests on anchors only</td><td>No stand-alone term counts for the area; all its climate information comes from anchored terms.</td></tr>
+  <tr><td>(area) measure or aim claimed without a counting tag</td><td>The AI read a climate measure or aim that no tag supports.</td></tr>
+  <tr><td>answers adjusted by code</td><td>The code cancelled an answer that failed a check (a quote not in the text, a role the taxonomy does not allow).</td></tr>
+  <tr><td>climate wording with no taxonomy term</td><td>The text has climate words that no taxonomy term matches (see the findings).</td></tr>
+  <tr><td>PRMS countries differ from the countries named in the text</td><td>The Countries field and the text name different countries.</td></tr>
+  <tr><td>main purpose in both areas</td><td>Climate is the main purpose for adaptation and for mitigation (L3 in both).</td></tr>
+  <tr><td>low confidence</td><td>The AI gave low confidence to a tag that counts.</td></tr>
+  <tr><td>very short text</td><td>Too little text to judge much.</td></tr>
+  <tr><td>translated</td><td>The text was translated into English before tagging.</td></tr>
+</table></div>
+</section>
+
+<p class="top"><a href="./">Back to the review</a></p>
+</main>
+</body>
+</html>
