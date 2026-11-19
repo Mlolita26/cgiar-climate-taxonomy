@@ -1,13 +1,21 @@
 // Stores the reviews. Rules: two reviewers per result; a reviewer sees the other review only
 // once both are submitted; a review is locked once both are submitted.
 //   POST /join  {name}             -> {code, name}: identifies a reviewer by name (created if new)
-//   GET  /me                       -> {name}
-//   GET  /state?batch=B            -> {name, mine: [...], counts: {result_id: {started, submitted}}, done: [...]}
+//   GET  /me                       -> {name, forms}
+//   GET  /state?batch=B            -> {name, form, mine: [...], counts: {result_id: {started, submitted}}, done: [...]}
 //   POST /review                   -> save or submit your review of one result (body as text/plain)
 //   GET  /export?batch=B           -> every review of the batch (for the download file)
 // The reviewer is identified by ?r=<personal code> (or the X-Reviewer header).
+// Two review forms, one table each:
+//   no form parameter  v4 batches (decision rules of taxonomy v4), table "reviews", as before
+//   &form=v6           batches under the CGIAR tagging standard, table "reviews_v6": one row per result, batch and
+//                      reviewer, the answers in one JSON column (created by migrations/0001_reviews_v6.sql)
 
-const JSON_COLS = ["tag_decisions", "added_terms", "proposals"];
+const FORMS = {
+  v4: { table: "reviews", json: ["tag_decisions", "added_terms", "proposals"] },
+  v6: { table: "reviews_v6", json: ["answers"] },
+};
+const MAX_ANSWERS = 200000;   // characters of JSON in one v6 review
 
 export default {
   async fetch(req, env) {
@@ -36,25 +44,48 @@ export default {
       const code = (url.searchParams.get("r") || req.headers.get("X-Reviewer") || "").trim();
       const me = code ? await env.DB.prepare("SELECT code, name FROM reviewers WHERE code = ?").bind(code).first() : null;
       if (!me) return out({ error: "Unknown reviewer link." }, 401);
+      const form = url.searchParams.get("form") === "v6" ? "v6" : "v4";
+      const F = FORMS[form];
       const names = Object.fromEntries((await env.DB.prepare("SELECT code, name FROM reviewers").all()).results.map(r => [r.code, r.name]));
       const shape = r => {
         const o = { ...r, reviewer: names[r.reviewer_code] || "?" };
-        JSON_COLS.forEach(c => { try { o[c] = JSON.parse(r[c] || "null"); } catch { o[c] = null; } });
+        F.json.forEach(c => { try { o[c] = JSON.parse(r[c] || "null"); } catch { o[c] = null; } });
         delete o.reviewer_code;            // codes are never sent to other reviewers
         o.mine = r.reviewer_code === me.code;
         return o;
       };
 
-      if (url.pathname === "/me") return out({ name: me.name });
+      if (url.pathname === "/me") return out({ name: me.name, forms: Object.keys(FORMS) });
 
       if (url.pathname === "/state" && req.method === "GET") {
         const b = url.searchParams.get("batch") || "";
-        const all = (await env.DB.prepare("SELECT * FROM reviews WHERE batch_id = ?").bind(b).all()).results;
+        const all = (await env.DB.prepare(`SELECT * FROM ${F.table} WHERE batch_id = ?`).bind(b).all()).results;
         const counts = {};
         all.forEach(r => { const c = counts[r.result_id] ||= { started: 0, submitted: 0 }; c.started++; if (r.submitted) c.submitted++; });
         const mine = all.filter(r => r.reviewer_code === me.code).map(shape);
         const done = all.filter(r => r.submitted && counts[r.result_id].submitted >= 2).map(shape);
-        return out({ name: me.name, mine, counts, done });
+        return out({ name: me.name, form, mine, counts, done });
+      }
+
+      if (url.pathname === "/review" && (req.method === "PUT" || req.method === "POST") && form === "v6") {
+        const r = JSON.parse(await req.text());   // sent as text/plain so the browser skips the permission check
+        if (!r.result_id || !r.batch_id) return out({ error: "result_id and batch_id are required." }, 400);
+        const answers = JSON.stringify(r.answers && typeof r.answers === "object" ? r.answers : {});
+        if (answers.length > MAX_ANSWERS) return out({ error: "The review is too large to store." }, 413);
+        const others = (await env.DB.prepare("SELECT reviewer_code, submitted FROM reviews_v6 WHERE result_id = ? AND batch_id = ? AND reviewer_code != ?")
+          .bind(r.result_id, r.batch_id, me.code).all()).results;
+        const otherSubmitted = others.filter(o => o.submitted).length;
+        const own = await env.DB.prepare("SELECT submitted FROM reviews_v6 WHERE result_id = ? AND batch_id = ? AND reviewer_code = ?")
+          .bind(r.result_id, r.batch_id, me.code).first();
+        if (otherSubmitted >= 2) return out({ error: "This result already has two reviews." }, 409);
+        if (own && own.submitted && otherSubmitted >= 1) return out({ error: "Both reviews are submitted; this review is locked." }, 409);
+        await env.DB.prepare(`INSERT INTO reviews_v6 (result_id, batch_id, reviewer_code, submitted, answers) VALUES (?, ?, ?, ?, ?)
+          ON CONFLICT (result_id, batch_id, reviewer_code) DO UPDATE SET submitted = excluded.submitted, answers = excluded.answers,
+            updated_at = datetime('now')`)
+          .bind(r.result_id, r.batch_id, me.code, r.submitted ? 1 : 0, answers).run();
+        const saved = await env.DB.prepare("SELECT * FROM reviews_v6 WHERE result_id = ? AND batch_id = ? AND reviewer_code = ?")
+          .bind(r.result_id, r.batch_id, me.code).first();
+        return out(shape(saved));
       }
 
       if (url.pathname === "/review" && (req.method === "PUT" || req.method === "POST")) {
@@ -84,7 +115,7 @@ export default {
 
       if (url.pathname === "/export" && req.method === "GET") {
         const b = url.searchParams.get("batch") || "";
-        const all = (await env.DB.prepare("SELECT * FROM reviews WHERE batch_id = ? ORDER BY result_id, created_at").bind(b).all()).results;
+        const all = (await env.DB.prepare(`SELECT * FROM ${F.table} WHERE batch_id = ? ORDER BY result_id, created_at`).bind(b).all()).results;
         const counts = {};
         all.forEach(r => { if (r.submitted) counts[r.result_id] = (counts[r.result_id] || 0) + 1; });
         // blind rule holds in the file too: another reviewer's answers appear only once both are submitted

@@ -12,7 +12,11 @@ const Tour = (() => {
   const clear = sel => { const el = document.querySelector(sel); if (el) { el.value = ""; el.dispatchEvent(new Event("input")); } const h = document.querySelector("#hits"); if (h) h.innerHTML = ""; };
 
   function pickResult() {
-    const r = S.list.find(x => bucket(x) === "todo") || S.list.find(x => bucket(x) === "waiting");
+    // v6 batches: a result with climate information, so that the area cards have questions to show
+    const lv = x => (x.adaptation || {}).level || "";
+    const r = (S.form === "v6" && (S.list.find(x => bucket(x) === "todo" && (lv(x) === "L2" || lv(x) === "L3"))
+                                   || S.list.find(x => bucket(x) === "todo" && lv(x) && lv(x) !== "L0")))
+      || S.list.find(x => bucket(x) === "todo") || S.list.find(x => bucket(x) === "waiting");
     return r && r.id;
   }
   async function openReview() {
@@ -23,6 +27,7 @@ const Tour = (() => {
   async function openList() { if (!location.hash.startsWith("#/list")) location.hash = "#/list/todo"; await until("#tabs .tab"); }
 
   function build() {
+    if (S.form === "v6") { steps = stepsV6(); return; }
     steps = [
       { title: "Welcome", text: "You will check how the AI tagged PRMS results against the climate taxonomy. Each result is reviewed by two people. You do not see the other person's answers until you have both submitted.", at: openList },
       { el: "#namebar", title: "First, your name", text: "Type your first and last name and press Start. It identifies your reviews and is shown to the other reviewers. This browser remembers you next time.", at: openList,
@@ -44,6 +49,38 @@ const Tour = (() => {
       { el: ".side > section:nth-of-type(5)", title: "4. Comment", text: "Anything the other reviewer and the taxonomy team should know: why you disagree, a doubt, a pattern you notice.", at: openReview },
       { el: ".actions", title: "5. Save or submit", text: "Save draft keeps your answers and lets you come back. Submit sends them and takes you to the next result. You can change a submitted review until the second reviewer submits.", at: openReview },
       { el: "#exp", title: "The file", text: "Download file gives one Excel sheet: one row per result, the AI's answer, then each reviewer's answers side by side.", at: openList },
+      { title: "That's it", text: "You can replay this tour with How to review, at the top right.", at: openList, last: true },
+    ];
+  }
+
+  // the tour of the form for batches under the CGIAR tagging standard (form "v6")
+  function stepsV6() {
+    const open = el => () => { const d = document.querySelector(el); if (d && !d.open) d.open = true; };
+    return [
+      { title: "Welcome", text: "You will check how the AI tagged PRMS results under the CGIAR tagging standard, with taxonomy v6. Each result is reviewed by two people. You do not see the other person's answers until you have both submitted.", at: openList },
+      { el: "#namebar", title: "First, your name", text: "Type your first and last name and press Start. It identifies your reviews and is shown to the other reviewers. This browser remembers you next time.", at: openList,
+        skipIf: () => !!S.code, demo: async () => { const n = document.querySelector("#nm"); await typeInto(n, "Jane Doe"); }, undo: () => { const n = document.querySelector("#nm"); if (n) n.value = ""; } },
+      { el: "#who", title: "That's you", text: "Your name stays here. If it is not you, for example on a shared computer, click change.", at: openList, skipIf: () => !S.code },
+      { el: "#tabs", title: "Your queues", text: "To review: results waiting for you. Waiting for 2nd review: you submitted, the other reviewer has not. Done: both reviews are in, split into agree and disagree on the levels and the marker answer.", at: openList },
+      { el: "table.list tbody tr:first-child", title: "This is one result to review", text: "Each row is one PRMS result, with the AI's level for adaptation and for mitigation (L0 to L3) and its marker answer. Click on a row to open it. We will open one for you.", at: openList,
+        pulse: "table.list tbody tr:first-child", demo: async () => { await wait(1400); const r = document.querySelector("table.list tbody tr:first-child"); if (r && running) { r.classList.add("tour-press"); await wait(260); r.classList.remove("tour-press"); } } },
+      { el: ".text", title: "The result", text: "The title and description as reported in PRMS. Yellow: taxonomy terms that count as climate information, stand-alone or anchored. Grey: terms found that do not count. Blue: terms you add. Only the taxonomy term or synonym is highlighted. Click a highlight to find its row in the tag table.", at: openReview, side: "right" },
+      { el: "#v6-levels", title: "Levels and marker answer", text: "The AI's level for each area and its marker answer, next to yours. You never choose a level: the page works yours out from your answers below, with the table of the tagging script. The outcome of your review is worked out too: captured well, minor gap or wrong.", at: openReview },
+      { el: "#v6-flags", title: "Flags", text: "Points the tagging script asks a person to look at first, such as an area resting on anchors only or an answer changed by the second check.", at: openReview },
+      { el: "#v6-area-adaptation", title: "One card per area", text: "Climate information: the terms that count for the area. Climate measure: agree, say it is not a measure and why, or paste the passage of a measure the AI missed. Purpose: main, additional or not stated, with the test that shows it. The answers start as the AI's: change only what is wrong. Questions that do not apply are greyed out.", at: openReview },
+      { el: "#v6-path", title: "The climate pathway", text: "Folded: reason, where, who, what was done, what came out, the links between them, and whether the work is planned or done. Open it when you need it, and note any pathway part to correct.", at: openReview, demo: async () => { open("#v6-pathway")(); }, undo: () => { const d = document.querySelector("#v6-pathway"); if (d) d.open = false; } },
+      { el: "#v6-tags", title: "The AI tags", text: "Each term the AI kept: how it was found in the text, whether it is stand-alone, anchored, no anchor or not relevant for each area, its role in the text, and whether it is planned or done. Every tag starts as agreed. Click change to correct a value, or ✗ to refuse it with a reason.", at: openReview, pulse: "table.v6t tbody tr:first-child .segs" },
+      { el: "#v6-dropped", title: "Terms found but not kept", text: "Terms the search found that the AI or the checks did not keep, with the reason. Click + keep when a term should have been kept.", at: openReview },
+      { el: "#v6-add", title: "Add a missing term", text: "Search by term or synonym, then click + add, and tick the area for which it counts.", at: openReview,
+        demo: async () => { const q = document.querySelector("#q"); q.scrollIntoView({ block: "center" }); await typeInto(q, "drought"); }, undo: () => clear("#q") },
+      { el: ".text", title: "Or tag straight from the text", text: "Select a word or phrase in the title or description (double-click a word, or drag over several). A box opens with the matching terms: click + add. If nothing fits, propose it from there.", at: openReview, side: "right",
+        demo: async () => { await wait(300); demoPick(); }, undo: () => { closePick(); getSelection().removeAllRanges(); } },
+      { el: "#v6-add", title: "Not in the taxonomy?", text: "If nothing fits, propose it: as a new term (choose its facet) or as a synonym of an existing term. Proposals go to the people who maintain the taxonomy.", at: openReview,
+        demo: async () => { const q = document.querySelector("#q"); await typeInto(q, "groundwater recharge zone"); }, undo: () => clear("#q") },
+      { el: "#v6-findings", title: "The AI's taxonomy findings", text: "Unmatched climate phrases and possible misclassifications the AI recorded. Accept, reject or leave each one for later. These answers go to the people who maintain the taxonomy and do not change the outcome of your review.", at: openReview },
+      { el: "#v6-comment", title: "Comment", text: "Anything the other reviewer and the taxonomy team should know: why you disagree, a doubt, a pattern you notice.", at: openReview },
+      { el: ".actions", title: "Save or submit", text: "Save draft keeps your answers and lets you come back. Submit checks that every question that applies is answered, sends your review and takes you to the next result. You can change a submitted review until the second reviewer submits.", at: openReview },
+      { el: "#exp", title: "The file", text: "Download file gives one Excel file: one row per result with the AI's levels and marker answer, then each reviewer's answers side by side, plus a sheet of tags and a sheet of taxonomy findings.", at: openList },
       { title: "That's it", text: "You can replay this tour with How to review, at the top right.", at: openList, last: true },
     ];
   }

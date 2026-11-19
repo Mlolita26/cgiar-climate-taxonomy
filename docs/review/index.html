@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tagging review</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=2">
 <link rel="icon" href="data:,">
 </head>
 <body>
@@ -22,8 +22,10 @@
   <span id="nmsg" class="small"></span>
 </div>
 <main id="main"><div class="empty">Loading…</div></main>
-<script src="config.js"></script>
-<script src="tour.js"></script>
-<script src="app.js"></script>
+<!-- ?v= : change it when the scripts change, so browsers do not mix an old and a new file -->
+<script src="config.js?v=2"></script>
+<script src="tour.js?v=2"></script>
+<script src="v6.js?v=2"></script>
+<script src="app.js?v=2"></script>
 </body>
 </html>

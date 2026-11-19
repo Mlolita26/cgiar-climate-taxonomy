@@ -2,9 +2,22 @@
  {
   "id": "test-2025",
   "name": "Test, 2025 results (taxonomy v4)",
+  "form": "v4",
   "taxonomy": "taxonomy_v4_plus.json",
+  "taxonomy_file": "taxonomy-v4.json",
   "n": 60,
   "v": "2108872e30",
   "tv": "75ec94054a"
+ },
+ {
+  "id": "pilot-2025-v6",
+  "name": "Pilot 2025, 200 results, taxonomy v6",
+  "form": "v6",
+  "taxonomy": "taxonomy_v6.json",
+  "taxonomy_file": "taxonomy-v6.json",
+  "n": 200,
+  "v": "fb4cf09633",
+  "tv": "18cd5dc4b5",
+  "prompt": "prms-standard-2026-11-10.r12"
  }
 ]

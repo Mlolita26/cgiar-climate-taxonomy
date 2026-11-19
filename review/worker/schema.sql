@@ -1,9 +1,11 @@
--- Reviews of the AI tagging. One row per result per reviewer.
+-- Reviews of the AI tagging. Full schema for a new database. An existing database is changed only by the files in
+-- migrations/ (0001 adds reviews_v6; the v4 table and its rows stay as they are).
 CREATE TABLE IF NOT EXISTS reviewers (
   code TEXT PRIMARY KEY,          -- the personal code in the reviewer's link (?r=code)
   name TEXT NOT NULL
 );
 
+-- v4 batches (decision rules of taxonomy v4). One row per result per reviewer.
 CREATE TABLE IF NOT EXISTS reviews (
   result_id          TEXT NOT NULL,
   batch_id           TEXT NOT NULL,
@@ -22,3 +24,17 @@ CREATE TABLE IF NOT EXISTS reviews (
   PRIMARY KEY (result_id, reviewer_code)
 );
 CREATE INDEX IF NOT EXISTS reviews_batch ON reviews(batch_id);
+
+-- Batches under the CGIAR tagging standard (form "v6"). One row per result, batch and reviewer; the answers in one
+-- JSON column. Same as migrations/0001_reviews_v6.sql.
+CREATE TABLE IF NOT EXISTS reviews_v6 (
+  result_id     TEXT NOT NULL,
+  batch_id      TEXT NOT NULL,
+  reviewer_code TEXT NOT NULL REFERENCES reviewers(code),
+  submitted     INTEGER NOT NULL DEFAULT 0,
+  answers       TEXT NOT NULL DEFAULT '{}',   -- JSON: the reviewer's answers and the levels worked out from them (README.md)
+  created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at    TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (result_id, batch_id, reviewer_code)
+);
+CREATE INDEX IF NOT EXISTS reviews_v6_batch ON reviews_v6(batch_id);
