@@ -425,21 +425,26 @@ const V6 = (() => {
       <td class="nowrap"><span class="segs sm">${segD("d-" + id, "agree", "✓", d.d === "agree", "ok")}${segD("d-" + id, "change", "change", d.d === "change", "ch")}${segD("d-" + id, "refuse", "✗", d.d === "refuse", "ko")}</span></td></tr>${extra}${sub}`;
   }
   // why a tag does not count, in plain words, from its values (the reviewer's when changed)
-  const whyNot = (t, ax, v) => v === "no_anchor" ? "no anchor (no link to climate in the text)"
-    : v === "not_relevant" ? (!t["role_" + ax] || t["role_" + ax] === "n/a" ? `not relevant (the taxonomy gives this term no ${ax} role)` : `not relevant (the text does not use it for ${ax})`)
-    : w(v);
+  // one short sentence (Lolita, 19 Nov 2026): first what the taxonomy rules out, then what the text does not link to climate
+  const whyNot = (t, ax, v) => v === "no_anchor" ? { k: 2, s: `for ${ax}, the text does not link it to climate` }
+    : v === "not_relevant" ? (!t["role_" + ax] || t["role_" + ax] === "n/a" ? { k: 1, s: `not a ${ax} term` } : { k: 1, s: `not used for ${ax} here` })
+    : { k: 3, s: `${ax}: ${w(v)}` };
+  const whyPhrase = (R, t) => AREAS.map(ax => whyNot(t, ax, val(R, t, ax))).sort((a, b) => a.k - b.k).map(x => x.s).join("; ");
   // two groups: tags that count (an area is stand-alone or anchored) and tags that do not; a tag moves when a value changes
   function renderTags() {
     const res = S.cur, R = S.rev, all = res.tags || [];
     const counting = t => counts(val(R, t, "adaptation")) || counts(val(R, t, "mitigation"));
     const yes = all.filter(counting), no = all.filter(t => !counting(t));
     const head = `<thead><tr><th>Term</th><th>Found as</th><th>Adaptation</th><th>Mitigation</th><th>Role in the text</th><th>Planned or done</th><th></th></tr></thead>`;
-    const why = t => `<tr class="why"><td colspan="7">Why it does not count: ${AREAS.map(ax => `${ax}: ${esc(whyNot(t, ax, val(R, t, ax)))}`).join("; ")}</td></tr>`;
+    // the reason once above the group when every tag shares it; otherwise one short line under each tag
+    const phrases = no.map(t => whyPhrase(R, t)), same = no.length > 1 && phrases.every(p => p === phrases[0]);
+    const why = t => same ? "" : `<tr class="why"><td colspan="7">Not counted: ${esc(whyPhrase(R, t))}.</td></tr>`;
+    const groupWhy = same ? `<div class="hint small pad">Not counted, for all of them: ${esc(phrases[0])}.</div>` : "";
     $("#v6-tags").innerHTML = `<h3 class="pad">AI tags <span class="muted">${all.length}</span></h3>
       <div class="hint small pad">A tag counts only when an area says stand-alone or anchored ${help("anchors")}. No anchor or not relevant: the term is tagged but is not climate information. ${help("tags")}</div>
       <h4 class="pad grp">Tags that count as climate information <span class="muted">${yes.length}</span></h4>
       <table class="tags v6t">${head}<tbody>${yes.map(t => tagRow(t, dec(R, t))).join("") || `<tr><td colspan="7" class="muted">None.</td></tr>`}</tbody></table>
-      <h4 class="pad grp">Tags that do not count <span class="muted">${no.length}</span></h4>
+      <h4 class="pad grp">Tags that do not count <span class="muted">${no.length}</span></h4>${groupWhy}
       <table class="tags v6t nocount">${head}<tbody>${no.map(t => tagRow(t, dec(R, t), why(t))).join("") || `<tr><td colspan="7" class="muted">None.</td></tr>`}</tbody></table>
       <div class="hint small pad">✓ agree, change to correct a value, ✗ to refuse a tag (a reason is needed).</div>`;
   }
