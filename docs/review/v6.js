@@ -311,17 +311,34 @@ const V6 = (() => {
   }
 
   // ---------------------------------------------------------------- list
+  // sort of the list: "id" (the order of the batch), "marker_desc" (Principal first), "marker_asc" (not provided first);
+  // remembered in this browser only
+  const SORT_KEY = "v6-list-sort";
+  const getSort = () => { if (!S.sortV6) { try { S.sortV6 = localStorage.getItem(SORT_KEY) || "id"; } catch (e) { S.sortV6 = "id"; } } return S.sortV6; };
+  const setSort = v => { S.sortV6 = v; try { localStorage.setItem(SORT_KEY, v); } catch (e) {} };
+  const markerRank = r => { const c = markerCode(r.marker); return c == null ? -1 : c; };
+  function sorted(rows) {
+    const s = getSort(), pos = new Map(S.list.map((r, i) => [r.id, i]));
+    if (s === "id") return rows;
+    const dir = s === "marker_asc" ? 1 : -1;
+    return rows.slice().sort((a, b) => dir * (markerRank(a) - markerRank(b)) || pos.get(a.id) - pos.get(b.id));
+  }
   function list() {
-    const rows = S.list.filter(r => bucket(r) === S.tab);
+    const rows = sorted(S.list.filter(r => bucket(r) === S.tab)), s = getSort();
+    const arrow = s === "marker_desc" ? " ▼" : s === "marker_asc" ? " ▲" : "";
     const done = S.tab === "agree" || S.tab === "disagree";
     const who = id => (S.others[id] || []).map(v => esc(v.reviewer)).join(", ");
     const you = r => { const m = S.mine[r.id]; return m ? (m.submitted ? "submitted" : "draft") : ""; };
     $("#main").innerHTML = storeNotice() + (rows.length ? `<p class="hint">Each row is one PRMS result with its PRMS climate marker. Click a row to open it${done ? " and see both reviews" : " and review it"}.</p><div class="card flush"><table class="list">
-      <thead><tr><th>ID</th><th>PRMS marker</th><th>Title</th><th>Description</th><th>${done ? "Reviewers" : "You"}</th></tr></thead><tbody>
+      <thead><tr><th><button type="button" class="sorth ${s === "id" ? "on" : ""}" data-sort="id" title="Sort by ID">ID</button></th>
+        <th><button type="button" class="sorth ${s !== "id" ? "on" : ""}" data-sort="marker" title="Sort by PRMS marker: Principal, Significant, Not targeted, not provided; click again to reverse">PRMS marker${arrow}</button></th>
+        <th>Title</th><th>Description</th><th>${done ? "Reviewers" : "You"}</th></tr></thead><tbody>
       ${rows.map(r => `<tr data-id="${esc(r.id)}"><td class="mono">${esc(r.id)}</td><td class="nowrap">${esc(r.marker || "not provided")}</td>
         <td>${esc(r.title)}</td><td class="small muted">${esc(cut(r.description, 220))}</td><td class="muted small nowrap">${done ? who(r.id) : you(r)}</td></tr>`).join("")}</tbody></table></div>`
       : `<div class="empty">Nothing here.</div>`);
     $$("tr[data-id]").forEach(tr => tr.onclick = () => location.hash = "#/r/" + encodeURIComponent(tr.dataset.id));
+    $$("button.sorth").forEach(b => b.onclick = () => {
+      setSort(b.dataset.sort === "id" ? "id" : getSort() === "marker_desc" ? "marker_asc" : "marker_desc"); list(); });
   }
 
   // ---------------------------------------------------------------- one result: the form
@@ -663,7 +680,7 @@ const V6 = (() => {
     if (row.submitted && !(was && was.submitted)) c.submitted++;
     refreshState();
     if (!submit) { msg.textContent = "Saved."; $("#save").disabled = $("#sub").disabled = false; tabs(); return; }
-    const next = S.list.find(r => bucket(r) === "todo" && r.id !== res.id);
+    const next = sorted(S.list).find(r => bucket(r) === "todo" && r.id !== res.id);   // the next one in the order chosen in the list
     location.hash = next ? "#/r/" + encodeURIComponent(next.id) : "#/list/todo";
   }
 
@@ -807,5 +824,5 @@ const V6 = (() => {
     link.textContent = lab;
   }
 
-  return { list, open, compare, agree, exportFile, aiResult, reviewResult, compareWith, norm, OUTCOMES, areaLevel, areaRank, markerCode };
+  return { list, open, compare, agree, exportFile, aiResult, reviewResult, compareWith, norm, sorted, OUTCOMES, areaLevel, areaRank, markerCode };
 })();

@@ -43,6 +43,10 @@ thead th { font-size: 12px; font-weight: 600; color: var(--muted); background: #
 table.list tbody tr { cursor: pointer; }
 table.list tbody tr:hover td { background: #F7FBF9; }
 table.list td:first-child, table.list th:first-child { padding-left: 16px; }
+.sorth { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; white-space: nowrap; }
+.sorth:hover { text-decoration: underline; }
+.sorth.on { color: var(--green-dk); }
+.sorth:focus-visible { outline: 2px solid var(--green-dk); outline-offset: 2px; }
 
 /* verdict pills */
 .pill { display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--rule); color: var(--muted); }

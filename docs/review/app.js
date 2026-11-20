@@ -243,7 +243,8 @@ async function openResult(id) {
 }
 
 function navBar(res) {
-  const ids = S.list.filter(r => bucket(r) === S.tab).map(r => r.id), i = ids.indexOf(res.id);
+  const base = S.form === "v6" && typeof V6 !== "undefined" ? V6.sorted(S.list) : S.list;   // v6: the order chosen in the list
+  const ids = base.filter(r => bucket(r) === S.tab).map(r => r.id), i = ids.indexOf(res.id);
   const prev = i > 0 ? ids[i - 1] : null, next = i >= 0 && i < ids.length - 1 ? ids[i + 1] : null;
   return `<div class="nav"><a href="#/list/${S.tab}" class="back">← ${TABS[S.tab] || "list"}</a>
     <span class="meta"><b class="mono">${esc(res.id)}</b><span>${esc(res.marker)}</span><span>${esc(res.level)}</span><span>${esc(res.type)}</span></span>
