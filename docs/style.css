@@ -61,7 +61,8 @@ form.search input:focus{outline:2px solid var(--blue);outline-offset:1px;backgro
 .hero .wrap{padding-top:58px;padding-bottom:66px}.hero::after{height:14px}
 .hero h1{font-size:44px;font-weight:600;max-width:21ch;letter-spacing:-.02em}.hero p{font-size:18px;max-width:62ch}
 
-main.wrap{padding-top:32px;padding-bottom:48px}
+body{min-height:100vh;display:flex;flex-direction:column}                /* the footer stays at the bottom of short pages */
+main.wrap{padding-top:32px;padding-bottom:48px;width:100%;flex:1 0 auto}
 
 /* buttons */
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 20px}
