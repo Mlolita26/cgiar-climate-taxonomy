@@ -1,0 +1,277 @@
+---
+title: "How the PRMS climate tagging script works"
+subtitle: "The script, step by step, and where each rule of the tagging standard is applied"
+date: "Version r17 of the script, 20 November 2026"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    number_sections: false
+    self_contained: true
+    css: explainer.css
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+<div class="lead">
+The tagging script reads the title and the description of every result reported in PRMS, the CGIAR performance and
+results management system. It finds the climate information they contain with the CGIAR climate taxonomy, describes
+the climate pathway, and compares what the text says with the climate marker given in PRMS. It applies the CGIAR
+Standard for Tagging Climate-Related Work of 10 November 2026. This page explains each part of the script in plain words,
+for readers who do not write code.
+</div>
+
+# What goes in and what comes out
+
+| | |
+|---|---|
+| **Goes in** | The PRMS export: for each result its title, description, climate marker (Principal, Significant, Not targeted or none), countries and program. The CGIAR climate taxonomy, version 6 (768 terms). |
+| **Two AI models** | gpt-5-mini tags the terms; gpt-5 reads each text with climate information twice, to find the climate measure and the purpose. |
+| **Comes out** | Three documents: (1) the tagged results, one row per result, with the tags and links; (2) a diagnosis page to read the run; (3) the taxonomy findings, with a decision column for the taxonomy team. Every record also keeps the AI's answers as received, so that a change to a rule can be replayed later at no cost. |
+
+The AI never sees the PRMS marker, the countries or the program. It sees only the title and the description.
+
+# The steps for one result
+
+<div class="flow">
+<div class="step"><span class="n">1</span><b>Prepare</b><br>English text, geography</div>
+<div class="step"><span class="n">2</span><b>Term search</b><br>code finds taxonomy terms</div>
+<div class="step"><span class="n">3</span><b>Skip</b><br>no climate word: no AI call</div>
+<div class="step ai"><span class="n">4</span><b>Tagging</b><br>AI judges each term</div>
+<div class="step"><span class="n">5</span><b>Checks</b><br>code checks every answer</div>
+<div class="step ai"><span class="n">6</span><b>Reading</b><br>AI, twice: measure and purpose</div>
+<div class="step"><span class="n">7</span><b>Decisions</b><br>pathway, level, marker answer</div>
+<div class="step"><span class="n">8</span><b>Findings</b><br>gaps in the taxonomy</div>
+</div>
+
+<p class="note">Steps in green are done by an AI model. All other steps are done by code, the same way every time.</p>
+
+The sections below follow these steps. Each section says what the step does, why, and where the rules of the standard
+are applied. The name in grey at the end of a section is the part of the script that does it, for readers who want to
+find it in the code.
+
+# 1. Preparing the text
+
+- The title and the description are joined into one text. Nothing else from PRMS is read by the AI.
+- A text in another language is translated into English first. The record says that it was translated.
+- **Geography** (standard, Rule 4) is taken from the PRMS Countries field. When the field is empty, the countries named
+  in the text are used and marked as taken from the text. When none of the countries named in the text is in the
+  field, the result is flagged for review.
+- A result with an empty text gets "no comparison".
+
+<p class="where">In the script: parts <code>data</code>, <code>geography</code>, <code>pipeline</code> (make_ctx)</p>
+
+# 2. Finding the taxonomy terms in the text
+
+The code searches the text for every term and synonym of the taxonomy. The terms it finds are the **candidates** that
+the AI will judge. The search:
+
+- ignores case and punctuation, and finds plurals and other word forms ("droughts", "drought-tolerant");
+- allows one extra word inside a term ("climate-resilient yam varieties" is Climate-resilient variety);
+- keeps the most precise term: "climate" inside "climate resilience" is not offered separately;
+- **hides known names first**: a climate word inside the name of a programme, project, fund or organisation is not
+  climate information on its own (standard, Rule 3). "Livestock and Climate Initiative" or "Green Climate Fund" do not
+  make a text climate-related;
+- matches **acronyms only in exact capitals**, as whole words, with a plural "s" ("NDCs"). An acronym with another common
+  meaning (CSA, CIS, NAP) counts only when the text spells it out or holds climate words. The acronyms come from a
+  register: a candidate report with a decision for each acronym (102 accepted). "gaps" is therefore no longer read as
+  GAP, Good agricultural practice;
+- offers at most 60 candidates per text.
+
+Four terms are applied in a provisional way until the taxonomy team decides (Anticipatory action, Food system
+transformation, Green Climate Fund, Avoided deforestation). The taxonomy file itself is not changed by the script.
+
+<p class="where">In the script: parts <code>taxonomy</code>, <code>prefilter</code> (shortlist_ids)</p>
+
+# 3. Skipping texts with no climate information
+
+A text that holds no climate word (climate change, drought, flood, heat, emissions, carbon, methane and similar) and no
+stand-alone climate term gets **no AI call**. It is recorded as having no climate information. General terms on their
+own, such as farmer, training or irrigation, never give climate information (standard, Rules 2 and 3), so such a text
+cannot become climate-related whatever the AI says. On the pilot of 200 results, 132 needed no AI call.
+
+<p class="where">In the script: part <code>pipeline</code> (skip_ai)</p>
+
+# 4. The tagging call (AI)
+
+The AI (gpt-5-mini) receives the text and the list of candidates, with instructions that follow the standard rule by
+rule and use the standard's own worked examples. For each candidate it fills a fixed form:
+
+- **kept or not**: is the term used in its taxonomy meaning? If not, why (another meaning, part of a name, used loosely);
+- for adaptation and for mitigation: does the term count on its own, need a climate link, or not apply;
+- its **role** in the text: climate rationale, system or population, intervention, or result (output, outcome, impact);
+- for an intervention or a result: **planned or carried out**, with the words that show it;
+- the **links** it sees: climate rationale to intervention, intervention to result, with the passage;
+- **taxonomy findings**: climate phrases with no term, terms that seem misclassified, new kinds of climate link.
+
+Every answer carries a quote from the text. Every answer is chosen from a closed list.
+
+<p class="where">In the script: parts <code>schema</code>, <code>prompt</code> (the instructions), <code>client</code> and <code>pipeline</code> (tag_group)</p>
+
+# 5. Checks in code
+
+The AI's answers are never taken on trust. The code checks each one against the text and against the taxonomy. An
+answer that fails a check is cancelled and recorded, never repaired by guessing.
+
+- **Quotes**: every quoted passage must be in the text word for word.
+- **Candidates**: a tag must be one of the candidates; a word-sense guard blocks known wrong meanings.
+- **Stand-alone terms** (standard, Rule 2) count on their own, for the areas the taxonomy gives them.
+- **Context-dependent terms** (standard, Rule 3): the code decides the climate link, the same way every time. A general
+  term counts for an area when a sentence that holds it also holds climate information of that area: a climate word, a
+  stand-alone climate term, or a climate driver said to change ("erratic rainfall"). When the reading (step 6) finds a
+  climate measure for the area, every general term of that area in the text counts, because the whole text describes
+  climate work. Otherwise only the terms in such a sentence count, so that a passing mention of climate does not make
+  the whole text climate-related.
+- **Area from the text** (standard, Rule 1 and Table 1): a system, intervention or stakeholder term that the taxonomy
+  gives only one area counts for the other area when its own sentence holds climate words specific to that area. "Rice
+  production generates significant greenhouse gas emissions" makes Rice count for mitigation.
+- **Terms of both areas** (standard, Rule 1): a term classed for both areas counts only for the area the text addresses.
+- **Roles**: a role must be one the term's facet allows (a stakeholder cannot be a result).
+- **Planned**: kept only with the words that show it ("will develop"); otherwise "unclear".
+- **Links** (standard, Rule 5): kept only when both tags count for the area, their roles fit and the passage is in the
+  text.
+
+<p class="where">In the script: part <code>validate</code> (validate_record)</p>
+
+# 6. The reading (AI, twice)
+
+For every text with climate information, a stronger model (gpt-5) reads the text **twice, in two independent calls**, and
+answers three questions with the exact words of the text (standard, Rule 7):
+
+1. **What kind of work is the result?** A product developed or tested; a product or practice delivered or scaled; a
+   training; an event organised; a study of responses; a study of a condition; a policy, plan or recommendation; or other.
+2. **What is the climate function of the result**, for adaptation and for mitigation?
+   - *specific*: the text says the work addresses a named climate problem, or the product's name states its climate
+     function (drought-tolerant variety, early warning system, greenhouse gas inventory);
+   - *label*: climate words only qualify a broad goal ("towards climate-resilient food systems", "for climate action");
+   - *context*: climate is background, a study variable, one item in a list, a finding, or a name;
+   - *none*.
+3. **What is the purpose?** Main or additional, by four rules applied in order: the text says main or also; the title
+   presents the work by its climate function alone (main) or with other aims (additional); the description names climate
+   among other benefits (additional); otherwise not stated.
+
+The code then decides:
+
+- a **climate measure** is a work of a measure kind (not a study of a condition, not "other") with a specific climate
+  function. A measure is an intervention of this work with a stated climate function;
+- the code refuses a specific function whose words are not in the text or name no climate problem, and a purpose whose
+  words are not where its rule says;
+- **the two readings are combined**: an area keeps what both support. A measure only when both find one; the purpose
+  only when both agree, otherwise "not stated". When the two readings differ, the result is flagged "needs review".
+
+<p class="where">In the script: part <code>prompt</code> (READING_RULES), part <code>validate</code> (apply_reading, use_readings), part <code>pipeline</code> (call_readings)</p>
+
+# 7. Decisions: pathway, level and marker answer
+
+All of this is done by code.
+
+**The climate pathway** (standard, Rules 4 to 6), for adaptation and for mitigation separately, from the tags that count:
+
+| Component | Filled with |
+|---|---|
+| Climate rationale | climate risk and climate driver terms (drought, climate change, emissions) |
+| Geography | the PRMS Countries field, or the countries in the text |
+| System or population | system and stakeholder terms (crops, livestock, farmers, communities) |
+| Intervention | intervention terms, with their type: the broader term at level 2 of the taxonomy tree |
+| Result | output, outcome and impact terms, with their level |
+
+Each relationship is recorded as stated, clear from the context, or not described. Planned and reported information is
+kept apart. There is no score.
+
+**The level of each area** (standard, Rule 8):
+
+| Level | What the text shows |
+|---|---|
+| L0 | No climate information |
+| L1 | Climate information, no climate measure |
+| L2 | A climate measure; purpose additional or not stated |
+| L3 | A climate measure; climate is the main purpose |
+
+**The marker answer** (standard, Rule 9). PRMS has one climate marker for both areas, so it is compared with the stronger
+area:
+
+| PRMS marker | L0 | L1 | L2 | L3 |
+|---|---|---|---|---|
+| Principal | cannot determine | marker higher | cannot determine (purpose not stated); marker higher (additional) | aligned |
+| Significant | cannot determine | cannot determine | aligned | marker lower |
+| Not targeted | aligned | aligned | marker lower | marker lower |
+
+"Cannot determine" always shows its reason: no climate information, climate context only, or main purpose not stated.
+A result with no marker gets "no comparison". The answer is a signal for review; the marker is never changed.
+
+**Review flags** point a reviewer to the results to look at first: the two readings differ, a reading failed, the
+countries differ, the text is very short or translated, and others.
+
+<p class="where">In the script: part <code>derive</code> (derive_result, area_level, OUTCOMES)</p>
+
+# 8. Taxonomy findings
+
+Tagging real texts shows where the taxonomy can improve (standard, Rules 10 to 12). Five kinds of finding are collected:
+
+| Finding | Comes from | Proposed action |
+|---|---|---|
+| Unmatched climate phrase | the AI | add as a synonym of the closest term, or as a new term; reject when there is no climate word |
+| Doubtful match | code, from the terms the AI did not keep, with its reason | review that synonym or the definition |
+| Possible misclassification | the AI and code | change the term's role, area or facet |
+| Unrecorded type of climate anchor | the AI | add an example to the term's context rule |
+| Measure with no intervention term | code, after the reading | add a synonym to one of the three closest intervention terms, or propose a new term |
+
+Document 3 lists every finding with its passage, the number of results, the proposed action, the reason and an empty
+decision column. Decisions are kept from one run to the next. Nothing enters the taxonomy by itself.
+
+<p class="where">In the script: parts <code>validate</code> (measure_findings), <code>findings</code></p>
+
+# 9. Outputs, running and quality control
+
+**Documents.** Document 1 (tagged results, with sheets for tags and links), document 2 (diagnosis page), document 3
+(taxonomy findings), and a run summary with counts and the cost.
+
+**Running.** The script runs one result at a time, in parallel, or through the OpenAI Batch API at half the price. Before
+any call it prints a cost estimate, and it stops at a cost cap. The API key is read from the user's settings, never
+written in the script.
+
+**Quality control**
+
+- **Fixed test cases**: 46 texts (the standard's worked examples and PRMS cases) with the answers the rules require.
+  They run before each tagging run; a blocking failure stops the run.
+- **Offline checks**: about 120 checks of the code with written answers in place of the AI, run after every change, at no
+  cost.
+- **Replay**: the AI's answers are stored, so a change to a rule in code can be replayed on a past run at no cost.
+- **Two independent readings** for measure and purpose, with differences flagged.
+- **Human double review** on the review site: two reviewers per result, blind until both have answered.
+
+<p class="where">In the script: parts <code>tests</code>, <code>selftest</code>, <code>run</code>, <code>results</code>, <code>outputs</code>; tools <code>offline_checks.R</code>, <code>test_cases.json</code></p>
+
+# Where each rule of the standard is applied
+
+| Rule of the standard | Where it is applied | How |
+|---|---|---|
+| **1.** Adaptation and mitigation separately | Tagging call; checks in code | One answer per area for each term. Taxonomy area by default; area from the text; terms of both areas count only for the area the text addresses. |
+| **2.** Stand-alone terms | Term search; tagging call; checks | The taxonomy role decides; the AI confirms the climate sense; one list of words that look like climate words and are not. |
+| **3.** Climate anchors for context-dependent terms | Checks in code, after the reading | A general term counts when its sentence holds climate information; when the work is a climate measure, the text anchors all of them. Names are hidden first. |
+| **4.** Pathway components | Decisions | Five components per area from the tags that count, by role; geography from the PRMS Countries field. |
+| **5.** Relationships | Tagging call; checks; decisions | Links with a passage, kept when both tags count; recorded as stated, clear from context, or not described. |
+| **6.** Type, result level, planned or reported | Taxonomy; tagging call; checks | Type from the taxonomy tree; result level from the role; "planned" only with its words. |
+| **7.** Objective, measure, purpose | Reading (gpt-5, twice); checks | Kind of work, climate function, purpose by four rules; what both readings support. |
+| **8.** Expectations for each marker | Decisions | Levels L0 to L3. |
+| **9.** Alignment or discrepancy | Decisions | The comparison table; the reason shown with "cannot determine"; the marker never changed. |
+| **10.** Gaps and errors | Tagging call; checks; findings | Four kinds of finding from the standard and one added: measure with no intervention term. |
+| **11.** Synonym or new term | Findings; acronym register | The closest existing term is proposed; a person decides. |
+| **12.** Record proposed changes | Findings; outputs | Document 3 with a decision column; the taxonomy version on every record. |
+
+# Words used on this page
+
+| Word | Meaning |
+|---|---|
+| Candidate | A taxonomy term found in the text by the code, which the AI then judges. |
+| Stand-alone term | A term that is climate-related by its meaning (drought, early warning system). It counts on its own. |
+| Context-dependent term | A general term (irrigation, yield, farmer). It counts only with a climate link in the text. |
+| Anchor | The climate information that makes a context-dependent term count. |
+| Climate measure | An intervention of this work whose climate function the text states. |
+| Purpose | Whether climate is the main or an additional aim of the work, as the text presents it. |
+| Level | L0 to L3: how much the text shows, from no climate information to a climate measure with climate as the main purpose. |
+| Marker answer | Aligned, marker higher, marker lower, cannot determine, or no comparison. |
+| Replay | Running the checks and decisions again on stored AI answers, at no cost. |

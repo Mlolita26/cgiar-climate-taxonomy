@@ -15,3 +15,4 @@ Two tools that use the taxonomy live in the same repository:
 
 - **Taxonomy brain:** https://mlolita26.github.io/cgiar-climate-taxonomy/brain/ . Type a text and see which words are taxonomy terms or synonyms, and whether the text tells a complete impact pathway.
 - **Tagging review:** https://mlolita26.github.io/cgiar-climate-taxonomy/review/ . Two reviewers check the AI tagging of each PRMS result.
+- **How the tagging script works:** https://mlolita26.github.io/cgiar-climate-taxonomy/tagging/ . The script step by step, for readers who do not write code, and where each rule of the tagging standard is applied. Source: [tagging/tagging_script_explained.Rmd](tagging/tagging_script_explained.Rmd).
