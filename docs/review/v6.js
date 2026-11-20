@@ -410,7 +410,7 @@ const V6 = (() => {
     box.innerHTML = `<p class="small muted">Worked out from your answers with the table of the tagging script. You do not set these.</p>
       <table class="lvl"><thead><tr><th></th><th>Tagged by AI</th><th>Your answers</th></tr></thead><tbody>
       ${AREAS.map(ax => `<tr><th>${AX[ax]} ${ax === "adaptation" ? help("levels") : ""}</th><td>${levelCell(ai[ax], ai.purpose[ax])}</td><td class="${d(ai[ax], me[ax])}">${levelCell(me[ax], me.purpose[ax])}</td></tr>`).join("")}
-      <tr class="pm"><th>PRMS marker ${help("marker")}</th><td colspan="2"><b>${esc(res.marker || "not provided")}</b> <span class="muted small">(the same for both; compared with the stronger area)</span></td></tr>
+      <tr class="pm"><th>PRMS marker ${help("marker")}</th><td>${esc(res.marker || "not provided")}</td><td>${esc(res.marker || "not provided")}</td></tr>
       <tr><th>Marker answer ${help("marker-answer")}</th><td>${markerCell(ai.marker, ai.detail)}</td><td class="${d(ai.marker, me.marker)}">${markerCell(me.marker, me.detail)}</td></tr>
       </tbody></table>
       <div class="small dis"><b>${dis.length ? `You disagree on ${dis.length} point${dis.length > 1 ? "s" : ""}` : "You agree with everything extracted"}</b>
@@ -511,8 +511,10 @@ const V6 = (() => {
     $("#v6-tags").innerHTML = `<h3 class="pad">Tags <span class="muted">${all.length}</span></h3>
       <div class="hint small pad">A tag counts only when an area says stand-alone or anchored ${help("anchors")}. No anchor or not relevant: the term is tagged but is not climate information. ${help("tags")}</div>
       <h4 class="pad grp">Tags that count as climate information <span class="muted">${yes.length}</span></h4>
+      <div class="hint small pad">Stand-alone terms, and context-dependent terms that the text links to climate (an anchor).</div>
       <table class="tags v6t">${head}<tbody>${yes.map(t => tagRow(t, dec(R, t))).join("") || `<tr><td colspan="7" class="muted">None.</td></tr>`}</tbody></table>
-      <h4 class="pad grp">Tags that do not count <span class="muted">${no.length}</span></h4>${groupWhy}
+      <h4 class="pad grp">Tags that do not count <span class="muted">${no.length}</span></h4>
+      <div class="hint small pad">These terms are in the text with their taxonomy meaning (maize is maize), so they are tags. They are context-dependent and the text gives them no climate anchor, so they are kept as general tags and are not counted as climate information (standard, Rule 3, last paragraph).</div>${groupWhy}
       <table class="tags v6t nocount">${head}<tbody>${no.map(t => tagRow(t, dec(R, t), why(t))).join("") || `<tr><td colspan="7" class="muted">None.</td></tr>`}</tbody></table>
       <div class="hint small pad">Agree, or Disagree to correct a value, remove the tag (with the reason) or write a note.</div>`;
   }
@@ -539,11 +541,14 @@ const V6 = (() => {
       const c = x.context, w = x.found_as || "", i = w ? c.toLowerCase().indexOf(w.toLowerCase()) : -1;
       return i < 0 ? esc(c) : esc(c.slice(0, i)) + `<b class="hl-g">${esc(c.slice(i, i + w.length))}</b>` + esc(c.slice(i + w.length)); };
     $("#v6-dropped").innerHTML = `<h3>Words found in the text but not tagged <span class="muted">${l.length}</span> ${help("terms-not-kept")}</h3>
-      <p class="hint small">A search marks every word of the text that matches a taxonomy term or synonym. These words were marked, then left out. Each row says where the words are and why they are not a tag. If one should be a tag, click + keep.</p>` + (l.length
-      ? `<table class="tags drops"><thead><tr><th>Term</th><th>Where in the text</th><th>Why it is not a tag</th><th></th></tr></thead><tbody>${l.map(x => { const kept = R.added_terms.includes(x.concept_id);
+      <p class="hint small">A search marks every word of the text that matches a taxonomy term or synonym, by its words only. Each word was then compared with the taxonomy definition and left out: it is not that concept here (random forest is an algorithm, not a forest), it is part of a name, or a narrower term on the same words is already tagged. These words are <b>not tags</b> and play no part in the answers. The taxonomy definition is shown so that you can compare. If one should be a tag, click + keep; when a closer term exists for the same words, it is proposed with + add.</p>` + (l.length
+      ? `<table class="tags drops"><thead><tr><th>Term</th><th>Where in the text</th><th>Why it is not a tag</th><th></th></tr></thead><tbody>${l.map(x => { const kept = R.added_terms.includes(x.concept_id), def = (S.terms[x.concept_id] || {}).definition || "", b = x.better;
           return `<tr><td><b>${esc(x.concept_name)}</b><div class="mono muted">${esc(x.concept_id)}${(S.terms[x.concept_id] || {}).facet ? " · " + esc(S.terms[x.concept_id].facet) : ""}</div></td>
             <td class="small">${ctx(x)}</td>
-            <td class="small">${(x.reasons || []).map(whyNotTagged).join("<br>")}</td>
+            <td class="small">${(x.reasons || []).map(whyNotTagged).join("<br>")}
+              ${def ? `<div class="muted">Taxonomy definition of ${esc(x.concept_name)}: “${esc(cut(def, 260))}”</div>` : ""}
+              ${b ? `<div class="better">A closer term for “${esc(b.phrase)}”: <b>${esc(b.term)}</b>${(S.terms[b.id] || {}).definition ? ` <span class="muted">(“${esc(cut(S.terms[b.id].definition, 160))}”)</span>` : ""}
+                ${R.added_terms.includes(b.id) ? ` <span class="c-yes">added by you</span>` : ` <button class="add" data-keep="${esc(b.id)}">+ add ${esc(b.term)}</button>`}</div>` : ""}</td>
             <td class="nowrap">${kept ? `<span class="small c-yes">kept by you</span>` : `<button class="add" data-keep="${esc(x.concept_id)}">+ keep</button>`}</td></tr>`; }).join("")}</tbody></table>
          <div class="hint small">A word you keep appears under Add a term; tick there the area for which it counts.</div>`
       : `<p class="muted small">None.</p>`);
@@ -554,7 +559,8 @@ const V6 = (() => {
     const meta = [f.facet, f.area].filter(Boolean).map(x => esc(String(x).toLowerCase())).join(", ");
     const lab = f.proposed_label || f.phrase || "", closest = String(f.proposed_value || "").replace(/^closest terms?:\s*/i, "");
     switch (f.finding_type) {
-      case "unmatched_climate_phrase": return `New term: <b>${esc(lab)}</b>${meta ? ` <span class="muted">(${meta})</span>` : ""}`;
+      case "unmatched_climate_phrase": return `New term: <b>${esc(lab)}</b>${meta ? ` <span class="muted">(${meta})</span>` : ""}`
+        + (f.closest ? ` <span class="better">closest existing term: <b>${esc(f.closest.term)}</b></span>` : "");
       case "measure_without_intervention_term": return `A term for the measure “${esc(cut(f.phrase, 90))}”${closest ? ` <span class="muted">(closest terms: ${esc(closest)})</span>` : ""}`;
       case "possible_misclassification": return `Change the classification of <b>${esc(f.concept_name || lab)}</b>${f.proposed_value ? `: ${esc(f.proposed_value)}` : ""}`;
       case "doubtful_match": return `Doubtful match: “${esc(lab)}” as ${esc(f.concept_name || "")}`;
@@ -566,8 +572,9 @@ const V6 = (() => {
     const res = S.cur, R = S.rev, l = res.findings || [];
     $("#v6-found").innerHTML = l.length ? `<div class="small muted">Found in the text: accept or reject each one (point at a line to see the passage)</div>` + l.map((f, i) => {
       const d = R.findings[fkey(f)] || "", tip = [f.excerpt ? `“${f.excerpt}”` : "", f.reason || ""].filter(Boolean).join(". ");
+      const syn = f.closest ? "synonym:" + f.closest.id : "";
       return `<div class="finding small" title="${esc(tip)}"><span>${findingLine(f)}</span>
-        <span class="segs sm">${segD("f-" + i, "accept", "Accept", d === "accept", "ok")}${segD("f-" + i, "reject", "Reject", d === "reject", "ko")}</span></div>`; }).join("")
+        <span class="segs sm">${segD("f-" + i, "accept", f.closest ? "Accept as new term" : "Accept", d === "accept", "ok")}${syn ? segD("f-" + i, syn, "Synonym of " + esc(f.closest.term), d === syn, "ok") : ""}${segD("f-" + i, "reject", "Reject", d === "reject", "ko")}</span></div>`; }).join("")
       : `<div class="small muted">Found in the text: none.</div>`;
   }
 
@@ -709,6 +716,9 @@ const V6 = (() => {
   }
   const functionText = (res, a, ax) => qText(a.areas[ax].fn, w((res[ax] || {}).climate_function || "none"), w(a.areas[ax].fn.value));
   const pathText = a => qText(a.path, "", "");
+  // a reviewer's answer on a proposal found in the text: accept, reject, "synonym of <term>" or no answer
+  const fdecText = (a, z) => { const v = String((a.findings || {})[fkey(z)] || "");
+    return v === "accept" || v === "reject" ? v : v.startsWith("synonym:") ? "synonym of " + ((S.terms[v.slice(8)] || {}).term || (z.closest || {}).term || v.slice(8)) : "no answer"; };
   function tagText(t, d) {
     if (!tagChanged(t, d)) return "agree";
     if (d.d === "refuse") return "removed" + (d.reason ? ": " + label(REFUSE, d.reason) : "") + (d.note ? ` (${d.note})` : "");
@@ -744,7 +754,7 @@ const V6 = (() => {
       ${sec("Terms added")}
       ${addedAll.length ? addedAll.map(id => row(esc((S.terms[id] || {}).term || id), "", A.map(a => (a.added_terms || []).includes(id) ? esc("added, " + addedHow(a, id)) : ""))).join("") : `<tr><td colspan="4" class="muted">None.</td></tr>`}
       ${sec("Proposed terms and synonyms found in the text")}
-      ${(res.findings || []).map(f => row(findingLine(f), "", A.map(a => esc(a.findings[fkey(f)] || "no answer")))).join("") || `<tr><td colspan="4" class="muted">None.</td></tr>`}
+      ${(res.findings || []).map(f => row(findingLine(f), "", A.map(a => esc(fdecText(a, f))))).join("") || `<tr><td colspan="4" class="muted">None.</td></tr>`}
       ${sec("Pathway, proposals and comments")}
       ${row("Climate pathway", "", A.map(a => esc(pathText(a))))}
       ${row("Proposals", "", A.map(a => (a.proposals || []).map(p => esc(proposalText(p))).join("<br>") || "none"))}
@@ -765,11 +775,13 @@ const V6 = (() => {
                 "adaptation climate function", "mitigation climate function", "adaptation climate measure", "mitigation climate measure",
                 "adaptation purpose", "mitigation purpose", "tags removed", "tags changed", "terms added",
                 "proposals accepted", "proposals rejected", "proposals with no answer", "climate pathway", "proposed new terms / synonyms", "comment", "date"];
-    const fdec = (a, z) => { const v = a.findings[fkey(z)]; return v === "accept" || v === "reject" ? v : "no answer"; };
+    const fdec = fdecText;
     const one = (r, res) => {
       if (!r) return Array(RV.length).fill("");
       const a = norm(r.answers, res), c = reviewResult(res, a), f = res.findings || [];
-      const fd = x => f.filter(z => fdec(a, z) === x).map(z => `${w(z.finding_type)}: ${z.phrase || z.concept_name || ""}`).join("; ");
+      // accepted proposals include those accepted as a synonym of the closest existing term
+      const fd = x => f.filter(z => x === "accept" ? (fdec(a, z) === "accept" || fdec(a, z).startsWith("synonym of")) : fdec(a, z) === x)
+        .map(z => `${w(z.finding_type)}: ${z.phrase || z.concept_name || ""}${fdec(a, z).startsWith("synonym of") ? " → " + fdec(a, z) : ""}`).join("; ");
       return [r.reviewer, r.submitted ? "submitted" : "draft",
         c.complete ? c.adaptation : "incomplete", c.complete ? c.mitigation : "incomplete", c.complete ? outcomeLabel(c.marker, c.detail) : "incomplete", c.review,
         functionText(res, a, "adaptation"), functionText(res, a, "mitigation"),

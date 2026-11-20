@@ -231,6 +231,8 @@ input.wide { width: 100%; margin-top: 6px; }
 .seg.ch input:checked + span { background: #B7791F; color: #fff; }
 .seg span small { font-size: 10.5px; opacity: .75; margin-left: 3px; }
 
+/* a closer existing term, proposed for words left out or for a proposed new term */
+.better { margin-top: 4px; color: var(--green-dk); }
 /* the four questions of the tagging standard */
 .qsec { display: flex; gap: 10px; align-items: flex-start; margin: 22px 0 8px; padding: 10px 12px; border-left: 4px solid var(--green-dk); background: var(--card); border-radius: 6px; }
 .qsec h2 { margin: 0 0 2px; font-size: 1.05rem; }

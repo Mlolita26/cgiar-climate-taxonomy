@@ -202,6 +202,53 @@ else:
         print("note: no drops file at %s; 'terms found but not kept' will be empty" % dpath, file=sys.stderr)
     tname = {str(c["id"]): c.get("term") for c in concepts}
 
+    # Closest existing term in the whole taxonomy (20 Nov 2026): for a phrase proposed as a new term, and for the words of
+    # a term left out as "another meaning", the term or synonym that shares most of its words (simple word stems; a word
+    # that ends with a term word counts, so "groundwater" matches "water"). Kept when the score is 0.6 or more and the match
+    # is not only on a general word. A suggestion for the reviewer, never a tag.
+    STOP = {"of", "the", "and", "for", "in", "on", "to", "a", "an", "with", "by", "or", "at", "from"}
+    GENERAL = {"management", "system", "practice", "climate", "approach", "service", "method", "development", "use",
+               "smart", "resilient", "resilience", "low", "sustainable", "integrated", "improved", "new"}
+    def stem(wd):
+        for suf in ("ations", "ation", "ments", "ment", "ings", "ing", "ies", "ed", "es", "s"):
+            if wd.endswith(suf) and len(wd) - len(suf) >= 4:
+                return wd[: -len(suf)] + ("y" if suf == "ies" else "")
+        return wd
+    def toks(s):
+        return [w for w in re.split(r"[^a-z0-9]+", str(s).lower()) if w and w not in STOP]
+    def same(a, b):
+        sa, sb = stem(a), stem(b)
+        # a compound counts only when the rest is a word part of 4 letters or more: "ground|water", not "dis|information"
+        return sa == sb or (min(len(sa), len(sb)) >= 5 and (sa.startswith(sb) or sb.startswith(sa))) or (len(b) >= 4 and a.endswith(b) and len(a) - len(b) >= 4)
+    FORM_TOKS = [(str(c["id"]), f, toks(f)) for c in concepts for f in [c.get("term")] + list(c.get("synonyms") or []) if f]
+    GEN = {stem(g) for g in GENERAL}
+    def score_of(pt, ft):
+        hit = [w for w in pt if any(same(w, x) for x in ft)]
+        ok = any(stem(w) not in GEN for w in hit)          # not a match on a general word or qualifier only
+        return (len(hit) / max(len(pt), len(ft))) if ok else 0.0
+    def closest(phrase, own=None, kept=(), head=False):
+        """the closest term other than `own`; None when an existing tag (kept) or the term itself fits as well or better.
+        head=True: the last word of the phrase (its main noun) must be matched ("heat-tolerant vaccine" is no variety)"""
+        pt = toks(phrase)
+        if not pt:
+            return None
+        best, own_score, kept_score = None, 0.0, 0.0
+        for cid, form, ft in FORM_TOKS:
+            if not ft:
+                continue
+            sc = score_of(pt, ft)
+            if cid in kept:                                   # a tag already kept for these words: compared without the head rule
+                kept_score = max(kept_score, sc); continue
+            if head and not any(same(pt[-1], x) for x in ft):
+                sc = 0.0
+            if cid == own:
+                own_score = max(own_score, sc); continue
+            if sc >= 0.6 and (best is None or sc > best["score"]):
+                best = {"id": cid, "term": tname.get(cid, cid), "form": form, "score": round(sc, 2)}
+        if not best or best["score"] <= max(own_score, kept_score):
+            return None
+        return best
+
     TAG_KEEP = ("concept_id", "concept_name", "facet", "role_adaptation", "role_mitigation", "detection_excerpt",
                 "adaptation", "adaptation_anchor_quote", "mitigation", "mitigation_anchor_quote",
                 "pathway_role", "result_level", "status", "status_quote", "intervention_type", "confidence",
@@ -256,6 +303,10 @@ else:
         for x in dropped:                            # where the words are in the text, for the reviewer
             given = next((z["detail"] for z in x["reasons"] if z["reason"].startswith("not_kept:") and z["detail"]), "")
             x["found_as"], x["context"] = where_in(full, x["concept_id"], given)
+            if given and any(z["reason"] in ("not_kept:different_meaning", "not_kept:other", "not_kept:too_generic") for z in x["reasons"]):
+                b = closest(given, own=x["concept_id"], kept=kept, head=True)
+                if b:
+                    x["better"] = dict(b, phrase=given)       # a better term for the same words
         res = {"id": uid, "title": r.get("title") or "", "description": r.get("description") or "",
                "marker": r.get("climate_marker") or "", "level": r.get("level") or "", "type": r.get("type") or "",
                "status": r.get("status") or "", "prompt": ver.get("prompt") or "", "translated": bool(r.get("translated")),
@@ -263,7 +314,10 @@ else:
                "adaptation": {k: (r.get("adaptation") or {}).get(k) for k in AREA_KEEP},
                "mitigation": {k: (r.get("mitigation") or {}).get(k) for k in AREA_KEEP},
                "review_flags": aslist(r.get("review_flags")),
-               "findings": [{k: f.get(k) for k in FIND_KEEP} for f in r.get("taxonomy_findings") or []],
+               "findings": [dict({k: f.get(k) for k in FIND_KEEP},
+                                 **({"closest": closest(f.get("proposed_label") or f.get("phrase") or "")} if f.get("finding_type") == "unmatched_climate_phrase"
+                                    and closest(f.get("proposed_label") or f.get("phrase") or "") else {}))
+                            for f in r.get("taxonomy_findings") or []],
                "dropped": dropped}
         if r.get("english_kept"):                     # r17e: English and Spanish in the field; only the English was used
             res["english_kept"] = True
