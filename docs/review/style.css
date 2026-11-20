@@ -234,6 +234,8 @@ input.wide { width: 100%; margin-top: 6px; }
 /* the final decision: always open, framed in yellow */
 #v6-gives.final { border: 3px solid var(--hl-c); background: #FFFBEA; }
 #v6-gives.final h3 { margin-top: 0; }
+#v6-gives .dis { margin: 10px 0 6px; }
+#v6-gives .dis ul, #v6-gives .bad ul { margin: 4px 0 6px 18px; padding: 0; }
 .intro p { margin: 0 0 6px; }
 .intro .flags { margin-top: 4px; }
 
