@@ -1,0 +1,41 @@
+name: Synonym
+description: Propose another word people use for an existing term
+title: "[Synonym] "
+labels: ["term-request", "synonym"]
+body:
+  - type: input
+    id: term_id
+    attributes:
+      label: Existing term
+      description: Its identifier and label, from the term page or the browser.
+      placeholder: e.g. CRK_011 Drought
+    validations:
+      required: true
+  - type: input
+    id: synonym
+    attributes:
+      label: Proposed synonym
+      description: The word or phrase, as people write it. One per line if several.
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: How close is it to the term?
+      options:
+        - Same meaning (exact)
+        - Narrower (a kind of the term)
+        - Broader (the term is a kind of it)
+        - Related, but not the same
+        - Spelling variant, plural or acronym
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence of use
+      description: Where does this word appear in CGIAR work? Quote or link one or two examples.
+  - type: input
+    id: orcid
+    attributes:
+      label: Your ORCID (optional)
+      description: So that the contribution can be credited in the release notes.
+      placeholder: 0000-0000-0000-0000

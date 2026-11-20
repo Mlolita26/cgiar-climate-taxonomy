@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About · CGIAR Climate Taxonomy</title>
+<meta name="description" content="CGIAR Climate Adaptation and Mitigation Taxonomy, version 6.0.0-draft: 768 concepts with definitions, sources, synonyms and relations, published as a SKOS vocabulary.">
+<link rel="stylesheet" href="style.css"><script src="site.js" defer></script></head>
+<body data-root="" data-page="about">
+<div class="banner">Draft for review (version 6.0.0-draft). Term identifiers are stable; their web address is provisional and will become <code>https://w3id.org/cgiar/climate-taxonomy/&lt;ID&gt;</code>. Licence proposed: CC BY 4.0.</div>
+<header class="top"><div class="wrap">
+<a class="brand" href="index.html" aria-label="Home"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="11" cy="12" r="5"/><circle cx="29" cy="10" r="4"/><circle cx="20" cy="28" r="7"/><circle cx="33" cy="27" r="3"/><path d="M11 12 20 28M29 10 20 28M20 28 33 27M11 12 29 10"/></svg><span><b>CGIAR Climate</b>Taxonomy</span></a>
+<nav><a href="browse.html">Browse</a><a href="downloads.html">Downloads</a><a href="releases.html">Releases</a><a href="contribute.html">Contribute</a><a href="about.html" class="on">About</a><a href="tools.html">Tools</a></nav>
+<form class="search hsearch" action="browse.html" role="search"><input name="q" type="search" placeholder="Search a term" aria-label="Search a term or synonym" autocomplete="off"><div class="sugg" hidden></div></form>
+</div></header>
+<section class="band"><div class="wrap"><h1>About the taxonomy</h1><p>What it is, who maintains it, how to cite it, and how FAIR it is.</p></div></section>
+<main class="wrap"><p class="def">The CGIAR Climate Adaptation and Mitigation Taxonomy is a controlled vocabulary for describing climate adaptation and mitigation in agricultural research results. It gives each concept a definition with its source, the other words people use for it, its place in a hierarchy, typed relations to other concepts, and the conditions under which it counts as adaptation or mitigation. It was developed by the CGIAR MELIAF Climate Adaptation Activator and is used to tag CGIAR results reported in PRMS.</p>
+
+<h2>Scope</h2>
+<p>768 concepts in 11 facets, from climate risks and drivers to interventions, outputs, outcomes, impacts and stakeholders. The <a href="browse.html">browser</a> lists the facets with their definitions. The vocabulary is published in SKOS, the web standard for thesauri and taxonomies, with a small documented extension for the typed relations and the tagging rules.</p>
+
+<h2 id="custodian">Who maintains it</h2>
+<p>Custodian: CGIAR MELIAF Climate Adaptation Activator (Andreea Nowak, Lolita Muller), Alliance of Bioversity International and CIAT. The custodian decides what enters, changes or leaves the vocabulary and publishes the releases. Anyone can propose a change: see <a href="contribute.html">Contribute</a>. The rules are in <a href="https://github.com/Mlolita26/cgiar-climate-taxonomy/blob/main/GOVERNANCE.md">GOVERNANCE.md</a>.</p>
+
+<h2 id="review">Review status of the terms</h2>
+<p>The vocabulary is a draft and no term is validated yet. Each term carries its review status, taken from the version 6 master (column Final verdict):</p>
+<table><tr><th>Status</th><th>Meaning</th><th class="num">Terms</th></tr><tr><td><span class="status ext">awaiting external validation</span></td><td>Selected for validation by the climate community under the version 6 rules: every stand-alone term, and the context-dependent terms whose meaning the climate community sets (for example Rainfall) or that name a broad category of systems (for example Crop system).</td><td class="num">297</td></tr><tr><td><span class="status">awaiting internal review</span></td><td>Not part of the external validation. Reviewed internally, by mapping the term to CGIAR domains.</td><td class="num">470</td></tr><tr><td><span class="status">review route to be decided</span></td><td>The custodian has not yet decided how this term is reviewed.</td><td class="num">1</td></tr></table>
+
+<h2 id="cite">How to cite</h2>
+<p>Nowak, A. and Muller, L. (2026). CGIAR Climate Adaptation and Mitigation Taxonomy, version 6.0.0-draft. CGIAR MELIAF. DOI to follow.</p>
+<p class="src">Machine-readable citation: <a href="https://github.com/Mlolita26/cgiar-climate-taxonomy/blob/main/CITATION.cff">CITATION.cff</a>. A permanent DOI will be issued through Zenodo with the first release after the licence is confirmed.</p>
+
+<h2 id="licence">Licence</h2>
+<p>Proposed: <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 (CC BY 4.0)</a>, pending confirmation by the custodian. Many definitions cite published sources (IPCC, AGROVOC, FAO, WMO, UNFCCC); attribution keeps that chain of credit visible. Details: <a href="https://github.com/Mlolita26/cgiar-climate-taxonomy/blob/main/LICENSE.md">LICENSE.md</a>.</p>
+
+<h2 id="identifiers">Identifiers and addresses</h2>
+<p>Every concept has an identifier such as <code>CRK_102</code> that is never reused, and does not change when the term moves. A retired term keeps its identifier and its page, marked deprecated and pointing to its successor; 35 identifiers are kept this way. Today the addresses use the GitHub Pages site (<code>https://mlolita26.github.io/cgiar-climate-taxonomy/terms/ID</code>); the planned permanent form is <code>https://w3id.org/cgiar/climate-taxonomy/ID</code>.</p>
+
+<h2 id="fair">Is it FAIR?</h2>
+<p>Self-assessment against the tests of Cox et al. (2021), <i>Ten simple rules for making a vocabulary FAIR</i>, Table 1.</p>
+<table><tr><th></th><th>Test</th><th>Status</th></tr><tr><td class=p>F</td><td>The vocabulary has a persistent unique web identifier</td><td class=pend>Pending: GitHub Pages address now, permanent namespace after the build-shop</td></tr><tr><td class=p>F</td><td>Each term has a persistent unique web identifier</td><td class=ok>Yes: stable ids since version 4, one web address per term</td></tr><tr><td class=p>F</td><td>One can search for a term and get its identifier</td><td class=ok>Yes: a search box on every page and a term browser; the whole vocabulary in JSON-LD and CSV</td></tr><tr><td class=p>F</td><td>The vocabulary is available from a repository the community recognises</td><td class=pend>Pending: registration (AgroPortal, Zenodo DOI) after the build-shop</td></tr><tr><td class=p>A</td><td>A term identifier returns a human- or machine-readable representation</td><td class=ok>Yes: each term page embeds JSON-LD; whole vocabulary in Turtle and JSON-LD</td></tr><tr><td class=p>I</td><td>At least one representation conforms to a community standard (SKOS)</td><td class=ok>Yes: SKOS, with a small documented extension for typed relations</td></tr><tr><td class=p>I</td><td>The vocabulary includes mapping relations to other vocabularies</td><td class=pend>Pending: mappings to the MELIAF taxonomy and AGROVOC are the next step</td></tr><tr><td class=p>R</td><td>The licence is clear and accessible</td><td class=pend>Proposed: CC BY 4.0, pending the custodian's confirmation</td></tr><tr><td class=p>R</td><td>Provenance and maintenance information is provided at vocabulary and term level</td><td class=ok>Yes: provenance per term, custodian, version, change log, governance</td></tr><tr><td class=p>R</td><td>Definitions are sufficient to understand each term</td><td class=ok>Yes: every concept has a sourced definition</td></tr></table>
+
+<h2>Method</h2>
+<p>How the taxonomy became a FAIR vocabulary, step by step: <a href="method.html">Method</a>.</p>
+
+<h2 id="contact">Contact</h2>
+<p>Questions and proposals: <a href="https://github.com/Mlolita26/cgiar-climate-taxonomy/issues">open an issue</a> on GitHub. The custodians are Andreea Nowak and Lolita Muller, Alliance of Bioversity International and CIAT.</p></main>
+<footer><div class="wrap cols">
+<div><h3>Vocabulary</h3><a href="browse.html">Browse</a><a href="downloads.html">Downloads</a><a href="releases.html">Releases</a></div>
+<div><h3>Take part</h3><a href="contribute.html">Propose a term</a><a href="https://github.com/Mlolita26/cgiar-climate-taxonomy/blob/main/GOVERNANCE.md">Governance</a><a href="https://github.com/Mlolita26/cgiar-climate-taxonomy/blob/main/CODE_OF_CONDUCT.md">Code of conduct</a></div>
+<div><h3>About</h3><a href="about.html">About the taxonomy</a><a href="about.html#cite">How to cite</a><a href="method.html">Method</a></div>
+<div><h3>Repository</h3><a href="https://github.com/Mlolita26/cgiar-climate-taxonomy">GitHub</a><a href="https://github.com/Mlolita26/cgiar-climate-taxonomy/issues">Issues</a><a href="https://github.com/Mlolita26/cgiar-climate-taxonomy/blob/main/LICENSE.md">Licence</a></div>
+</div><p class="wrap small">CGIAR Climate Adaptation and Mitigation Taxonomy · version 6.0.0-draft · Custodian: CGIAR MELIAF Climate Adaptation Activator (Andreea Nowak, Lolita Muller), Alliance of Bioversity International and CIAT</p></footer>
+</body></html>

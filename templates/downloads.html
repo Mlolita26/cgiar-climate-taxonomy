@@ -1,0 +1,20 @@
+<p class="def">The whole vocabulary in three formats. The files below are always the latest release; each release on GitHub keeps its own copy of them.</p>
+<table><tr><th>File</th><th>Format</th><th>What it holds</th><th class="num">Size</th></tr><<download_rows>></table>
+
+<h2>Addresses</h2>
+<p>Each term has a web address made of a base address and its identifier, for example <code><<BASE_IRI>>terms/CRK_102</code>. The address opens the term's page, which also carries the term's data in JSON-LD for programs. The base address is provisional: the planned permanent form is <code><<FUTURE_IRI>>CRK_102</code>. The identifiers themselves will not change.</p>
+
+<h2>Earlier versions</h2>
+<p>Every release, with its files and its list of changes, is on <a href="<<REPO>>/releases">GitHub releases</a>. The changes are also on the <a href="releases.html">release notes</a> page.</p>
+
+<h2>Use it in code</h2>
+<table><tr><th>Language</th><th>Example</th></tr>
+<tr><td>R</td><td><code>readr::read_csv("<<BASE_IRI>>dist/climate-taxonomy.csv")</code></td></tr>
+<tr><td>Python</td><td><code>pandas.read_csv("<<BASE_IRI>>dist/climate-taxonomy.csv")</code></td></tr>
+<tr><td>Command line</td><td><code>curl -O <<BASE_IRI>>dist/climate-taxonomy.ttl</code></td></tr></table>
+
+<h2>Columns of the CSV</h2>
+<table><tr><th>Column</th><th>Meaning</th></tr><<csv_rows>></table>
+
+<h2>Licence</h2>
+<p>Proposed: <a href="<<LICENCE>>">CC BY 4.0</a>, pending confirmation by the custodian. <a href="about.html#licence">Details</a>.</p>

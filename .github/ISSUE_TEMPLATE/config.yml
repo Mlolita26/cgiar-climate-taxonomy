@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Browse and search the taxonomy
+    url: https://mlolita26.github.io/cgiar-climate-taxonomy/browse.html
+    about: Check whether a term or synonym already exists before proposing it.
+  - name: How proposals are decided
+    url: https://github.com/Mlolita26/cgiar-climate-taxonomy/blob/main/GOVERNANCE.md
+    about: The screening questions, the decision log and the rules that never change.

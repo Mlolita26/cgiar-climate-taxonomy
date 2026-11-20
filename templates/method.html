@@ -1,4 +1,3 @@
-<h1>Method</h1>
 <p class="def">How the climate taxonomy became a FAIR vocabulary, in plain words. The whole method is one R script, <code>build_fair.R</code>, in the <a href="https://github.com/Mlolita26/cgiar-climate-taxonomy">repository</a>. Running it again rebuilds everything on this site.</p>
 
 <h2>Starting point</h2>
@@ -12,7 +11,7 @@
 <li><b>Kept the retired identifiers.</b> The <<nrow(retired)>> identifiers retired in versions 5 and 6 are still in the vocabulary, marked deprecated and pointing to their successor, so old reports stay readable.</li>
 <li><b>Wrote the vocabulary in three formats:</b> Turtle and JSON-LD for machines, CSV for spreadsheets.</li>
 <li><b>Made one web page per term</b>, plus this site. Each page shows the term for a reader and embeds the same data for a machine.</li>
-<li><b>Checked the result</b> with a second script, <code>qa/check_skos.R</code>: unique identifiers, a label and a definition for every term, every parent and relation target exists, no loops in the hierarchy, and the files parse back correctly. Nineteen checks, all passing.</li>
+<li><b>Checked the result</b> with a second script, <code>qa/check_skos.R</code>: unique identifiers, a label and a definition for every term, every parent and relation target exists, no loops in the hierarchy, and the files parse back correctly. The checks run again automatically on GitHub every time the vocabulary changes; the latest result is in <code>qa/report.txt</code>.</li>
 <li><b>Published.</b> The site is served by GitHub Pages from the repository. Each version is a tagged release with the files attached, and a test deposit was made in Zenodo Sandbox to try the citation step.</li>
 </ol>
 
@@ -24,10 +23,10 @@
 <tr><td><code>dist/climate-taxonomy.jsonld</code></td><td>The same in JSON-LD</td></tr>
 <tr><td><code>dist/climate-taxonomy.csv</code></td><td>The same as a flat table</td></tr>
 <tr><td><code>dist/meliaf-relations.ttl</code></td><td>Definitions of the typed relations and rule attributes</td></tr>
-<tr><td><code>docs/index.html</code>, <code>docs/terms/*.html</code></td><td>This site: the landing page and <<nrow(concepts) + nrow(retired)>> term pages</td></tr>
+<tr><td><code>docs/index.html</code>, <code>docs/terms/*.html</code></td><td>This site: the home page, the browser, the pages for downloads, releases, contributing, tools and this method, and <<nrow(concepts) + nrow(retired)>> term pages</td></tr>
 <tr><td><code>source/provenance_map.csv</code></td><td>Turns the free text about where a term came from into four classes</td></tr>
 <tr><td><code>source/relation_definitions.csv</code></td><td>One line explaining each typed relation</td></tr>
-<tr><td><code>source/fair_checklist.csv</code></td><td>The self-assessment shown on the landing page</td></tr>
+<tr><td><code>source/fair_checklist.csv</code></td><td>The self-assessment shown on the About page</td></tr>
 <tr><td><code>GOVERNANCE.md</code></td><td>Who decides, how to propose a term, rules that never change</td></tr>
 <tr><td><code>CHANGELOG.md</code></td><td>What changed in each version (generated)</td></tr>
 <tr><td><code>LICENSE.md</code>, <code>CITATION.cff</code></td><td>Licence and how to cite</td></tr>

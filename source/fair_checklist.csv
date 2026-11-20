@@ -1,7 +1,7 @@
 principle,test,status
 F,The vocabulary has a persistent unique web identifier,"Pending: GitHub Pages address now, permanent namespace after the build-shop"
 F,Each term has a persistent unique web identifier,"Yes: stable ids since version 4, one web address per term"
-F,One can search for a term and get its identifier,Yes: browse below; search via the JSON-LD and CSV
+F,One can search for a term and get its identifier,"Yes: a search box on every page and a term browser; the whole vocabulary in JSON-LD and CSV"
 F,The vocabulary is available from a repository the community recognises,"Pending: registration (AgroPortal, Zenodo DOI) after the build-shop"
 A,A term identifier returns a human- or machine-readable representation,Yes: each term page embeds JSON-LD; whole vocabulary in Turtle and JSON-LD
 I,At least one representation conforms to a community standard (SKOS),"Yes: SKOS, with a small documented extension for typed relations"

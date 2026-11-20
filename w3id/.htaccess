@@ -1,0 +1,32 @@
+# w3id.org/cgiar/climate-taxonomy/  ->  CGIAR Climate Adaptation and Mitigation Taxonomy
+# Prepared 2026-11-20 and NOT YET SUBMITTED to perma-id/w3id.org (see SUBMIT.md in this folder).
+# Destination in the w3id.org repository: cgiar/climate-taxonomy/.htaccess
+# Current host: GitHub Pages (https://mlolita26.github.io/cgiar-climate-taxonomy/).
+# If the host moves, only the addresses on the right-hand side change; term identifiers stay.
+
+Options +FollowSymLinks
+RewriteEngine on
+
+# The vocabulary itself: programs asking for Turtle or JSON-LD get the data, people get the home page
+RewriteCond %{HTTP_ACCEPT} text/turtle
+RewriteRule ^(scheme)?$ https://mlolita26.github.io/cgiar-climate-taxonomy/dist/climate-taxonomy.ttl [R=303,L]
+RewriteCond %{HTTP_ACCEPT} application/ld\+json
+RewriteRule ^(scheme)?$ https://mlolita26.github.io/cgiar-climate-taxonomy/dist/climate-taxonomy.jsonld [R=303,L]
+RewriteRule ^(scheme)?$ https://mlolita26.github.io/cgiar-climate-taxonomy/ [R=303,L]
+
+# The latest files under stable names
+RewriteRule ^climate-taxonomy\.(ttl|jsonld|csv)$ https://mlolita26.github.io/cgiar-climate-taxonomy/dist/climate-taxonomy.$1 [R=302,L]
+
+# The files of a given release, for example releases/6.0.0-draft/climate-taxonomy.ttl
+RewriteRule ^releases/([^/]+)/([^/]+)$ https://github.com/Mlolita26/cgiar-climate-taxonomy/releases/download/v$1/$2 [R=302,L]
+
+# The relation and rule properties that the vocabulary adds to SKOS
+RewriteRule ^relations/?.*$ https://mlolita26.github.io/cgiar-climate-taxonomy/dist/meliaf-relations.ttl [R=303,L]
+
+# Terms, for example CRK_102: programs asking for Turtle or JSON-LD get the vocabulary file,
+# people get the term page (which also embeds the term in JSON-LD)
+RewriteCond %{HTTP_ACCEPT} text/turtle
+RewriteRule ^([A-Z]{2,4}_[0-9]+)$ https://mlolita26.github.io/cgiar-climate-taxonomy/dist/climate-taxonomy.ttl [R=303,L]
+RewriteCond %{HTTP_ACCEPT} application/ld\+json
+RewriteRule ^([A-Z]{2,4}_[0-9]+)$ https://mlolita26.github.io/cgiar-climate-taxonomy/dist/climate-taxonomy.jsonld [R=303,L]
+RewriteRule ^([A-Z]{2,4}_[0-9]+)$ https://mlolita26.github.io/cgiar-climate-taxonomy/terms/$1.html [R=303,L]

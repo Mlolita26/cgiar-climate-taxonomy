@@ -1,0 +1,42 @@
+name: Change a term
+description: Propose a correction to a definition, label, source, position or tagging role
+title: "[Change] "
+labels: ["term-request", "change"]
+body:
+  - type: input
+    id: term_id
+    attributes:
+      label: Term
+      description: Its identifier and label. The "Propose a change" button on a term page fills this in.
+      placeholder: e.g. INT_040 Drip irrigation
+    validations:
+      required: true
+  - type: dropdown
+    id: what
+    attributes:
+      label: What should change?
+      multiple: true
+      options:
+        - Definition
+        - Definition source
+        - Label
+        - Broader term or facet
+        - Climate area
+        - Tagging role (stand-alone or context-dependent) or context rule
+        - Relations to other terms
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: What it says now, what it should say, and why. Cite a source where one exists.
+    validations:
+      required: true
+  - type: input
+    id: orcid
+    attributes:
+      label: Your ORCID (optional)
+      description: So that the contribution can be credited in the release notes.
+      placeholder: 0000-0000-0000-0000

@@ -1,0 +1,35 @@
+name: Retire a term
+description: Propose that a term leaves the vocabulary, or merges into another
+title: "[Retire] "
+labels: ["term-request", "retire"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A retired term is not deleted. It stays in the vocabulary, marked deprecated, with its identifier and its page, and points to its successor. Its identifier is never reused.
+  - type: input
+    id: term_id
+    attributes:
+      label: Term to retire
+      placeholder: e.g. INT_123 Example term
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: Reason
+      description: Why should the term leave? For example a duplicate, a concept outside the scope, or a term nobody uses.
+    validations:
+      required: true
+  - type: input
+    id: successor
+    attributes:
+      label: Successor term (if any)
+      description: The term that people should use instead.
+      placeholder: e.g. INT_456 Other term
+  - type: input
+    id: orcid
+    attributes:
+      label: Your ORCID (optional)
+      description: So that the contribution can be credited in the release notes.
+      placeholder: 0000-0000-0000-0000

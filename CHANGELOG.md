@@ -1,7 +1,8 @@
 # Changelog
 
-## 6.0.0-draft (2026-11-09)
+## 6.0.0-draft (published 2026-11-09, updated 2026-11-20)
 Content is version 6 of the taxonomy (master_v6.csv, revision of 16 October 2026). Draft status.
+Update of 2026-11-20: every concept now carries a review status (`meliaf:reviewStatus`), taken from the column Final verdict of the version 6 master: awaiting external validation (297), awaiting internal review (470), review route to be decided (1). No term is validated yet. The web site was redesigned, with a search box on every page, a term browser and pages for downloads, releases, contributing and the tools that use the taxonomy. No concept, identifier or definition changed.
 Version 6 replaced the per-axis columns (climate scope, adaptation tag and condition, mitigation tag and condition) with three: climate area, tagging role (stand-alone or context-dependent) and context rule. The vocabulary publishes these as `meliaf:climateArea`, `meliaf:taggingRole` and `meliaf:contextRule`.
 
 ## Version 6 compared with version 5

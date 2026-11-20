@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Downloads · CGIAR Climate Taxonomy</title>
+<meta name="description" content="CGIAR Climate Adaptation and Mitigation Taxonomy, version 6.0.0-draft: 768 concepts with definitions, sources, synonyms and relations, published as a SKOS vocabulary.">
+<link rel="stylesheet" href="style.css"><script src="site.js" defer></script></head>
+<body data-root="" data-page="downloads">
+<div class="banner">Draft for review (version 6.0.0-draft). Term identifiers are stable; their web address is provisional and will become <code>https://w3id.org/cgiar/climate-taxonomy/&lt;ID&gt;</code>. Licence proposed: CC BY 4.0.</div>
+<header class="top"><div class="wrap">
+<a class="brand" href="index.html" aria-label="Home"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="11" cy="12" r="5"/><circle cx="29" cy="10" r="4"/><circle cx="20" cy="28" r="7"/><circle cx="33" cy="27" r="3"/><path d="M11 12 20 28M29 10 20 28M20 28 33 27M11 12 29 10"/></svg><span><b>CGIAR Climate</b>Taxonomy</span></a>
+<nav><a href="browse.html">Browse</a><a href="downloads.html" class="on">Downloads</a><a href="releases.html">Releases</a><a href="contribute.html">Contribute</a><a href="about.html">About</a><a href="tools.html">Tools</a></nav>
+<form class="search hsearch" action="browse.html" role="search"><input name="q" type="search" placeholder="Search a term" aria-label="Search a term or synonym" autocomplete="off"><div class="sugg" hidden></div></form>
+</div></header>
+<section class="band"><div class="wrap"><h1>Downloads</h1><p>The vocabulary in SKOS (Turtle and JSON-LD) and as a CSV, free to reuse.</p></div></section>
+<main class="wrap"><p class="def">The whole vocabulary in three formats. The files below are always the latest release; each release on GitHub keeps its own copy of them.</p>
+<table><tr><th>File</th><th>Format</th><th>What it holds</th><th class="num">Size</th></tr><tr><td><a href="dist/climate-taxonomy.ttl">climate-taxonomy.ttl</a></td><td>SKOS, Turtle</td><td>The whole vocabulary: concepts, labels, synonyms, definitions and sources, hierarchy, facets, relations, retired identifiers.</td><td class="num">1074 KB</td></tr><tr><td><a href="dist/climate-taxonomy.jsonld">climate-taxonomy.jsonld</a></td><td>SKOS, JSON-LD</td><td>The same content as the Turtle file, for programs that read JSON.</td><td class="num">1088 KB</td></tr><tr><td><a href="dist/climate-taxonomy.csv">climate-taxonomy.csv</a></td><td>CSV</td><td>One row per concept and per retired identifier, for spreadsheets. Columns below.</td><td class="num">504 KB</td></tr><tr><td><a href="dist/meliaf-relations.ttl">meliaf-relations.ttl</a></td><td>OWL, Turtle</td><td>Definitions of the properties the vocabulary adds to SKOS: the typed relations and the rule attributes.</td><td class="num">4 KB</td></tr></table>
+
+<h2>Addresses</h2>
+<p>Each term has a web address made of a base address and its identifier, for example <code>https://mlolita26.github.io/cgiar-climate-taxonomy/terms/CRK_102</code>. The address opens the term's page, which also carries the term's data in JSON-LD for programs. The base address is provisional: the planned permanent form is <code>https://w3id.org/cgiar/climate-taxonomy/CRK_102</code>. The identifiers themselves will not change.</p>
+
+<h2>Earlier versions</h2>
+<p>Every release, with its files and its list of changes, is on <a href="https://github.com/Mlolita26/cgiar-climate-taxonomy/releases">GitHub releases</a>. The changes are also on the <a href="releases.html">release notes</a> page.</p>
+
+<h2>Use it in code</h2>
+<table><tr><th>Language</th><th>Example</th></tr>
+<tr><td>R</td><td><code>readr::read_csv("https://mlolita26.github.io/cgiar-climate-taxonomy/dist/climate-taxonomy.csv")</code></td></tr>
+<tr><td>Python</td><td><code>pandas.read_csv("https://mlolita26.github.io/cgiar-climate-taxonomy/dist/climate-taxonomy.csv")</code></td></tr>
+<tr><td>Command line</td><td><code>curl -O https://mlolita26.github.io/cgiar-climate-taxonomy/dist/climate-taxonomy.ttl</code></td></tr></table>
+
+<h2>Columns of the CSV</h2>
+<table><tr><th>Column</th><th>Meaning</th></tr><tr><td><code>id</code></td><td>Identifier, for example CRK_102. Never reused.</td></tr><tr><td><code>iri</code></td><td>Web address of the term.</td></tr><tr><td><code>term</code></td><td>Preferred label.</td></tr><tr><td><code>synonyms</code></td><td>Other words for the same concept, separated by semicolons.</td></tr><tr><td><code>facet</code></td><td>One of the eleven facets.</td></tr><tr><td><code>level</code></td><td>Depth in the hierarchy (1 = top concept).</td></tr><tr><td><code>parent_id</code></td><td>Broader concept. For a retired identifier: its successor, if any.</td></tr><tr><td><code>definition</code></td><td>Definition. For a retired identifier: when and why it was retired.</td></tr><tr><td><code>definition_source</code></td><td>Authority the definition comes from.</td></tr><tr><td><code>pathway_stage</code></td><td>Position in the results chain.</td></tr><tr><td><code>climate_area</code></td><td>Adaptation, Mitigation, or Adaptation + Mitigation.</td></tr><tr><td><code>tagging_role</code></td><td>Stand-alone (counts on its own) or Context-dependent.</td></tr><tr><td><code>context_rule</code></td><td>For a context-dependent term: when it counts.</td></tr><tr><td><code>is_hazard</code></td><td>TRUE for climate hazards.</td></tr><tr><td><code>provenance</code></td><td>Where the concept came from.</td></tr><tr><td><code>review_status</code></td><td>How the term is being reviewed (see About).</td></tr><tr><td><code>status</code></td><td>current or deprecated.</td></tr><tr><td><code>version</code></td><td>Version of the vocabulary.</td></tr></table>
+
+<h2>Licence</h2>
+<p>Proposed: <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, pending confirmation by the custodian. <a href="about.html#licence">Details</a>.</p></main>
+<footer><div class="wrap cols">
+<div><h3>Vocabulary</h3><a href="browse.html">Browse</a><a href="downloads.html">Downloads</a><a href="releases.html">Releases</a></div>
+<div><h3>Take part</h3><a href="contribute.html">Propose a term</a><a href="https://github.com/Mlolita26/cgiar-climate-taxonomy/blob/main/GOVERNANCE.md">Governance</a><a href="https://github.com/Mlolita26/cgiar-climate-taxonomy/blob/main/CODE_OF_CONDUCT.md">Code of conduct</a></div>
+<div><h3>About</h3><a href="about.html">About the taxonomy</a><a href="about.html#cite">How to cite</a><a href="method.html">Method</a></div>
+<div><h3>Repository</h3><a href="https://github.com/Mlolita26/cgiar-climate-taxonomy">GitHub</a><a href="https://github.com/Mlolita26/cgiar-climate-taxonomy/issues">Issues</a><a href="https://github.com/Mlolita26/cgiar-climate-taxonomy/blob/main/LICENSE.md">Licence</a></div>
+</div><p class="wrap small">CGIAR Climate Adaptation and Mitigation Taxonomy · version 6.0.0-draft · Custodian: CGIAR MELIAF Climate Adaptation Activator (Andreea Nowak, Lolita Muller), Alliance of Bioversity International and CIAT</p></footer>
+</body></html>

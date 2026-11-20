@@ -12,9 +12,10 @@ governance of the wider MELIAF taxonomy; this vocabulary will follow that route 
 ## Anyone can propose
 
 Anyone in CGIAR, and later partners, can propose to **add**, **change**, **merge** or **retire**
-a term. Open an issue with the *Term request* template. It asks for the same things the
-custodian needs to decide: the proposed term, a definition, its source, the facet and parent it
-belongs under, synonyms, and evidence that the term is actually used in CGIAR work.
+a term. Open an issue with one of the forms (New term, Synonym, Change a term, Retire a term,
+Report an error); see [CONTRIBUTING.md](CONTRIBUTING.md). The forms ask for what the custodian
+needs to decide: the term, a definition, its source, the facet and broader term, synonyms,
+evidence that the term is used in CGIAR work, and optionally the proposer's ORCID for credit.
 
 ## How a proposal is screened
 
@@ -41,7 +42,31 @@ concepts (see `notes/governance-rehearsal.md` for the steps).
 - **Retire, do not delete.** A retired term stays in the vocabulary, marked deprecated and
   pointing to its successor, so that past reporting stays interpretable.
 - **Definitions can improve, identifiers do not move.** Editing a definition or moving a term
-  in the hierarchy keeps its identifier, as long as the concept is the same.
+  in the hierarchy keeps its identifier, as long as the concept is the same. This holds also when
+  the term moves to another facet: the identifier keeps its old prefix (for example an `INT_`
+  term that becomes an output stays `INT_...`). The prefix tells where a term was first placed,
+  not where it is now; the facet is recorded separately. (Rule made explicit on 2026-11-20. In
+  version 6, eight terms that changed facet received new identifiers before this rule; they stay
+  as published, with the old identifier retired and pointing to the new one. `qa/check_skos.R`
+  fails if a later release does this again.)
+- **New identifiers are never recycled.** A new concept takes the next unused number of its
+  facet prefix, never the number of a retired concept.
+
+## Review status of each term
+
+Each term carries a review status (`meliaf:reviewStatus`), taken from the column Final verdict of
+the version 6 master and the rules written with it (Climate Master v6):
+
+- **awaiting external validation**: every stand-alone term, and the context-dependent terms whose
+  meaning the climate community sets (definitions from the IPCC, UNFCCC, WMO or GCOS, for example
+  Rainfall) or that name a broad category of systems (System terms at L1 or L2, for example Crop
+  system). These go to validation by the climate community.
+- **awaiting internal review**: the other terms, reviewed internally by mapping them to CGIAR
+  domains.
+- **review route to be decided**: not yet assigned.
+
+No term is validated yet. When a review is complete, the status of its terms changes in the next
+release.
 
 ## Releases
 

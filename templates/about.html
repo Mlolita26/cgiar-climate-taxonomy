@@ -1,0 +1,31 @@
+<p class="def">The <<h(TITLE)>> is a controlled vocabulary for describing climate adaptation and mitigation in agricultural research results. It gives each concept a definition with its source, the other words people use for it, its place in a hierarchy, typed relations to other concepts, and the conditions under which it counts as adaptation or mitigation. It was developed by the CGIAR MELIAF Climate Adaptation Activator and is used to tag CGIAR results reported in PRMS.</p>
+
+<h2>Scope</h2>
+<p><<nrow(concepts)>> concepts in <<nrow(facets)>> facets, from climate risks and drivers to interventions, outputs, outcomes, impacts and stakeholders. The <a href="browse.html">browser</a> lists the facets with their definitions. The vocabulary is published in SKOS, the web standard for thesauri and taxonomies, with a small documented extension for the typed relations and the tagging rules.</p>
+
+<h2 id="custodian">Who maintains it</h2>
+<p>Custodian: <<h(CUSTODIAN)>>. The custodian decides what enters, changes or leaves the vocabulary and publishes the releases. Anyone can propose a change: see <a href="contribute.html">Contribute</a>. The rules are in <a href="<<REPO>>/blob/main/GOVERNANCE.md">GOVERNANCE.md</a>.</p>
+
+<h2 id="review">Review status of the terms</h2>
+<p>The vocabulary is a draft and no term is validated yet. Each term carries its review status, taken from the version 6 master (column Final verdict):</p>
+<table><tr><th>Status</th><th>Meaning</th><th class="num">Terms</th></tr><<review_defs>></table>
+
+<h2 id="cite">How to cite</h2>
+<p><<citation>></p>
+<p class="src">Machine-readable citation: <a href="<<REPO>>/blob/main/CITATION.cff">CITATION.cff</a>. A permanent DOI will be issued through Zenodo with the first release after the licence is confirmed.</p>
+
+<h2 id="licence">Licence</h2>
+<p>Proposed: <a href="<<LICENCE>>">Creative Commons Attribution 4.0 (CC BY 4.0)</a>, pending confirmation by the custodian. Many definitions cite published sources (IPCC, AGROVOC, FAO, WMO, UNFCCC); attribution keeps that chain of credit visible. Details: <a href="<<REPO>>/blob/main/LICENSE.md">LICENSE.md</a>.</p>
+
+<h2 id="identifiers">Identifiers and addresses</h2>
+<p>Every concept has an identifier such as <code>CRK_102</code> that is never reused, and does not change when the term moves. A retired term keeps its identifier and its page, marked deprecated and pointing to its successor; <<nrow(retired)>> identifiers are kept this way. Today the addresses use the GitHub Pages site (<code><<BASE_IRI>>terms/ID</code>); the planned permanent form is <code><<FUTURE_IRI>>ID</code>.</p>
+
+<h2 id="fair">Is it FAIR?</h2>
+<p>Self-assessment against the tests of Cox et al. (2021), <i>Ten simple rules for making a vocabulary FAIR</i>, Table 1.</p>
+<table><tr><th></th><th>Test</th><th>Status</th></tr><<fair_table>></table>
+
+<h2>Method</h2>
+<p>How the taxonomy became a FAIR vocabulary, step by step: <a href="method.html">Method</a>.</p>
+
+<h2 id="contact">Contact</h2>
+<p>Questions and proposals: <a href="<<REPO>>/issues">open an issue</a> on GitHub. The custodians are Andreea Nowak and Lolita Muller, Alliance of Bioversity International and CIAT.</p>

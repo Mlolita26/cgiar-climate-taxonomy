@@ -20,6 +20,17 @@ recode   <- function(x) { i <- match(x, fix$id_in_master); ifelse(is.na(i), x, f
 ids <- recode(ids); parents <- recode(parents); targets <- recode(targets)
 dangling <- setdiff(targets, ids)                    # relation targets missing from the master; the build leaves these relations out
 
+# An identifier must not change when its term moves, also to another facet (GOVERNANCE.md, rule of 2026-11-20).
+# A retired id whose successor carries the same label is such a move. The moves recorded in versions 5 and 6
+# were published before the rule and stay as published; one in any later file of retired ids fails the check.
+ret_files <- list.files("source", "^v[0-9]+_retired_ids\\.csv$", full.names = TRUE)
+moves <- map_dfr(ret_files, \(f) read_csv(f, col_types = cols(.default = "c")) |> mutate(file = basename(f))) |>
+  mutate(succ = str_extract(successor, "[A-Z]{2,4}_[0-9]+"), succ_label = labels[match(succ, ids)]) |>
+  filter(!is.na(succ_label), str_to_lower(succ_label) == str_to_lower(Term))
+moves_after_rule <- moves |> filter(!file %in% c("v5_retired_ids.csv", "v6_retired_ids.csv"))
+csv_out <- read_csv("dist/climate-taxonomy.csv", col_types = cols(.default = "c"))
+site    <- c("index", "browse", "downloads", "releases", "contribute", "about", "tools", "method")
+
 # walk up the parent chain from every concept; a cycle would never reach a top concept
 depth <- function(id, seen = character()) {
   if (id %in% seen) return(NA_integer_)
@@ -45,7 +56,13 @@ checks <- tribble(
   "no synonym duplicates another concept's label",           !any(str_to_lower(unlist(synonyms)) %in% str_to_lower(labels)),
   "every concept belongs to one of 11 facets",               n_distinct(facets) == 11,
   "dist files exist",                                        all(file.exists(c("dist/climate-taxonomy.ttl", "dist/climate-taxonomy.jsonld", "dist/climate-taxonomy.csv", "dist/meliaf-relations.ttl"))),
-  "one page per concept and per retired id",                 all(file.exists(sprintf("docs/terms/%s.html", c(ids, retired$ID))))
+  "one page per concept and per retired id",                 all(file.exists(sprintf("docs/terms/%s.html", c(ids, retired$ID)))),
+  sprintf("no identifier changed for a move (%d moves of versions 5 and 6, made before the rule, stay as published)", nrow(moves)),
+                                                             nrow(moves_after_rule) == 0,
+  "every current concept has a review status",               all(nzchar(csv_out$review_status[csv_out$status == "current"]) & !is.na(csv_out$review_status[csv_out$status == "current"])),
+  "the site pages, the search data, the stylesheet and the script exist",
+                                                             all(file.exists(c(sprintf("docs/%s.html", site), "docs/data/terms.json", "docs/style.css", "docs/site.js"))),
+  "the search data holds every current and retired id",      setequal(c(map_chr(read_json("docs/data/terms.json")$concepts, "id"), map_chr(read_json("docs/data/terms.json")$retired, "id")), c(ids, retired$ID))
 )
 
 # JSON-LD: parse and count with jsonlite (always possible)
