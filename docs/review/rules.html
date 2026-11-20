@@ -19,6 +19,9 @@
   p, ul, ol { margin: 0 0 10px; } li { margin: 2px 0; }
   a { color: var(--green-dk); }
   .muted { color: var(--muted); } .small { font-size: 13px; }
+  mark { padding: 0 3px; border-radius: 3px; color: inherit; }
+  mark.hc { background: #FFE27A; } mark.hg { background: #E4E7E5; } mark.ha { background: #BFE3FF; }
+  mark.hp { background: #F1E8FB; border-bottom: 2px dotted #7A4FB0; }
   .toc { columns: 2; column-gap: 24px; padding-left: 18px; }
   @media (max-width: 560px) { .toc { columns: 1; } }
   .tbl { overflow-x: auto; margin: 0 0 10px; }
@@ -38,6 +41,7 @@
   <li><a href="#what-to-do">How to review a result</a></li>
   <li><a href="#climate-information">Climate information</a></li>
   <li><a href="#tags">Tags: count, do not count, not tagged</a></li>
+  <li><a href="#colours">Colours in the text</a></li>
   <li><a href="#anchors">Stand-alone, anchored, no anchor, not relevant</a></li>
   <li><a href="#measure">Climate measure</a></li>
   <li><a href="#purpose">Purpose</a></li>
@@ -109,6 +113,18 @@
   <li><b>Role in the text</b>: climate reason (rationale); system or population (who or what is affected or targeted); intervention (what the work did); result (output, outcome, impact, or level not clear); none.</li>
   <li><b>Planned or done</b>: planned; carried out or reported; unclear. An aim or a recommendation is planned.</li>
 </ul>
+</section>
+
+<section id="colours">
+<h2>Colours in the text</h2>
+<div class="tbl"><table>
+  <tr><th>Colour</th><th>Meaning</th></tr>
+  <tr><td><mark class="hc">yellow</mark></td><td>A tag that counts as climate information: a stand-alone term, or a context-dependent term with a climate anchor in the text.</td></tr>
+  <tr><td><mark class="hg">grey</mark></td><td>A tag that does not count: the term is in the text with its taxonomy meaning, but it is context-dependent and the text gives it no climate anchor.</td></tr>
+  <tr><td><mark class="ha">blue</mark></td><td>A term added by you (or by a reviewer, in the view of both reviews).</td></tr>
+  <tr><td><mark class="hp">purple, dotted</mark></td><td>A proposed tag: words that no taxonomy term covers, found by the check of the text (a new climate term, or a new kind of climate anchor). It does not count as climate information; accept or reject it under question 4.</td></tr>
+</table></div>
+<p>Words found by the search but not tagged are not coloured. Only the taxonomy term or synonym is coloured, at its place in the text. Click a colour to find its row in the tag table.</p>
 </section>
 
 <section id="anchors">

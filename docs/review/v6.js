@@ -221,6 +221,7 @@ const V6 = (() => {
     purpose: ["purpose", "Main, additional or not stated, by the first rule that applies: the text says main or also; the title presents the work by its climate function alone (main) or with other aims (additional); the description names climate among other benefits (additional); otherwise not stated. When the two readings differ, the purpose is not stated. The purpose counts only when there is a climate measure."],
     tags: ["tags", "Each taxonomy term tagged in the text, with the words it was found as, its value for each area, its role in the text and whether the work is planned or done. Agree, or disagree to correct a value, remove the tag or write a note."],
     anchors: ["tag values", "Stand-alone: the term is climate information on its own. Anchored: a context-dependent term that counts, because its own sentence holds climate words of the area (shown in quotes) or because the work is a climate measure for the area (anchored by the text). No anchor: a context-dependent term without such a link, so it does not count. Not relevant: the term does not concern this area."],
+    colours: ["colours in the text", "Yellow: a tag that counts as climate information (a stand-alone term, or a context-dependent term with a climate anchor). Grey: a tag that does not count (a context-dependent term with no climate anchor in the text). Blue: a term added by you. Purple, dotted: a proposed tag, words that no taxonomy term covers (decided under question 4). Words found but not tagged are not coloured. Only the taxonomy term or synonym is coloured, at its place in the text; click a colour to find its row."],
     "terms-not-kept": ["words found but not tagged", "A search marks every word of the text that matches a taxonomy term or synonym. Some become tags, others are left out. These are the ones left out, with where they are in the text and why. If one should be a tag, click + keep."],
     pathway: ["climate pathway", "The parts of the climate pathway for each area, from the tags that count: reason, where, who, what was done, what came out, the links between them, and whether the work is planned or done. Who is the system or population affected or targeted; an organisation that carries out the work is not the who. Agree, or disagree (a note on which part is wrong is optional)."],
     flags: ["flags", "Points the tagging script asks a person to look at first, for example two readings of the text that differ on the climate measure or the purpose. A flag is not an error."],
@@ -271,6 +272,8 @@ const V6 = (() => {
     if (f === "purpose" && rs.some(e => e.measure !== "yes")) return "";          // no measure in one reading: shown with the measure
     return v.every(x => x === v[0]) ? "" : v.map(x => w(x === "yes" ? "a measure" : x === "no" ? "no measure" : x)).join(" and ");
   }
+  // proposed tags: new climate terms and new kinds of anchor found in the text (findings), not yet in the taxonomy
+  const proposedOf = res => (res.findings || []).filter(f => (f.finding_type === "unmatched_climate_phrase" || f.finding_type === "unrecorded_anchor_type") && f.phrase);
   function foundAs(t) {
     const ex = t.detection_excerpt || "", hl = t.hl || "", i = hl ? ex.toLowerCase().indexOf(hl.toLowerCase()) : -1;
     return i < 0 ? esc(ex) : esc(ex.slice(0, i)) + `<b>${esc(ex.slice(i, i + hl.length))}</b>` + esc(ex.slice(i + hl.length));
@@ -298,15 +301,18 @@ const V6 = (() => {
     const forms = [];
     (added || []).forEach(id => { const t = S.terms[id]; if (t) [t.term, ...(t.synonyms || [])].forEach(x => forms.push([x, id])); });
     forms.sort((a, b) => b[0].length - a[0].length).forEach(([x, id]) => every(x, "ha", id));
+    // r17e: proposed tags, words that no taxonomy term covers (decided under question 4)
+    proposedOf(res).forEach(f => every(f.phrase, "hp", ""));
     hits.sort((a, b) => a.b - b.b);
     let html = "", at = 0;
-    hits.forEach(h => { html += esc(text.slice(at, h.b)) + `<mark class="${h.cls}" data-id="${esc(h.id)}" title="${esc((S.terms[h.id] || {}).term || h.id)}">${esc(text.slice(h.b, h.e))}</mark>`; at = h.e; });
+    hits.forEach(h => { const tl = h.cls === "hp" ? "proposed tag: no taxonomy term yet" : (S.terms[h.id] || {}).term || h.id;
+      html += esc(text.slice(at, h.b)) + `<mark class="${h.cls}" data-id="${esc(h.id)}" title="${esc(tl)}">${esc(text.slice(h.b, h.e))}</mark>`; at = h.e; });
     return html + esc(text.slice(at));
   }
   function textBlock(res, added, editable) {
     const tr = (res.translated || res.english_kept) && (res.title_en || res.description_en);
     const title = tr ? res.title_en || res.title : res.title, desc = tr ? res.description_en || res.description : res.description;
-    return `<div class="text card" ${editable ? "data-edit" : ""}><div class="legend"><span class="k hc">counts</span><span class="k hg">found, does not count</span><span class="k ha">${editable ? "added by you" : "added by a reviewer"}</span></div>
+    return `<div class="text card" ${editable ? "data-edit" : ""}><div class="legend"><span class="k hc">tag that counts</span><span class="k hg">tag that does not count</span><span class="k ha">${editable ? "added by you" : "added by a reviewer"}</span>${proposedOf(res).length ? `<span class="k hp">proposed tag (no term yet)</span>` : ""} ${help("colours")}</div>
       ${editable ? `<div class="hint small">Select a word or phrase in the text to tag it.</div>` : ""}
       ${tr ? `<div class="hint small">${res.english_kept ? "The PRMS text gives the same text in English and in Spanish: only the English is used." : "Translated into English for the tagging."} The original text is at the end.</div>` : ""}
       <h2>${hlHtml(title, res, added)}</h2><p>${hlHtml(desc, res, added)}</p>
@@ -398,7 +404,9 @@ const V6 = (() => {
     const area = has.adaptation && has.mitigation ? "adaptation and mitigation" : has.adaptation ? "adaptation" : has.mitigation ? "mitigation" : "neither adaptation nor mitigation";
     $("#v6-info").innerHTML = `<h3>Climate information found ${help("climate-information")}</h3>
       <table class="pway small"><thead><tr><th></th><th>Terms that count (stand-alone or anchored)</th></tr></thead><tbody>${rows}</tbody></table>
-      <div class="small">The text contains climate information on: <b>${area}</b>. <span class="muted">It follows from the tags above; change them there.</span></div>`;
+      <div class="small">The text contains climate information on: <b>${area}</b>. <span class="muted">It follows from the tags above; change them there.</span></div>
+      ${(() => { const p = proposedOf(res); return p.length ? `<div class="small" style="margin-top:8px"><b>Proposed tags</b> <span class="muted">(words that no taxonomy term covers; they do not count as climate information; accept or reject them under question 4)</span>
+        <ul class="ptags">${p.map(f => `<li><mark class="hp">${esc(f.phrase)}</mark> → ${f.finding_type === "unrecorded_anchor_type" ? "new kind of climate anchor" : "new term"}: <b>${esc(f.proposed_label || f.phrase)}</b>${f.closest ? ` <span class="better">closest existing term: ${esc(f.closest.term)}</span>` : ""}</li>`).join("")}</ul></div>` : ""; })()}`;
   }
 
   // near Submit, always open in a yellow frame (the final decision): the levels, marker answer and outcome that follow

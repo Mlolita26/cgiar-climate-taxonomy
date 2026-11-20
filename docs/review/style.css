@@ -66,6 +66,8 @@ table.list td:first-child, table.list th:first-child { padding-left: 16px; }
 .legend .k { font-size: 11.5px; padding: 1px 8px; border-radius: 4px; color: var(--ink); }
 mark { padding: 0 2px; border-radius: 3px; color: inherit; cursor: pointer; }
 .hc { background: var(--hl-c); } .hg { background: var(--hl-g); } .ha { background: var(--hl-a); }
+.hp { background: #F1E8FB; border-bottom: 2px dotted #7A4FB0; }       /* proposed tag: no taxonomy term yet */
+ul.ptags { margin: 4px 0 0 18px; padding: 0; }
 mark.flash, tr.flash td { outline: 2px solid var(--green); outline-offset: 1px; }
 
 .verdict { padding: 10px 0; border-top: 1px solid var(--rule); }
