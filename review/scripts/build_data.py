@@ -13,7 +13,9 @@ batch file and the batch's entry in batches.json. Reviews are not here: they are
 """
 import argparse, hashlib, json, os, random, re, sys
 
-ROOT = r"C:\Users\mlolita\OneDrive - CGIAR\Nowak, Andreea (Alliance Bioversity-CIAT)'s files - MELIAF-Implementation"
+# The project folder that holds Taxonomy/: four levels above this script (Taxonomy/4_Climate_taxonomy_repository/review/
+# scripts/), or the folder given in the environment variable MELIAF_ROOT.
+ROOT = os.environ.get("MELIAF_ROOT") or os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", ".."))
 DEFAULT_TAGS = os.path.join(ROOT, r"Taxonomy\3_Tagging\outputs\2026-08 2025 marked - 4343 results - v4\_working\prms_tags.jsonl")
 DEFAULT_TAX = os.path.join(ROOT, r"Taxonomy\1_Versions\v4 - Aug 2026\machine_readable\taxonomy_v4_plus.json")
 DEFAULT_V6_TAGS = os.path.join(ROOT, r"Taxonomy\3_Tagging\outputs\2026-11 2025 pilot - 200 results - v6\_working\prms_tags.jsonl")
@@ -202,10 +204,24 @@ else:
 
     TAG_KEEP = ("concept_id", "concept_name", "facet", "role_adaptation", "role_mitigation", "detection_excerpt",
                 "adaptation", "adaptation_anchor_quote", "mitigation", "mitigation_anchor_quote",
-                "pathway_role", "result_level", "status", "status_quote", "intervention_type", "confidence")
+                "pathway_role", "result_level", "status", "status_quote", "intervention_type", "confidence",
+                "anchored_by_text")                  # r17: the term counts because the work is a climate measure
     AREA_KEEP = ("information", "objective", "objective_quote", "measure", "measure_quote", "measure_kind", "purpose",
                  "purpose_basis", "purpose_quote", "claim_without_tags", "level", "rationale", "system_or_population",
-                 "intervention", "result", "intervention_type", "link_rationale_intervention", "link_intervention_result")
+                 "intervention", "result", "intervention_type", "link_rationale_intervention", "link_intervention_result",
+                 "climate_function", "function_quote")   # r16: the climate function read by the AI, with its words
+    RD_AREA = ("function_class", "function_words", "measure", "purpose")
+
+    def reading_of(r):
+        """r16 and later: the kind of work and, when there are two readings, what each said per area"""
+        rd = r.get("reading") or {}
+        if not rd.get("n_readings"):
+            return None
+        each = [{"kind": x.get("kind") or "",
+                 **{ax: {k: (x.get(ax) or {}).get(k) for k in RD_AREA} for ax in ("adaptation", "mitigation")}}
+                for x in rd.get("readings") or []]
+        return {"kind_name": rd.get("kind_name") or "", "work_words": rd.get("work_words") or "",
+                "n": rd.get("n_readings"), "differ": bool(rd.get("differ")), "readings": each}
     LINK_KEEP = ("area", "kind", "from_id", "from_name", "to_id", "to_name", "how", "quote")
     FIND_KEEP = ("finding_type", "phrase", "excerpt", "concept_id", "concept_name", "proposed_action", "proposed_label",
                  "facet", "area", "proposed_value", "reason", "climate_wording")
@@ -255,6 +271,9 @@ else:
             res[k] = r.get(k)
         if "marker_outcome_detail" in r:             # script r12 and later; the page works it out when absent
             res["marker_outcome_detail"] = r.get("marker_outcome_detail") or ""
+        rdg = reading_of(r)
+        if rdg:
+            res["reading"] = rdg
         results.append(res)
     prompts = "; ".join(sorted(p for p in prompt_set if p))
     print("highlighting: %d of %d tag excerpts hold no term or synonym of their concept and are highlighted in full"

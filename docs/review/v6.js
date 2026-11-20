@@ -18,6 +18,10 @@ const V6 = (() => {
     text_says_main: "the text says main", text_says_additional: "the text says additional",
     title_names_climate_aim_only: "the title names the climate aim and no other aim",
     other_benefits_are_cobenefits: "other benefits are co-benefits of the climate measure", other: "other",
+    title_climate_function_only: "the title presents the work by its climate function alone",
+    title_names_other_aims: "the title names the climate function together with other aims",
+    benefits_listed_together: "the description names climate together with other benefits",
+    specific: "specific", label: "label only", context: "context only",
     stated: "stated", shown_by_measure: "shown by the measure", not_described: "not described", described: "described",
     produced: "produced", carried_out: "carried out", organised: "organised", recommended: "recommended",
     studied_for_response: "studied to serve the climate response",
@@ -108,6 +112,7 @@ const V6 = (() => {
                   ["not_this_work", "not about this work"], ["other", "other (say why in the note)"]];
   const NOT_MEASURE = [["study_only", "a study that describes a climate condition and does not serve the response"],
                        ["event_or_topic", "an event attended or a topic discussed"], ["subject_or_setting", "a subject or setting, not an action"],
+                       ["label_only", "climate words only describe a broad goal (a label)"], ["others_work", "the work of others, or a programme or partnership described"],
                        ["general_statement", "a general statement or aim"], ["not_climate_response", "the action does not respond to a climate problem"],
                        ["other", "other (say why in the comment)"]];
   const PURPOSE_TESTS = {
@@ -200,15 +205,15 @@ const V6 = (() => {
         <tr><td>L1</td><td>mentions climate (a hazard, climate change, emissions) but describes no climate measure.</td></tr>
         <tr><td>L2</td><td>describes a climate measure; climate is an additional purpose, or the purpose is not stated.</td></tr>
         <tr><td>L3</td><td>describes a climate measure, and climate is the main purpose.</td></tr></table>`],
-    "climate-information": ["climate information", "The taxonomy terms that count for this area: stand-alone terms, and context-dependent terms with a climate anchor in the text. If no term counts, the area holds no climate information. Change them in the tag table."],
-    measure: ["climate measure", "An action the work carried out, produced, organised or recommends, in response to a climate problem of this area. A study that only describes a climate condition, an event attended or a general aim is not a measure. Keep the AI's answer, say why it is not a measure, or paste the passage of a measure the AI missed."],
+    "climate-information": ["climate information", "The taxonomy terms that count for this area: stand-alone terms, and context-dependent terms whose own sentence holds climate words of the area, or all of them when the work is a climate measure for the area. If no term counts, the area holds no climate information. Change them in the tag table."],
+    measure: ["climate measure", "The work's own product or action (a product, something delivered or scaled, a training, an event it organised, a study of responses, a policy or recommendation) with a specific climate function: the text says it addresses a climate problem of this area. A study that only describes a climate condition, speaking at an event of others, the work of others, or climate words used only as a label or as context are not a measure. The AI reads the text twice; a measure is kept only when both readings find one. Keep the AI's answer, say why it is not a measure, or paste the passage of a measure the AI missed."],
     purpose: ["purpose", "Whether the text presents climate as the main purpose of the work, an additional purpose, or does not say. The purpose counts only when a climate measure is described."],
     tags: ["AI tags", "Each taxonomy term the AI kept, with the words it was found as, its value for each area, its role in the text and whether the work is planned or done. Click ✓ to agree, change to correct a value, or ✗ to refuse the tag with a reason."],
-    anchors: ["tag values", "Stand-alone: the term is climate information on its own. Anchored: a context-dependent term with a climate anchor in the text, shown in quotes. No anchor: a context-dependent term without a climate anchor, so it does not count. Not relevant: the term does not concern this area."],
+    anchors: ["tag values", "Stand-alone: the term is climate information on its own. Anchored: a context-dependent term that counts, because its own sentence holds climate words of the area (shown in quotes) or because the work is a climate measure for the area (anchored by the text). No anchor: a context-dependent term without such a link, so it does not count. Not relevant: the term does not concern this area."],
     "terms-not-kept": ["words found but not tagged", "Before the AI reads the text, a search marks every word that matches a taxonomy term or synonym. The AI then keeps some as tags and leaves others out; the code can also refuse one. These are the ones left out, with where they are in the text and why. If one should be a tag, click + keep."],
     findings: ["AI taxonomy findings", "Possible gaps or errors in the taxonomy that the AI recorded, such as a climate phrase with no matching term. Accept, reject or leave each one for later. These answers go to the taxonomy team and do not change the outcome of your review."],
     pathway: ["climate pathway", "The parts of the climate pathway the AI recorded for each area: reason, where, who, what was done, what came out, the links between them, and whether the work is planned or done. Open it when useful and note any part to correct."],
-    flags: ["flags", "Points the tagging script asks a person to look at first, for example an area that rests on anchors only or an answer changed by the second check. A flag is not an error."],
+    flags: ["flags", "Points the tagging script asks a person to look at first, for example two AI readings that differ on the climate measure or the purpose. A flag is not an error."],
     "marker-answer": ["marker answer", "The comparison of the PRMS marker with the stronger area: aligned, marker higher, marker lower, cannot determine (with its reason) or no comparison. It is worked out from the levels with the table of the tagging script."],
     outcome: ["outcome of the review", "Worked out from your answers. Wrong when a level or the marker answer differs from the AI's; minor gap when only tags, terms, the pathway or the purpose differ; captured well when nothing differs."],
     proposals: ["proposed terms", "Wording that is not in the taxonomy, proposed as a new term or as a synonym of an existing term. Proposals go to the people who maintain the taxonomy."],
@@ -237,6 +242,22 @@ const V6 = (() => {
   const levelCell = (lv, purpose) => `${lvPill(lv, purpose)} <span class="small">${esc(levelWords(lv, purpose))}</span>`;
   const markerCell = (o, d) => o ? `<span class="oc oc-${esc(o.replace(/ /g, "-"))}">${esc(outcomeLabel(o, d))}</span>` : "";
   const storeNotice = () => S.storeOk === false ? `<div class="notice bad">The review store does not take reviews of this batch yet (the worker is older than the page). You can read the results; nothing can be saved until the worker is updated.</div>` : "";
+  // r16 and later: what the AI read (kind of work, climate function with its words) and, when the two readings differ,
+  // what each reading said for this area. A measure is kept only when both readings find one.
+  const KIND = { P: "product developed or tested", D: "product or practice delivered or scaled", T: "training given", E: "event organised",
+                 R: "study of responses", S: "study of a condition", G: "policy, plan or recommendation", O: "other" };
+  function readingHtml(res, ax) {
+    const rd = res.reading, a = res[ax] || {};
+    if (!rd) return "";
+    const fn = a.climate_function ? `${esc(w(a.climate_function))}${a.function_quote ? `, “${esc(cut(a.function_quote, 160))}”` : ""}` : `<span class="muted">none</span>`;
+    let h = `<div class="small muted">Kind of work: ${esc(rd.kind_name || "")}${rd.work_words ? ` (“${esc(cut(rd.work_words, 90))}”)` : ""}. Climate function: ${fn}</div>`;
+    const rs = rd.readings || [], each = rs.map(x => x[ax] || {}), f0 = each[0] || {};
+    const differ = rd.differ && rs.length > 1 && (rs.some(x => x.kind !== rs[0].kind) ||
+      each.some(e => ["function_class", "measure", "purpose"].some(k => (e[k] || "") !== (f0[k] || ""))));
+    if (differ) h += `<div class="small"><span class="flag">the two AI readings differ</span> ${rs.map((x, i) => { const e = x[ax] || {};
+      return `reading ${i + 1}: ${esc(KIND[x.kind] || x.kind || "")}, ${esc(w(String(e.function_class || "none").toLowerCase()))}, measure ${esc(e.measure || "no")}${e.purpose && e.purpose !== "n_a" ? `, purpose ${esc(w(e.purpose))}` : ""}`; }).join("; ")}</div>`;
+    return h;
+  }
   function foundAs(t) {
     const ex = t.detection_excerpt || "", hl = t.hl || "", i = hl ? ex.toLowerCase().indexOf(hl.toLowerCase()) : -1;
     return i < 0 ? esc(ex) : esc(ex.slice(0, i)) + `<b>${esc(ex.slice(i, i + hl.length))}</b>` + esc(ex.slice(i + hl.length));
@@ -364,12 +385,13 @@ const V6 = (() => {
       const opts = aiDesc ? [["agree", "Agree", "ok"], ["not_measure", "Not a measure", "ko"]] : [["agree", "Agree: no measure", "ok"], ["missed", "Measure missed", "ko"]];
       h += `<div class="q1 ${off ? "off" : ""}"><div class="qh">Climate measure ${help("measure")}</div>
         <div class="small"><span class="muted">AI:</span> ${aiDesc ? `“${esc(ai.measure_quote || "")}”${ai.measure_kind ? ` <span class="muted">(${esc(w(ai.measure_kind))})</span>` : ""}` : `<span class="muted">no climate measure described</span>`}</div>
+        ${readingHtml(res, ax)}
         ${ai.objective && ai.objective !== "not_described" ? `<div class="small muted">Objective: ${esc(w(ai.objective))}${ai.objective_quote ? `, “${esc(ai.objective_quote)}”` : ""}</div>` : ""}
         <div class="decide"><span class="segs">${opts.map(([v, l, c]) => segD("m-" + ax, v, l, r.measure === v, c, off)).join("")}</span>
           ${r.measure === "not_measure" ? `<select data-k="measure_reason" data-ax="${ax}" ${off ? "disabled" : ""}><option value="">why not…</option>${NOT_MEASURE.map(([v, l]) => opt(v, l, r.measure_reason === v)).join("")}</select>` : ""}</div>
         ${r.measure === "missed" ? `<input class="wide" data-k="measure_quote" data-ax="${ax}" placeholder="paste the passage that describes the measure" value="${esc(r.measure_quote || "")}" ${off ? "disabled" : ""}>` : ""}</div>`;
       const needP = me.A[ax].measure === "described", aiP = ai.purpose || "not_stated", offP = off || !needP;
-      // only main / additional / not stated is shown and asked (Lolita, 19 Nov 2026): no test names, no test to choose
+      // only main / additional / not stated is shown and asked (decision of 19 Nov 2026): no test names, no test to choose
       h += `<div class="q1 ${offP ? "off" : ""}"><div class="qh">Purpose ${help("purpose")} <span class="muted small">main, additional or not stated</span></div>
         <div class="small"><span class="muted">AI:</span> ${esc(w(aiP))}</div>
         <div class="decide"><span class="segs">${["main", "additional", "not_stated"].map(v => segD("p-" + ax, v, w(v) + (v === aiP ? ` <small>AI</small>` : ""), r.purpose === v, "ok", offP)).join("")}</span></div>
@@ -406,7 +428,8 @@ const V6 = (() => {
     const v = t[ax], role = t["role_" + ax], mine = d.d === "change" && d[ax] != null && d[ax] !== v ? d[ax] : null, q = t[ax + "_anchor_quote"];
     return `<span class="cv cv-${esc(v)}">${esc(w(v))}</span>${mine ? ` → <span class="you">${esc(w(mine))}</span>` : ""}
       ${role && role !== "n/a" && role !== w(v) ? `<div class="muted">${esc(role)}</div>` : ""}
-      ${v === "anchored" && q ? `<div class="q" title="${esc(q)}">“${esc(cut(q, 110))}”</div>` : ""}`;
+      ${v === "anchored" && t.anchored_by_text ? `<div class="muted">anchored by the text: the work is a climate measure for ${esc(ax)}</div>`
+        : v === "anchored" && q ? `<div class="q" title="${esc(q)}">“${esc(cut(q, 110))}”</div>` : ""}`;
   }
   function tagRow(t, d, extra = "") {
     const id = t.concept_id, cls = [d.d === "refuse" ? "disagree" : "", d.d === "change" ? "changed" : ""].join(" ");
@@ -425,7 +448,7 @@ const V6 = (() => {
       <td class="nowrap"><span class="segs sm">${segD("d-" + id, "agree", "✓", d.d === "agree", "ok")}${segD("d-" + id, "change", "change", d.d === "change", "ch")}${segD("d-" + id, "refuse", "✗", d.d === "refuse", "ko")}</span></td></tr>${extra}${sub}`;
   }
   // why a tag does not count, in plain words, from its values (the reviewer's when changed)
-  // one short sentence (Lolita, 19 Nov 2026): first what the taxonomy rules out, then what the text does not link to climate
+  // one short sentence (decision of 19 Nov 2026): first what the taxonomy rules out, then what the text does not link to climate
   const whyNot = (t, ax, v) => v === "no_anchor" ? { k: 2, s: `for ${ax}, the text does not link it to climate` }
     : v === "not_relevant" ? (!t["role_" + ax] || t["role_" + ax] === "n/a" ? { k: 1, s: `not a ${ax} term` } : { k: 1, s: `not used for ${ax} here` })
     : { k: 3, s: `${ax}: ${w(v)}` };

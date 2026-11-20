@@ -117,47 +117,47 @@
 <div class="tbl"><table>
   <tr><th>Value</th><th>Counts?</th><th>Meaning</th></tr>
   <tr><td>stand-alone</td><td>yes</td><td>The term is climate-related by its own meaning.</td></tr>
-  <tr><td>anchored</td><td>yes</td><td>A context-dependent term that the text links to climate. The anchor passage is shown.</td></tr>
+  <tr><td>anchored</td><td>yes</td><td>A context-dependent term that the text links to climate: its own sentence is shown, or the note "anchored by the text".</td></tr>
   <tr><td>no anchor</td><td>no</td><td>A context-dependent term with no link to climate in the text.</td></tr>
   <tr><td>not relevant</td><td>no</td><td>The taxonomy gives the term no role in this area, or the text does not use it for this area.</td></tr>
 </table></div>
-<p>The anchor:</p>
+<p>The anchor is decided by the code, the same way every time (since script r17, 20 Nov 2026):</p>
 <ul>
-  <li>An anchor is a passage that ties the term to climate: a hazard, climate change, a climate aim, emissions or carbon.</li>
-  <li>The link can run into the next sentence. "Climate change" in general can be the anchor.</li>
-  <li>For people and results, the anchor holds when the term's own sentence has climate words, when the term is tied to a climate measure, or when the sentence says what followed ("As a result, ...").</li>
-  <li>A name cannot be an anchor.</li>
+  <li>A context-dependent term counts for an area when its own sentence holds climate information of that area: a climate word (climate change, drought, flood, heat, emissions, carbon and similar), a stand-alone climate term, or a climate driver said to change ("erratic rainfall").</li>
+  <li>When the AI reading finds a climate measure for the area, every context-dependent term of that area in the text counts: the whole text describes climate work. The tag then shows "anchored by the text".</li>
+  <li>Otherwise only the terms in such a sentence count, so that a passing mention of climate does not make the whole text climate-related.</li>
+  <li>A name cannot be an anchor: climate words inside the name of a programme, project, fund or organisation are hidden first.</li>
 </ul>
 </section>
 
 <section id="measure">
 <h2>Climate measure</h2>
-<p>A climate measure is something this work did or produced that responds to a climate problem, or that reduces, stores or measures emissions.</p>
-<ul>
-  <li>Research, policy, tools and training count when they serve the climate response.</li>
-  <li>A measure that the text recommends counts, with status planned.</li>
-  <li>A workshop or training that the work organised on a climate subject counts.</li>
-</ul>
-<p>Not a measure:</p>
-<ul>
-  <li>a study that describes a climate condition and does not serve the response;</li>
-  <li>an event attended or a topic discussed;</li>
-  <li>a subject or a setting, not an action;</li>
-  <li>a general statement or aim;</li>
-  <li>an action that does not respond to a climate problem.</li>
-</ul>
+<p>A climate measure is the work's own product or action with a specific climate function in this area. The AI reads the text and answers two questions with the exact words of the text; the code then applies the definition.</p>
+<p><b>1. Kind of work.</b> A measure can be: a product developed or tested (variety, technology, tool, platform, dataset, method, practice); a product or practice delivered, demonstrated, scaled or adopted; a training given by the work; an event organised by the work; a study that develops, tests or assesses responses; a policy, plan, strategy or recommendation the work contributed to or makes. A presentation, news item or brief about the work's own product takes the kind of that product.</p>
+<p><b>2. Climate function</b>, for adaptation and for mitigation:</p>
+<div class="tbl"><table>
+  <tr><th>Class</th><th>Meaning</th><th>Example</th></tr>
+  <tr><td>specific</td><td>The text says the work's own product or action addresses a climate problem of the area, in the same sentence or in the work's own setting, or the product's name states its climate function.</td><td>"trials to promote farm diversification for climate resilience"; drought-tolerant variety; early warning system; greenhouse gas inventory</td></tr>
+  <tr><td>label only</td><td>Climate words qualify a broad goal or frame, not the work's own product.</td><td>"towards climate-resilient food systems"; "for climate action"</td></tr>
+  <tr><td>context only</td><td>Climate is background, a study variable, one item in a list, a finding or a name.</td><td>"climate change threatens production"; climate scenarios as model inputs</td></tr>
+  <tr><td>none</td><td>No climate words of the area.</td><td></td></tr>
+</table></div>
+<p><b>Measure</b> = a kind of work from the list above and a specific climate function. Never a measure: a study that only describes a condition (trends, impacts, risks, vulnerability); speaking at an event of others; describing a programme, a partnership or the work of others; a general statement. A measure the work recommends or plans counts.</p>
+<p>The AI reads each text twice, in two independent calls. A measure is kept only when both readings find one; when the readings differ, the result is flagged "the two readings differ: needs review" and the form shows what each reading said.</p>
 <p>Answers in the review: agree; not a measure (with the reason); measure missed (paste the passage). When the AI found no measure: agree, no measure; or measure missed.</p>
 </section>
 
 <section id="purpose">
 <h2>Purpose</h2>
-<p>Asked only when there is a climate measure. Climate is the main purpose, an additional purpose, or not stated. Four tests, in this order:</p>
+<p>Asked only when there is a climate measure. Climate is the main purpose, an additional purpose, or not stated. Four rules, the first that applies:</p>
 <ol>
-  <li>The text says it: main, primary, principal, central, core, fundamental (main); also, in addition, additional, co-benefit, secondary (additional).</li>
-  <li>The title names the climate aim, the measure or the hazard, and no other main aim is named. Another main aim is one in the title, or one the description presents as main with a word such as main, primary or central. Words on how or for whom the work is done (women-led, inclusive) are not another aim. Result: main.</li>
-  <li>The text calls the other benefits co-benefits of the climate measure. Result: main.</li>
+  <li><b>Words.</b> The sentence with the climate aim says main, primary, principal, central, core, fundamental or overarching: main. It says also, in addition, additional, secondary or co-benefit for the climate aim: additional.</li>
+  <li><b>Title.</b> The title presents the result by its climate function and names no non-climate aim or benefit: main. The title names the climate function together with a non-climate aim or benefit (income, yield, productivity, nutrition, gender, restoration, peace, labour, water saving, market access), or presents the result only by a non-climate aim: additional. A label, a finding about climate or a name in the title is not a climate function: go to rule 3.</li>
+  <li><b>List.</b> A sentence of the description names the climate benefit together with non-climate benefits or aims of the result: additional.</li>
   <li>Otherwise: not stated.</li>
 </ol>
+<p>Main is never given only because the text describes a climate problem, a response and an intention.</p>
+<p class="ex">"Diversified rice based systems for climate resilience expanded in Cambodia": rule 2, main. "Direct Seeders: Reducing Labor, Ensuring Timely Field Operations, and Mitigating End-of-Season Drought": rule 2, additional.</p>
 <p class="ex">"The programme's primary objective is to raise rural incomes. As an additional objective, it delivers heat-stress advisories." Measure: the heat-stress advisories. Purpose: additional.</p>
 </section>
 
@@ -229,9 +229,7 @@
   <tr><td>Too general</td><td>The word says nothing specific about the work ("works with sweet potato").</td></tr>
   <tr><td>A narrower term is already tagged</td><td>Two terms match the same words; only the narrower one is kept ("Local government" rather than "Public institution").</td></tr>
   <tr><td>Words not in the text</td><td>The AI quoted words that are not in the text word for word ("public sectors" when the text says something else). Every quote must be in the text, so the code refused the tag.</td></tr>
-  <tr><td>Second check</td><td>A second AI check said the term is not in the text.</td></tr>
   <tr><td>Area not addressed</td><td>The term belongs to one area in the taxonomy and the text does not talk about that area.</td></tr>
-  <tr><td>No climate words in the anchor</td><td>The AI linked the term to a passage that holds no climate words.</td></tr>
 </table></div>
 <p>A word left out is not wrong in itself: most are general words that say nothing about climate. Use "+ keep" when one should be a tag, then say for which area it counts.</p>
 </section>
@@ -279,13 +277,9 @@
 <p>Reasons for a person to look at the result first. A flag is not an error.</p>
 <div class="tbl"><table id="flag-list">
   <tr><th>Flag</th><th>Meaning</th></tr>
-  <tr><td>second check changed an answer</td><td>A second AI call reviewed the tags, anchors, measure and purpose, and changed at least one answer.</td></tr>
-  <tr><td>the reading and the check reading differ</td><td>Two separate AI readings of the text disagree on what the work did or on its aims.</td></tr>
+  <tr><td>the two readings differ: needs review</td><td>The two independent AI readings of the text disagree on the kind of work, the climate function, the measure or the purpose. The area keeps only what both support; the form shows what each reading said.</td></tr>
   <tr><td>(area) intervention tag but no measure described</td><td>A tag counts as an intervention for the area, but no climate measure was found.</td></tr>
-  <tr><td>(area) one passage anchors four or more terms</td><td>One climate passage is the anchor of many terms. Check that each term is really linked to it.</td></tr>
-  <tr><td>(area) rests on anchors only</td><td>No stand-alone term counts for the area; all its climate information comes from anchored terms.</td></tr>
-  <tr><td>(area) measure or aim claimed without a counting tag</td><td>The AI read a climate measure or aim that no tag supports.</td></tr>
-  <tr><td>answers adjusted by code</td><td>The code cancelled an answer that failed a check (a quote not in the text, a role the taxonomy does not allow).</td></tr>
+  <tr><td>answers adjusted by code</td><td>The code changed or cancelled an answer: a quote not in the text, a role the taxonomy does not allow, an area taken from the text, terms anchored by the text, a climate function or purpose whose words do not hold.</td></tr>
   <tr><td>climate wording with no taxonomy term</td><td>The text has climate words that no taxonomy term matches (see the findings).</td></tr>
   <tr><td>PRMS countries differ from the countries named in the text</td><td>The Countries field and the text name different countries.</td></tr>
   <tr><td>main purpose in both areas</td><td>Climate is the main purpose for adaptation and for mitigation (L3 in both).</td></tr>
