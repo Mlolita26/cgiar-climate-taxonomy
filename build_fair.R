@@ -241,7 +241,7 @@ old_log <- old_log[seq(match(TRUE, str_starts(old_log, "## 5.0.0-draft")), lengt
 write_lines(c(
   glue("# Changelog\n\n## {VERSION} (published {PUBLISHED}, updated {TODAY})\n"),
   glue("Content is version 6 of the taxonomy (master_v6.csv, revision of 16 October 2026). Draft status.\n"),
-  glue("Update of 2026-11-20: every concept now carries a review status (`meliaf:reviewStatus`), taken from the column Final verdict of the version 6 master: {paste0(names(REVIEW), ' (', map_int(names(REVIEW), \\(r) sum(concepts$review == r)), ')', collapse = ', ')}. No term is validated yet. The web site was redesigned, with a search box on every page, a term browser and pages for downloads, releases, contributing and the tools that use the taxonomy. No concept, identifier or definition changed.\n"),
+  glue("Update of 2026-11-20: every concept now carries a review status (`meliaf:reviewStatus`), taken from the column Final verdict of the version 6 master: {paste0(names(REVIEW), ' (', map_int(names(REVIEW), \\(r) sum(concepts$review == r)), ')', collapse = ', ')}. No term is validated yet. The web site was redesigned, with a search box on every page, a term browser and pages for downloads, releases, contributing and about. No concept, identifier or definition changed.\n"),
   "Version 6 replaced the per-axis columns (climate scope, adaptation tag and condition, mitigation tag and condition) with three: climate area, tagging role (stand-alone or context-dependent) and context rule. The vocabulary publishes these as `meliaf:climateArea`, `meliaf:taggingRole` and `meliaf:contextRule`.\n",
   "## Version 6 compared with version 5\n",
   glue("{nrow(concepts)} concepts (version 5 had 739). Changes recorded at term level (a concept can appear under several):\n"),
@@ -262,18 +262,8 @@ cat("Wrote dist/climate-taxonomy.csv and CHANGELOG.md\n")
 # The structure follows the established ontology sites (Disease Ontology in particular): a menu, a search box on every
 # page, a browse page and one page per term. The look ("climate atlas": navy, warming stripes, IBM Plex fonts served from
 # docs/fonts) is in docs/style.css; docs/site.js does the search. Both are written by hand.
-# Line icons drawn for this site (24 x 24, stroked), used on the home page and on buttons
-ICONS <- c(
-  search   = '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/>',
-  browse   = '<rect x="3" y="3" width="7" height="5" rx="1.2"/><rect x="14" y="10" width="7" height="5" rx="1.2"/><rect x="14" y="17" width="7" height="4.5" rx="1.2"/><path d="M6.5 8v11.2H14M6.5 12.5H14"/>',
-  download = '<path d="M12 3v12m-5-5 5 5 5-5M4 20h16"/>',
-  propose  = '<path d="M4 5h16v11H10l-4.5 4v-4H4z"/><path d="M12 7.8v5.4M9.3 10.5h5.4"/>',
-  cite     = '<path d="M4.5 17.5c2.6-1 4.5-3 4.5-6.5V6.5H4.5v4.8H9M13.5 17.5c2.6-1 4.5-3 4.5-6.5V6.5h-4.5v4.8H18"/>',
-  releases = '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
-  about    = '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.6v.1"/>',
-  brain    = '<path d="M4 6h16M4 11h8M4 16h5"/><circle cx="16.5" cy="15" r="3.5"/><path d="m19 17.5 2.5 2.5"/>',
-  review   = '<path d="M10 6h10M10 12h10M10 18h10"/><path d="m3.5 6 1.5 1.5 2.8-2.8M3.5 12l1.5 1.5 2.8-2.8M3.5 18l1.5 1.5 2.8-2.8"/>',
-  edit     = '<path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="m14.5 7.5 3 3"/>')
+# The one icon on the site: the magnifier inside the search field of the header (24 x 24, stroked)
+ICONS <- c(search = '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/>')
 icon <- function(n) paste0('<svg class="i" viewBox="0 0 24 24" aria-hidden="true">', ICONS[[n]], "</svg>")
 STRIPE_COLOURS <- c("#08306b", "#08519c", "#2171b5", "#4292c6", "#6baed6", "#9ecae1", "#fc9272", "#fb6a4a", "#ef3b2c", "#cb181d", "#a50f15")
 h <- function(x) x |> str_replace_all("&", "&amp;") |> str_replace_all("<", "&lt;") |> str_replace_all(">", "&gt;")
@@ -284,7 +274,7 @@ change_url <- function(id, term) paste0(REPO, "/issues/new?template=change-term.
 facet_slug <- function(f) coalesce(facets$slug[match(f, facets$facet)], "")
 
 PAGE <- read_file("templates/page.html")                        # the shell every page shares; <<...>> are filled by glue
-NAV  <- c(browse = "Browse", downloads = "Downloads", releases = "Releases", contribute = "Contribute", about = "About", tools = "Tools")
+NAV  <- c(browse = "Browse", downloads = "Downloads", releases = "Releases", contribute = "Contribute", about = "About")
 nav_html  <- function(pageid, depth) paste0('<a href="', depth, names(NAV), '.html"', if_else(names(NAV) == pageid, ' class="on"', ""), ">", NAV, "</a>", collapse = "")
 band_html <- function(title, sub = "", crumbs = "") glue('<section class="band"><div class="wrap">{crumbs}<h1>{title}</h1>{if (nzchar(sub)) paste0("<p>", sub, "</p>") else ""}</div></section>')
 page <- function(title, body, depth = "", pageid = "", band = band_html(h(title))) glue(PAGE, .open = "<<", .close = ">>")
@@ -326,7 +316,7 @@ pwalk(concepts, function(id, term, synonyms, facet, parent_id, definition, sourc
     if (nzchar(example)) mrow("Example of use", h(example)),
     mrow("Provenance", h(prov_class))
   )
-  body <- glue('<div class="actions"><a class="btn primary" href="../browse.html#{id}">{icon("browse")}Show in the tree</a><a class="btn" href="{change_url(id, term)}">{icon("edit")}Propose a change</a><a class="btn" href="../downloads.html">{icon("download")}Download the vocabulary</a></div>
+  body <- glue('<div class="actions"><a class="btn primary" href="../browse.html#{id}">Show in the tree</a><a class="btn" href="{change_url(id, term)}">Propose a change</a><a class="btn" href="../downloads.html">Download the vocabulary</a></div>
 <table class="meta">{paste(rows, collapse = "\n")}</table>
 <script type="application/ld+json">{toJSON(list("@context" = context, "@graph" = list(concept_json(id, term, synonyms, facet, parent_id, definition, source, urls, stage, area, role, rule, is_hazard, example, prov_class, provenance, review))), auto_unbox = TRUE, null = "null")}</script>')
   write_file(page(term, body, "../", "browse", term_band(id, term, facet)), glue("docs/terms/{id}.html"))
@@ -342,20 +332,18 @@ pwalk(retired, function(ID, Term, Facet, successor, reason, retired_in) {
 
 # 5c. Values the main pages show
 n_syn <- sum(lengths(concepts$synonyms))
-# the home page: one button per destination, coloured from the cool to the warm end of the warming stripes
-tiles <- tribble(~href, ~icon, ~title, ~text,
-  "browse.html",    "browse",   "Browse the taxonomy", "Every facet and its terms, as a tree, with definitions and their sources.",
-  "downloads.html", "download", "Download",            "The vocabulary in SKOS (Turtle and JSON-LD) and as a spreadsheet.",
-  "contribute.html","propose",  "Propose a term",      "Add, change or retire a term. Every decision is recorded with its reason.",
-  "about.html#cite","cite",     "Cite",                "How to cite the taxonomy in a report or a paper.",
-  "releases.html",  "releases", "Release notes",       "What changed in each version, and what stayed.",
-  "about.html",     "about",    "About",               "What the taxonomy is, who maintains it, and how FAIR it is.",
-  "brain/",         "brain",    "Taxonomy brain",      "Paste a text and see which words are taxonomy terms or synonyms.",
-  "review/",        "review",   "Tagging review",      "Reviewers check how CGIAR results were tagged with the taxonomy.") |>
-  mutate(c = c("#08306b", "#08519c", "#2171b5", "#4292c6", "#ef3b2c", "#cb181d", "#a50f15", "#67000d"),
-         t = rep(c("#e6eef8", "#fdebe7"), each = 4))
-home_tiles <- paste0('<a class="tile" href="', tiles$href, '" style="--c:', tiles$c, ";--t:", tiles$t, '"><span class="ic">', map_chr(tiles$icon, icon),
-                     "</span><b>", tiles$title, "</b><span>", tiles$text, "</span></a>", collapse = "")
+# the home page: one round button per destination, in a row coloured from the cool to the warm end of the warming stripes
+tiles <- tribble(~href, ~title, ~text,
+  "browse.html",     "Browse",         "Every facet and its terms, as a tree",
+  "downloads.html",  "Download",       "SKOS (Turtle, JSON-LD) and a spreadsheet",
+  "contribute.html", "Propose a term", "Add, change or retire a term",
+  "about.html#cite", "Cite",           "How to cite the taxonomy",
+  "releases.html",   "Release notes",  "What changed in each version",
+  "about.html",      "About",          "Who maintains it, and how FAIR it is",
+  "brain/",          "Taxonomy brain", "See which words of a text are terms",
+  "review/",         "Tagging review", "How CGIAR results were tagged") |>
+  mutate(c = c("#08306b", "#08519c", "#1d63a8", "#2f7bbd", "#d94530", "#c3261c", "#a50f15", "#67000d"))
+home_tiles <- paste0('<a class="dot" href="', tiles$href, '" style="--c:', tiles$c, '"><span class="disc">', tiles$title, "</span><span class=\"txt\">", tiles$text, "</span></a>", collapse = "")
 review_defs <- paste0('<tr><td><span class="status', if_else(names(REVIEW) == names(REVIEW)[1], " ext", ""), '">', names(REVIEW), "</span></td><td>", h(REVIEW), '</td><td class="num">', map_int(names(REVIEW), \(r) sum(concepts$review == r)), "</td></tr>", collapse = "")
 examples <- paste0(glue('<a href="terms/{ids}.html">{h(concepts$term[match(ids, concepts$id)])}</a>', ids = concepts$id[match(c("Drought", "Seed system", "Index insurance", "Agroforestry", "Smallholder farmer"), concepts$term)] |> discard(is.na)), collapse = " · ")
 fair_rows  <- read_csv("source/fair_checklist.csv", show_col_types = FALSE)   # Cox et al. 2021, Table 1, with our status
@@ -397,44 +385,36 @@ csv_cols <- tribble(~col, ~meaning,
   "review_status", "How the term is being reviewed (see About).", "status", "current or deprecated.", "version", "Version of the vocabulary.")
 csv_rows <- paste0("<tr><td><code>", csv_cols$col, "</code></td><td>", h(csv_cols$meaning), "</td></tr>", collapse = "")
 
-# contribute: one card per issue form, and the decisions taken so far
+# contribute: one round button per issue form
 forms <- tribble(~file, ~name, ~what,
-  "term-request.yml", "New term",       "A concept the taxonomy does not have yet.",
-  "add-synonym.yml",  "Synonym",        "Another word people use for an existing term.",
-  "change-term.yml",  "Change a term",  "A definition, label, source or position to correct.",
-  "retire-term.yml",  "Retire a term",  "A term that should leave the vocabulary, or merge into another.",
-  "report-error.yml", "Report an error", "A mistake in the data, a page or a download.")
-form_cards <- paste0('<a class="card" href="', REPO, "/issues/new?template=", forms$file, '"><h2>', forms$name, "</h2><p>", forms$what, "</p></a>", collapse = "")
-decisions  <- read_csv("governance/decisions.csv", show_col_types = FALSE)
-decision_rows <- paste0("<tr><td>", decisions$date, '</td><td><a href="', decisions$issue, '">', h(decisions$proposal), "</a></td><td>", h(decisions$decision), "</td><td>", h(decisions$reason), "</td></tr>", collapse = "")
+  "term-request.yml", "New term",        "A concept the taxonomy does not have yet",
+  "add-synonym.yml",  "Synonym",         "Another word for an existing term",
+  "change-term.yml",  "Change a term",   "A definition, label or position to correct",
+  "retire-term.yml",  "Retire a term",   "A term that should leave, or merge into another",
+  "report-error.yml", "Report an error", "A mistake in the data, a page or a download") |>
+  mutate(c = c("#08306b", "#1d63a8", "#2f7bbd", "#d94530", "#a50f15"))
+form_dots <- paste0('<a class="dot" href="', REPO, "/issues/new?template=", forms$file, '" style="--c:', forms$c, '"><span class="disc">', forms$name,
+                    '</span><span class="txt">', forms$what, "</span></a>", collapse = "")
 
-# releases: the change log as a page (headings, lists, paragraphs, code)
-md_html <- function(lines) {
-  inline <- function(x) h(x) |> str_replace_all("`([^`]+)`", "<code>\\1</code>") |> str_replace_all("\\*\\*([^*]+)\\*\\*", "<b>\\1</b>") |>
-    str_replace_all("\\[([^]]+)\\]\\(([^)]+)\\)", '<a href="\\2">\\1</a>')
-  out <- character(); inlist <- FALSE
-  for (l in lines) {
-    if (str_starts(l, "- ")) { if (!inlist) out <- c(out, "<ul>"); inlist <- TRUE; out <- c(out, paste0("<li>", inline(str_sub(l, 3)), "</li>")); next }
-    if (inlist) { out <- c(out, "</ul>"); inlist <- FALSE }
-    if (str_starts(l, "### ")) out <- c(out, paste0("<h3>", inline(str_sub(l, 5)), "</h3>"))
-    else if (str_starts(l, "## ")) out <- c(out, paste0("<h2>", inline(str_sub(l, 4)), "</h2>"))
-    else if (nzchar(str_trim(l)) && !str_starts(l, "# ")) out <- c(out, paste0("<p>", inline(l), "</p>"))
-  }
-  paste(c(out, if (inlist) "</ul>"), collapse = "\n")
-}
-changelog_html <- md_html(read_lines("CHANGELOG.md"))
+# releases: one short entry per version; the full list of changes is in CHANGELOG.md and in each GitHub release
+releases <- tribble(~version, ~tag, ~when, ~what,
+  VERSION, paste0("v", VERSION), glue("Published {PUBLISHED}, updated {TODAY}"),
+  "Content of the taxonomy version 6. Each term has a climate area, a tagging role, a context rule and a review status.",
+  "5.0.0-draft", "v5.0.0-draft", "Published 2026-09-23",
+  "First publication of the taxonomy as a FAIR vocabulary, with the content of version 5.")
+release_rows <- paste0('<section class="release"><h2>', releases$version, '</h2><p class="src">', releases$when, "</p><p>", releases$what,
+                       '</p><a class="btn" href="', REPO, "/releases/tag/", releases$tag, '">Changes and files</a></section>', collapse = "")
 
 # 5d. Write the main pages
-hero <- glue('<section class="band hero"><div class="wrap"><h1>{h(TITLE)}</h1><p>A controlled vocabulary for describing climate adaptation and mitigation in agricultural research. Each concept comes with its definition and source, the other words people use for it, its relations to other concepts, and the conditions under which it counts as adaptation or mitigation.</p></div></section>')
+hero <- glue('<section class="band hero"><div class="wrap"><h1>{h(TITLE)}</h1><p>A controlled vocabulary for describing climate adaptation and mitigation in agricultural research.</p></div></section>')
 write_file(page("Home", template("index.html"), "", "home", hero), "docs/index.html")
 write_file(page("Browse", template("browse.html"), "", "browse", band_html("Browse the taxonomy")), "docs/browse.html")
 write_file(page("Downloads", template("downloads.html"), "", "downloads", band_html("Downloads", "The vocabulary in SKOS (Turtle and JSON-LD) and as a CSV, free to reuse.")), "docs/downloads.html")
-write_file(page("Releases", template("releases.html"), "", "releases", band_html("Releases", "What changed in each version.")), "docs/releases.html")
-write_file(page("Contribute", template("contribute.html"), "", "contribute", band_html("Contribute", "Propose to add, change or retire a term.")), "docs/contribute.html")
+write_file(page("Releases", template("releases.html"), "", "releases", band_html("Releases")), "docs/releases.html")
+write_file(page("Contribute", template("contribute.html"), "", "contribute", band_html("Contribute")), "docs/contribute.html")
 write_file(page("About", template("about.html"), "", "about", band_html("About the taxonomy", "What it is, who maintains it, how to cite it, and how FAIR it is.")), "docs/about.html")
-write_file(page("Tools", template("tools.html"), "", "tools", band_html("Tools and uses", "Tools built on the taxonomy, and where it is used.")), "docs/tools.html")
 write_file(page("Method", template("method.html"), "", "about", band_html("Method", "How the taxonomy became a FAIR vocabulary.")), "docs/method.html")
 invisible(file.create("docs/.nojekyll"))
 dir.create("docs/dist", showWarnings = FALSE)
 file.copy(list.files("dist", full.names = TRUE), "docs/dist", overwrite = TRUE) |> invisible()
-cat(glue("Wrote {nrow(concepts) + nrow(retired)} term pages, 8 main pages and docs/data/terms.json\n"))
+cat(glue("Wrote {nrow(concepts) + nrow(retired)} term pages, 7 main pages and docs/data/terms.json\n"))

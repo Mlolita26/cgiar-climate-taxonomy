@@ -45,7 +45,7 @@ Everything else is generated.
 
 1. **Build.** From the repository root: `Rscript build_fair.R`. It writes `dist/` (Turtle, JSON-LD,
    CSV, relation properties), `CHANGELOG.md`, and the web site in `docs/` (home page, browser,
-   downloads, releases, contributing, about, tools, method, one page per term, and
+   downloads, releases, contributing, about, method, one page per term, and
    `docs/data/terms.json` for the search box). The settings block at the top of the script holds
    the version, licence, addresses and DOI. `docs/style.css` and `docs/site.js` are written by hand.
 2. **Check.** `Rscript qa/check_skos.R`. It writes `qa/report.txt` and stops if a check fails. The

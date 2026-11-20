@@ -29,7 +29,7 @@ moves <- map_dfr(ret_files, \(f) read_csv(f, col_types = cols(.default = "c")) |
   filter(!is.na(succ_label), str_to_lower(succ_label) == str_to_lower(Term))
 moves_after_rule <- moves |> filter(!file %in% c("v5_retired_ids.csv", "v6_retired_ids.csv"))
 csv_out <- read_csv("dist/climate-taxonomy.csv", col_types = cols(.default = "c"))
-site    <- c("index", "browse", "downloads", "releases", "contribute", "about", "tools", "method")
+site    <- c("index", "browse", "downloads", "releases", "contribute", "about", "method")
 
 # walk up the parent chain from every concept; a cycle would never reach a top concept
 depth <- function(id, seen = character()) {
