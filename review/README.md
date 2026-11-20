@@ -32,16 +32,19 @@ shows the form the batch needs; switching batch in the list at the top loads the
 | Form | Batches | What the reviewer answers | Stored in |
 |---|---|---|---|
 | v4 | records of the v4 decision rules (August 2026 run), e.g. `test-2025` | agree or disagree with the AI verdict (Full, Partial, Minimal, None) per area; agree or disagree with each tag; terms added; proposals | table `reviews` |
-| v6 | records of the CGIAR tagging standard with taxonomy v6 (script `PRMS_Tagging.Rmd`, r11 and later), e.g. `pilot-2025-v6` | per area: the climate measure (agree, not a measure with a reason, or measure missed with the passage) and the purpose (main, additional or not stated, with the test); each tag (agree, change a value, or refuse with a reason); terms found but not kept to keep; terms added and for which area they count; the AI's taxonomy findings (accept, reject, later); pathway parts to correct; proposals | table `reviews_v6` |
+| v6 | records of the CGIAR tagging standard with taxonomy v6 (script `PRMS_Tagging.Rmd`, r11 and later), e.g. `pilot-2025-v6` | each question answered Agree, or Disagree with a note (and the right value where there is a list): each tag (Disagree: correct a value, or remove it with a reason); the climate pathway; the kind of work; per area the climate function, the climate measure (Disagree turns yes or no around) and the purpose (Disagree: main, additional or not stated); terms found but not kept to keep; terms added and for which area they count; terms and synonyms proposed from the text (accept, reject); own proposals | table `reviews_v6` |
 
-The v6 result view shows only what the reviewer acts on, under one line saying what to do: the answers start as
-the AI's, and the reviewer changes only what is wrong. The tags are in two groups, tags that count (an area is
-stand-alone or anchored) and tags that do not count (each with the reason in words); words the term search found
-but the AI or the code did not tag are listed apart. Each question and value has a "?" toggle with a short
-explanation and a link to its section of `rules.html` (anchors: what-to-do, climate-information, anchors, tags,
-measure, purpose, levels, marker, marker-answer, pathway, terms-not-kept, findings, proposals, outcome, agreement,
-flags). The levels, marker answer and outcome that follow from the answers are folded near Submit ("What your
-answers give").
+The v6 result view (since 20 Nov 2026) shows what was extracted, without naming the AI, from the most basic to the
+most precise: tags, words found but not tagged, add a term, climate pathway (shown, not folded), kind of work, one
+card per area (climate information, climate function, climate measure, purpose, each with the words that gave it and
+what the two readings said when they differ), proposed terms and synonyms (one line each, the passage on hover),
+comment. Every question is shown for both areas, empty when nothing was extracted. The tags are in two groups, tags
+that count (an area is stand-alone or anchored) and tags that do not count (each with the reason in words). Each
+question and value has a "?" toggle with a short explanation and a link to its section of `rules.html` (anchors:
+what-to-do, climate-information, anchors, tags, kind, function, measure, purpose, levels, marker, marker-answer,
+pathway, terms-not-kept, proposals, outcome, agreement, flags). The list shows the ID, the PRMS marker, the title and
+the description. The levels, marker answer and outcome that follow from the answers are folded near Submit ("What
+your answers give").
 
 In the v6 form the reviewer never chooses a level. The page works out the level of each area (L0 to L3)
 and the marker answer (aligned, marker higher, marker lower, cannot determine with its reason, no
@@ -50,8 +53,8 @@ comparison) from the answers, with the rules and the comparison table of the tag
 `v6.js`; change both together). Climate information for an area means at least one tag that counts for
 it (stand-alone or anchored) after the reviewer's changes, or an added term marked as counting for it.
 It also works out the outcome of the review: wrong when a level or the marker answer differs from the
-AI's; minor gap when only tags, terms, the pathway or the purpose differ; captured well when nothing
-differs. The taxonomy findings and the proposals do not count in the outcome. The two reviewers agree
+extracted one; minor gap when only tags, terms, the pathway, the kind of work, the climate function or the purpose
+differ; captured well when nothing differs. The taxonomy findings and the proposals do not count in the outcome. The two reviewers agree
 when they end with the same levels and the same marker answer.
 
 Highlighting in the v6 form: only the taxonomy term or synonym found inside each tag's excerpt (the rule
@@ -65,11 +68,12 @@ A v6 review is one JSON object in the column `answers`:
 
 | Key | Content |
 |---|---|
-| `areas.adaptation`, `areas.mitigation` | `measure` (agree, not_measure, missed), `measure_reason`, `measure_quote`, `purpose` (main, additional, not_stated), `purpose_basis` |
-| `tags` | per concept id: `d` (agree, change, refuse) and, when changed, `adaptation`, `mitigation`, `pathway_role`, `status`; `reason` for a refusal; `note` |
+| `kind`, `path` | `{d: agree or disagree, value, note}`: kind of work (value P, D, T, E, R, S, G, O) and climate pathway |
+| `areas.adaptation`, `areas.mitigation` | `fn` climate function (value specific, label, context, none), `me` climate measure (disagree turns the extracted yes or no around), `pu` purpose (value main, additional, not_stated); each `{d, value, note}`. Drafts of the form of 19 Nov 2026 (`measure`, `purpose`, `pathway_note`) are converted when read |
+| `tags` | per concept id: `d` (agree; change or refuse = Disagree) and, when changed, `adaptation`, `mitigation`, `pathway_role`, `status`; `reason` for a removal; `note` |
 | `added_terms`, `added_counts` | concept ids added, and per id `{adaptation: true/false, mitigation: true/false}` |
-| `findings` | per AI finding (key: finding type, concept id and phrase, joined by a vertical bar): accept, reject, later |
-| `pathway_note`, `proposals`, `comment` | free text; proposals as in the v4 form |
+| `findings` | per proposal found in the text (key: finding type, concept id and phrase, joined by a vertical bar): accept or reject; no key = no answer |
+| `proposals`, `comment` | free text; proposals as in the v4 form |
 | `computed` | levels, comparison area, marker answer and its reason, outcome of the review, as worked out at the last save |
 | `basis` | the batch stamp (`v` in `batches.json`) and the prompt version of the record that was reviewed |
 
