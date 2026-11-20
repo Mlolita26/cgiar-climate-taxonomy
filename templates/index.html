@@ -1,24 +1,5 @@
 <div class="bigsearch">
-<h2>Find a term</h2>
-<form class="search" action="browse.html" role="search"><input name="q" type="search" placeholder="Search <<nrow(concepts)>> terms and <<n_syn>> synonyms" aria-label="Search a term or synonym" autocomplete="off"><button type="submit">Search</button><div class="sugg" hidden></div></form>
+<form class="search" action="browse.html" role="search"><input name="q" type="search" placeholder="Search a term or a synonym, for example drought" aria-label="Search a term or synonym" autocomplete="off"><button type="submit"><<icon("search")>><span>Search</span></button><div class="sugg" hidden></div></form>
 <p class="hint">For example: <<examples>></p>
 </div>
-<div class="cards">
-<a class="card" href="browse.html"><h2>Browse</h2><p>The <<nrow(facets)>> facets as a tree. Each term with its definition, source, synonyms and relations.</p></a>
-<a class="card" href="downloads.html"><h2>Download</h2><p>SKOS in Turtle and JSON-LD, and a CSV for spreadsheets.</p></a>
-<a class="card" href="contribute.html"><h2>Propose a term</h2><p>Add, change or retire a term through a GitHub issue. Every decision is recorded with its reason.</p></a>
-<a class="card" href="about.html#cite"><h2>Cite</h2><p>Nowak and Muller (<<str_sub(PUBLISHED, 1, 4)>>), version <<VERSION>>. <<if (nzchar(DOI)) "" else "DOI to follow.">></p></a>
-</div>
-<div class="two">
-<section class="panel"><h2>In numbers</h2>
-<div class="nums"><div><b><<nrow(concepts)>></b><span>concepts</span></div><div><b><<n_syn>></b><span>synonyms</span></div><div><b><<nrow(relations)>></b><span>typed relations</span></div><div><b><<sum(concepts$role == "Stand-alone")>></b><span>stand-alone terms</span></div><div><b><<sum(concepts$role == "Context-dependent")>></b><span>context-dependent terms</span></div><div><b><<nrow(retired)>></b><span>retired identifiers, kept</span></div></div>
-<table><tr><th>Facet</th><th class="num">Terms</th></tr><<facet_rows>></table></section>
-<section class="panel"><h2>Latest release</h2>
-<p><b>Version <<VERSION>></b>, published <<PUBLISHED>>, content of the taxonomy version 6 (master of 16 October 2026). <a href="releases.html">Release notes</a> · <a href="<<REPO>>/releases">all releases on GitHub</a>.</p>
-<h2>Climate area</h2><table><<area_rows>></table>
-<h2>Review status</h2><table><<review_rows>></table>
-<p class="src">No term is validated yet: the vocabulary is a draft. <a href="about.html#review">What the status means</a>.</p>
-<h2>Tools that use it</h2>
-<p><a href="brain/">Taxonomy brain</a>: type a text and see which words are taxonomy terms or synonyms.<br><a href="review/">Tagging review</a>: two reviewers check the AI tagging of each PRMS result.<br><a href="tools.html">All tools and uses</a></p>
-</section>
-</div>
+<div class="tiles"><<home_tiles>></div>

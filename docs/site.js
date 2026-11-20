@@ -1,4 +1,4 @@
-// site.js: search suggestions on every page, and the term browser on browse.html.
+// site.js: search suggestions on every page, and on browse.html the search results and "show in the tree".
 // Written by hand. It only reads data/terms.json, which build_fair.R writes from the taxonomy.
 (function () {
   const ROOT = document.body.dataset.root || "";
@@ -8,16 +8,12 @@
   const norm = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[-_/,()]+/g, " ").replace(/\s+/g, " ").trim();
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const debounce = (f, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => f(...a), ms); }; };
-  const href = id => PAGE === "browse" ? "#" + id : ROOT + "terms/" + id + ".html";
+  const href = id => ROOT + "terms/" + id + ".html";                    // a term always opens its own page
 
   function prep(d) {
-    d.byId = {}; d.kids = {};
-    d.concepts.forEach(c => {
-      d.byId[c.id] = c; c._t = norm(c.t); c._s = (c.s || []).map(norm);
-      if (c.p) (d.kids[c.p] = d.kids[c.p] || []).push(c.id);
-    });
+    d.byId = {};
+    d.concepts.forEach(c => { d.byId[c.id] = c; c._t = norm(c.t); c._s = (c.s || []).map(norm); });
     d.retired.forEach(r => { r.dep = true; r._t = norm(r.t); r._s = []; d.byId[r.id] = r; });
-    Object.values(d.kids).forEach(k => k.sort((a, b) => d.byId[a].t.localeCompare(d.byId[b].t)));
     return d;
   }
 
@@ -42,14 +38,14 @@
     return out.sort((a, b) => b.score - a.score || a.c.t.length - b.c.t.length).slice(0, n);
   }
   function hl(label, q) {
-    const i = label.toLowerCase().indexOf(q.trim().toLowerCase());
-    if (!q.trim() || i < 0) return esc(label);
-    return esc(label.slice(0, i)) + "<mark>" + esc(label.slice(i, i + q.trim().length)) + "</mark>" + esc(label.slice(i + q.trim().length));
+    const t = q.trim(), i = label.toLowerCase().indexOf(t.toLowerCase());
+    if (!t || i < 0) return esc(label);
+    return esc(label.slice(0, i)) + "<mark>" + esc(label.slice(i, i + t.length)) + "</mark>" + esc(label.slice(i + t.length));
   }
   const line = (r, q) => `<a href="${href(r.c.id)}">${hl(r.c.t, q)}${r.c.dep ? ' <span class="status retired">retired</span>' : ""}` +
-    `<span class="f">${esc(r.c.id)} · ${esc(r.c.f)}${r.via ? " · synonym: " + esc(r.via) : ""}</span></a>`;
+    `<span class="f">${esc(r.c.f)}${r.via ? " · synonym: " + esc(r.via) : ""}</span></a>`;
 
-  // a search box with suggestions; Enter without a choice opens the full result list on the browse page
+  // a search box with suggestions; Enter without a choice opens the full list on the browse page
   function attach(form) {
     const input = form.querySelector("input"), box = form.querySelector(".sugg");
     let sel = -1;
@@ -76,7 +72,6 @@
       if (sel >= 0 && links[sel]) { e.preventDefault(); close(); location.href = links[sel].getAttribute("href"); }
       else if (PAGE === "browse") { e.preventDefault(); close(); history.pushState(null, "", "?q=" + encodeURIComponent(input.value)); showResults(input.value); }
     });
-    box.addEventListener("click", e => { if (e.target.closest("a")) close(); });
     document.addEventListener("click", e => { if (!form.contains(e.target)) close(); });
   }
   document.querySelectorAll("form.search").forEach(attach);
@@ -87,67 +82,29 @@
     navigator.clipboard.writeText(b.dataset.copy).then(() => { const t = b.textContent; b.textContent = "Copied"; setTimeout(() => b.textContent = t, 1200); });
   });
 
-  // ---------- the browser (browse.html) ----------
-  const meta = document.getElementById("meta-body"), tree = document.getElementById("tree");
-  const termLink = (d, id) => d.byId[id] ? `<a href="#${id}">${esc(d.byId[id].t)}</a>` : esc(id);
-  const links = (d, ids) => ids && ids.length ? ids.map(id => termLink(d, id)).join(", ") : "none";
-  const row = (k, v) => `<tr><th>${k}</th><td>${v}</td></tr>`;
-
-  // scroll the tree panel only, never the page
-  const reveal = el => { const r = el.getBoundingClientRect(), t = tree.getBoundingClientRect(); tree.scrollTop += r.top - t.top - tree.clientHeight / 3; };
-  function mark(id) {
+  // ---------- browse.html ----------
+  const tree = document.getElementById("tree"), results = document.getElementById("results");
+  function showInTree(id) {                                             // from a term page's "Show in the tree" button
     tree.querySelectorAll("a.cur").forEach(a => a.classList.remove("cur"));
     const a = tree.querySelector(`a[data-id="${id}"]`); if (!a) return;
     for (let el = a.parentElement; el && el !== tree; el = el.parentElement) if (el.tagName === "DETAILS") el.open = true;
-    a.classList.add("cur"); reveal(a);
+    a.classList.add("cur"); a.scrollIntoView({ block: "center" });
   }
-  function showTerm(d, c) {
-    const iri = d.base + "terms/" + c.id;
-    const change = d.repo + "/issues/new?template=change-term.yml&title=" + encodeURIComponent("[Change] " + c.id + " " + c.t) + "&term_id=" + c.id;
-    let rows;
-    if (c.dep) {
-      rows = row("ID", `<code>${c.id}</code>`) + row("Name", esc(c.t)) + row("Status", '<span class="status retired">retired</span> in version ' + esc(c.v)) +
-        row("Replaced by", c.by ? termLink(d, c.by) : "No successor (concept dropped)") + row("Reason", esc(c.why)) + row("Facet", esc(c.f));
-    } else {
-      const rels = (c.rel || []).map(r => `<span class="k">${esc(r[0])}</span>${termLink(d, r[1])}`).join("<br>");
-      const src = c.src ? `<div class="src">Source: ${esc(c.src)}${(c.u || []).map(u => ` · <a href="${esc(u)}">reference</a>`).join("")}</div>` : "";
-      rows = row("ID", `<code>${c.id}</code>`) +
-        row("Address", `<a href="${iri}">${iri}</a><button class="copy" data-copy="${iri}">Copy</button><div class="src">Planned permanent address: ${esc(d.future + c.id)}</div>`) +
-        row("Name", esc(c.t)) + row("Definition", esc(c.d) + src) +
-        row("Synonyms", c.s && c.s.length ? esc(c.s.join(", ")) : "none") +
-        row("Facet", `<a href="#facet-${c.fs}">${esc(c.f)}</a>`) + row("Pathway stage", esc(c.st)) +
-        row("Broader", c.p ? termLink(d, c.p) : "Top concept of the facet") + row("Narrower", links(d, d.kids[c.id])) +
-        (rels ? row("Relations", rels) : "") + row("Climate area", esc(c.a)) +
-        row("Tagging role", c.r === "Stand-alone" ? "Stand-alone: counts on its own." : "Context-dependent: counts only when " + esc(c.cr)) +
-        row("Review status", `<span class="status${c.rv === d.review_ext ? " ext" : ""}">${esc(c.rv)}</span> <span class="src">${esc(d.review[c.rv] || "")}</span>`) +
-        (c.ex ? row("Example of use", esc(c.ex)) : "") + row("Provenance", esc(c.pv));
-    }
-    meta.innerHTML = `<p class="src">${esc(c.f)} · ${esc(c.id)}</p><h2>${esc(c.t)}</h2>
-      <div class="actions"><a class="btn primary" href="terms/${c.id}.html">Open the term page</a>${c.dep ? "" : `<a class="btn" href="${change}">Propose a change</a>`}</div>
-      <table class="meta">${rows}</table>`;
-    mark(c.id); document.title = c.t + " · CGIAR Climate Taxonomy";
-  }
-  function showFacet(d, slug) {
-    const f = d.facets.find(x => x.slug === slug); if (!f) return;
-    const det = document.getElementById("facet-" + slug); if (det) { det.open = true; reveal(det); }
-    meta.innerHTML = `<p class="src">Facet · prefix ${esc(f.prefix)}</p><h2>${esc(f.name)}</h2><p class="def">${esc(f.def)}</p>
-      <p>${f.n} terms, ${f.top.length} top concepts:</p><p>${links(d, f.top)}</p>`;
+  function showFacet(slug) {
+    const det = document.getElementById("facet-" + slug); if (!det) return;
+    det.open = true; det.scrollIntoView({ block: "start" });
   }
   async function showResults(q) {
     const d = await load(), res = search(d, q, 60);
-    meta.innerHTML = `<h2>Search: ${esc(q)}</h2><p class="src">${res.length ? res.length + (res.length === 60 ? "+" : "") + " matching terms and synonyms" : "No term or synonym matches."}</p>
+    results.innerHTML = `<h2>Search: ${esc(q)}</h2><p class="src">${res.length ? "Terms and synonyms that match. Choose one to open its page." : "No term or synonym matches."}</p>
       <div class="results">${res.map(r => line(r, q)).join("")}</div>`;
+    results.hidden = false;
+    const input = document.querySelector("form.hsearch input"); if (input) input.value = q;
   }
-  async function browse() {
-    const d = await load();
-    const show = () => {
-      const h = decodeURIComponent(location.hash.slice(1));
-      if (h.startsWith("facet-")) return showFacet(d, h.slice(6));
-      if (h && d.byId[h]) return showTerm(d, d.byId[h]);
-      const q = new URLSearchParams(location.search).get("q");
-      if (q) { document.querySelector("form.hsearch input").value = q; return showResults(q); }
-    };
-    window.addEventListener("hashchange", show); window.addEventListener("popstate", show); show();
+  function route() {
+    const h = decodeURIComponent(location.hash.slice(1)), q = new URLSearchParams(location.search).get("q");
+    if (q) showResults(q); else results.hidden = true;
+    if (h.startsWith("facet-")) showFacet(h.slice(6)); else if (h) showInTree(h);
   }
-  if (PAGE === "browse" && meta && tree) browse();
+  if (PAGE === "browse" && tree && results) { window.addEventListener("hashchange", route); window.addEventListener("popstate", route); route(); }
 })();

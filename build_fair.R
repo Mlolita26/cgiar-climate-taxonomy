@@ -259,15 +259,29 @@ write_lines(c(
 cat("Wrote dist/climate-taxonomy.csv and CHANGELOG.md\n")
 
 # 5. Site: the page shell, the data for search and browsing, one page per term, and the main pages -------------------
-# The look follows the established ontology sites (Disease Ontology in particular): a menu, a search box on every page,
-# a browser with the tree on the left and the term on the right. docs/style.css and docs/site.js are written by hand.
+# The structure follows the established ontology sites (Disease Ontology in particular): a menu, a search box on every
+# page, a browse page and one page per term. The look ("climate atlas": navy, warming stripes, IBM Plex fonts served from
+# docs/fonts) is in docs/style.css; docs/site.js does the search. Both are written by hand.
+# Line icons drawn for this site (24 x 24, stroked), used on the home page and on buttons
+ICONS <- c(
+  search   = '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/>',
+  browse   = '<rect x="3" y="3" width="7" height="5" rx="1.2"/><rect x="14" y="10" width="7" height="5" rx="1.2"/><rect x="14" y="17" width="7" height="4.5" rx="1.2"/><path d="M6.5 8v11.2H14M6.5 12.5H14"/>',
+  download = '<path d="M12 3v12m-5-5 5 5 5-5M4 20h16"/>',
+  propose  = '<path d="M4 5h16v11H10l-4.5 4v-4H4z"/><path d="M12 7.8v5.4M9.3 10.5h5.4"/>',
+  cite     = '<path d="M4.5 17.5c2.6-1 4.5-3 4.5-6.5V6.5H4.5v4.8H9M13.5 17.5c2.6-1 4.5-3 4.5-6.5V6.5h-4.5v4.8H18"/>',
+  releases = '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+  about    = '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.6v.1"/>',
+  brain    = '<path d="M4 6h16M4 11h8M4 16h5"/><circle cx="16.5" cy="15" r="3.5"/><path d="m19 17.5 2.5 2.5"/>',
+  review   = '<path d="M10 6h10M10 12h10M10 18h10"/><path d="m3.5 6 1.5 1.5 2.8-2.8M3.5 12l1.5 1.5 2.8-2.8M3.5 18l1.5 1.5 2.8-2.8"/>',
+  edit     = '<path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="m14.5 7.5 3 3"/>')
+icon <- function(n) paste0('<svg class="i" viewBox="0 0 24 24" aria-hidden="true">', ICONS[[n]], "</svg>")
+STRIPE_COLOURS <- c("#08306b", "#08519c", "#2171b5", "#4292c6", "#6baed6", "#9ecae1", "#fc9272", "#fb6a4a", "#ef3b2c", "#cb181d", "#a50f15")
 h <- function(x) x |> str_replace_all("&", "&amp;") |> str_replace_all("<", "&lt;") |> str_replace_all(">", "&gt;")
 by_label <- function(ids) ids[order(concepts$term[match(ids, concepts$id)])]
 link <- function(ids) if (length(ids)) paste0(glue('<a href="{ids}.html">{h(concepts$term[match(ids, concepts$id)])}</a>'), collapse = ", ") else "none"
 mrow <- function(k, v) glue("<tr><th>{k}</th><td>{v}</td></tr>")
 change_url <- function(id, term) paste0(REPO, "/issues/new?template=change-term.yml&title=", URLencode(paste0("[Change] ", id, " ", term), reserved = TRUE), "&term_id=", id)
 facet_slug <- function(f) coalesce(facets$slug[match(f, facets$facet)], "")
-facet_prefix <- map_chr(facets$facet, \(f) names(sort(table(str_extract(concepts$id[concepts$facet == f], "^[A-Z]+")), decreasing = TRUE))[1])
 
 PAGE <- read_file("templates/page.html")                        # the shell every page shares; <<...>> are filled by glue
 NAV  <- c(browse = "Browse", downloads = "Downloads", releases = "Releases", contribute = "Contribute", about = "About", tools = "Tools")
@@ -276,25 +290,15 @@ band_html <- function(title, sub = "", crumbs = "") glue('<section class="band">
 page <- function(title, body, depth = "", pageid = "", band = band_html(h(title))) glue(PAGE, .open = "<<", .close = ">>")
 template <- function(file) glue(read_file(file.path("templates", file)), .open = "<<", .close = ">>", .envir = globalenv())
 
-# 5a. Data for the search box and the browser (read by docs/site.js)
+# 5a. Data for the search box (read by docs/site.js): identifier, label, synonyms and facet of every term
 dir.create("docs/data", showWarnings = FALSE, recursive = TRUE)
 site_data <- list(
-  version = VERSION, base = BASE_IRI, future = FUTURE_IRI, repo = REPO, review = as.list(REVIEW), review_ext = names(REVIEW)[1],
-  facets = pmap(list(facets$facet, facets$facet_def, facets$slug, facet_prefix), \(f, d, s, p) list(
-    slug = s, name = f, def = d, prefix = p, n = sum(concepts$facet == f), top = I(by_label(concepts$id[concepts$facet == f & is.na(concepts$parent_id)])))),
-  concepts = pmap(concepts, function(id, term, synonyms, facet, parent_id, definition, source, urls, stage, area, role, rule, example, prov_class, review, ...) {
-    rels <- relations |> filter(id == !!id)
-    compact(list(id = id, t = term, s = if (length(synonyms)) I(synonyms), f = facet, fs = facet_slug(facet), p = if (!is.na(parent_id)) parent_id,
-                 d = definition, src = if (nzchar(source)) source, u = if (length(urls)) I(urls), st = stage, a = area, r = role,
-                 cr = if (nzchar(rule)) rule, rv = review, ex = if (nzchar(example)) example, pv = prov_class,
-                 rel = if (nrow(rels)) map2(rels$type, rels$target, \(a, b) c(a, b))))
-  }),
-  retired = pmap(retired, \(ID, Term, Facet, successor, reason, retired_in) compact(list(
-    id = ID, t = Term, f = Facet, by = if (!is.na(successor)) successor, why = reason, v = retired_in)))
-)
+  version  = VERSION,
+  concepts = pmap(list(concepts$id, concepts$term, concepts$synonyms, concepts$facet), \(id, t, s, f) compact(list(id = id, t = t, s = if (length(s)) I(s), f = f))),
+  retired  = pmap(list(retired$ID, retired$Term, retired$Facet), \(id, t, f) list(id = id, t = t, f = f)))
 write_json(site_data, "docs/data/terms.json", auto_unbox = TRUE, null = "null")
 
-# 5b. One page per term: the band shows the path from the facet down, the body a metadata table as on the browser
+# 5b. One page per term: the band shows the path from the facet down, the body a table of the term's details
 term_band <- function(id, title, facet, tag = "") {
   anc <- character(); p <- concepts$parent_id[concepts$id == id]
   while (length(p) && !is.na(p)) { anc <- c(p, anc); p <- concepts$parent_id[concepts$id == p] }
@@ -322,7 +326,7 @@ pwalk(concepts, function(id, term, synonyms, facet, parent_id, definition, sourc
     if (nzchar(example)) mrow("Example of use", h(example)),
     mrow("Provenance", h(prov_class))
   )
-  body <- glue('<div class="actions"><a class="btn primary" href="../browse.html#{id}">Show in the tree</a><a class="btn" href="{change_url(id, term)}">Propose a change</a><a class="btn" href="../downloads.html">Download the vocabulary</a></div>
+  body <- glue('<div class="actions"><a class="btn primary" href="../browse.html#{id}">{icon("browse")}Show in the tree</a><a class="btn" href="{change_url(id, term)}">{icon("edit")}Propose a change</a><a class="btn" href="../downloads.html">{icon("download")}Download the vocabulary</a></div>
 <table class="meta">{paste(rows, collapse = "\n")}</table>
 <script type="application/ld+json">{toJSON(list("@context" = context, "@graph" = list(concept_json(id, term, synonyms, facet, parent_id, definition, source, urls, stage, area, role, rule, is_hazard, example, prov_class, provenance, review))), auto_unbox = TRUE, null = "null")}</script>')
   write_file(page(term, body, "../", "browse", term_band(id, term, facet)), glue("docs/terms/{id}.html"))
@@ -338,11 +342,20 @@ pwalk(retired, function(ID, Term, Facet, successor, reason, retired_in) {
 
 # 5c. Values the main pages show
 n_syn <- sum(lengths(concepts$synonyms))
-count_rows <- function(values, labels = values) paste0("<tr><td>", h(labels), '</td><td class="num">', map_int(values, \(v) sum(concepts$review == v | concepts$area == v)), "</td></tr>", collapse = "")
-facet_rows <- paste0('<tr><td><a href="browse.html#facet-', facets$slug, '">', h(facets$facet), '</a></td><td class="num">', map_int(facets$facet, \(f) sum(concepts$facet == f)), "</td></tr>", collapse = "")
-facet_def_rows <- paste0('<tr><td><a href="#facet-', facets$slug, '">', h(facets$facet), "</a></td><td>", h(facets$facet_def), '</td><td class="num">', map_int(facets$facet, \(f) sum(concepts$facet == f)), "</td></tr>", collapse = "")
-area_rows   <- count_rows(sort(unique(concepts$area)))
-review_rows <- count_rows(names(REVIEW))
+# the home page: one button per destination, coloured from the cool to the warm end of the warming stripes
+tiles <- tribble(~href, ~icon, ~title, ~text,
+  "browse.html",    "browse",   "Browse the taxonomy", "Every facet and its terms, as a tree, with definitions and their sources.",
+  "downloads.html", "download", "Download",            "The vocabulary in SKOS (Turtle and JSON-LD) and as a spreadsheet.",
+  "contribute.html","propose",  "Propose a term",      "Add, change or retire a term. Every decision is recorded with its reason.",
+  "about.html#cite","cite",     "Cite",                "How to cite the taxonomy in a report or a paper.",
+  "releases.html",  "releases", "Release notes",       "What changed in each version, and what stayed.",
+  "about.html",     "about",    "About",               "What the taxonomy is, who maintains it, and how FAIR it is.",
+  "brain/",         "brain",    "Taxonomy brain",      "Paste a text and see which words are taxonomy terms or synonyms.",
+  "review/",        "review",   "Tagging review",      "Reviewers check how CGIAR results were tagged with the taxonomy.") |>
+  mutate(c = c("#08306b", "#08519c", "#2171b5", "#4292c6", "#ef3b2c", "#cb181d", "#a50f15", "#67000d"),
+         t = rep(c("#e6eef8", "#fdebe7"), each = 4))
+home_tiles <- paste0('<a class="tile" href="', tiles$href, '" style="--c:', tiles$c, ";--t:", tiles$t, '"><span class="ic">', map_chr(tiles$icon, icon),
+                     "</span><b>", tiles$title, "</b><span>", tiles$text, "</span></a>", collapse = "")
 review_defs <- paste0('<tr><td><span class="status', if_else(names(REVIEW) == names(REVIEW)[1], " ext", ""), '">', names(REVIEW), "</span></td><td>", h(REVIEW), '</td><td class="num">', map_int(names(REVIEW), \(r) sum(concepts$review == r)), "</td></tr>", collapse = "")
 examples <- paste0(glue('<a href="terms/{ids}.html">{h(concepts$term[match(ids, concepts$id)])}</a>', ids = concepts$id[match(c("Drought", "Seed system", "Index insurance", "Agroforestry", "Smallholder farmer"), concepts$term)] |> discard(is.na)), collapse = " · ")
 fair_rows  <- read_csv("source/fair_checklist.csv", show_col_types = FALSE)   # Cox et al. 2021, Table 1, with our status
@@ -351,18 +364,19 @@ fair_table <- paste0("<tr><td class=p>", fair_rows$principle, "</td><td>", h(fai
 cite_doi   <- if (!nzchar(DOI)) "DOI to follow." else if (str_starts(DOI, "10.5072")) glue('Test DOI (Zenodo Sandbox, not resolvable outside it): <a href="https://sandbox.zenodo.org/records/{str_extract(DOI, "[0-9]+$")}">{DOI}</a>. A permanent DOI comes with the first non-draft release.') else glue('<a href="https://doi.org/{DOI}">doi:{DOI}</a>')
 citation   <- glue("Nowak, A. and Muller, L. ({str_sub(PUBLISHED, 1, 4)}). {h(TITLE)}, version {VERSION}. CGIAR MELIAF. {cite_doi}")
 
-# the tree of the browser: each facet, then its top concepts, children indented under their parent
+# the browse page: each facet is a dropdown showing its definition; inside, its terms as a tree. A term opens its page.
 tree <- function(ids) {
   if (!length(ids)) return("")
   items <- map_chr(by_label(ids), function(i) {
     kids <- children$kids[match(i, children$parent_id)][[1]]
-    a <- glue('<a href="#{i}" data-id="{i}">{h(concepts$term[concepts$id == i])}</a>')
-    if (length(kids)) glue('<li><details><summary>{a}<span class="n">{length(kids)}</span></summary>{tree(kids)}</details></li>') else glue("<li>{a}</li>")
+    a <- glue('<a href="terms/{i}.html" data-id="{i}">{h(concepts$term[concepts$id == i])}</a>')
+    if (length(kids)) glue('<li><details><summary>{a}</summary>{tree(kids)}</details></li>') else glue("<li>{a}</li>")
   })
   paste0("<ul>", paste(items, collapse = ""), "</ul>")
 }
-browse_tree <- paste(pmap_chr(list(facets$facet, facets$slug), \(f, s) {
-  glue('<details class="facet" id="facet-{s}"><summary>{h(f)}<span class="n">{sum(concepts$facet == f)}</span></summary>{tree(concepts$id[concepts$facet == f & is.na(concepts$parent_id)])}</details>')
+facet_def_clean <- str_remove(facets$facet_def, "\\s*Prefix [A-Z]+_\\.?")     # the prefix note is for editors, not readers
+browse_tree <- paste(pmap_chr(list(facets$facet, facets$slug, facet_def_clean, STRIPE_COLOURS[seq_len(nrow(facets))]), \(f, s, d, col) {
+  glue('<details class="facet" id="facet-{s}" style="--c:{col}"><summary><span class="fname">{h(f)}</span><span class="fdef">{h(d)}</span></summary><div class="tree">{tree(concepts$id[concepts$facet == f & is.na(concepts$parent_id)])}</div></details>')
 }), collapse = "")
 
 # downloads: the files and the columns of the CSV
@@ -411,9 +425,9 @@ md_html <- function(lines) {
 changelog_html <- md_html(read_lines("CHANGELOG.md"))
 
 # 5d. Write the main pages
-hero <- glue('<section class="band hero"><div class="wrap"><h1>{h(TITLE)}</h1><p>A controlled vocabulary for describing climate adaptation and mitigation in agricultural research: {nrow(concepts)} concepts with definitions and their sources, {n_syn} synonyms, {nrow(relations)} typed relations, and the conditions under which a term counts as adaptation or mitigation. Version {VERSION}.</p></div></section>')
+hero <- glue('<section class="band hero"><div class="wrap"><h1>{h(TITLE)}</h1><p>A controlled vocabulary for describing climate adaptation and mitigation in agricultural research. Each concept comes with its definition and source, the other words people use for it, its relations to other concepts, and the conditions under which it counts as adaptation or mitigation.</p></div></section>')
 write_file(page("Home", template("index.html"), "", "home", hero), "docs/index.html")
-write_file(page("Browse", template("browse.html"), "", "browse", band_html("Browse the taxonomy", glue("{nrow(facets)} facets, {nrow(concepts)} terms. Choose a term in the tree, or search above."))), "docs/browse.html")
+write_file(page("Browse", template("browse.html"), "", "browse", band_html("Browse the taxonomy")), "docs/browse.html")
 write_file(page("Downloads", template("downloads.html"), "", "downloads", band_html("Downloads", "The vocabulary in SKOS (Turtle and JSON-LD) and as a CSV, free to reuse.")), "docs/downloads.html")
 write_file(page("Releases", template("releases.html"), "", "releases", band_html("Releases", "What changed in each version.")), "docs/releases.html")
 write_file(page("Contribute", template("contribute.html"), "", "contribute", band_html("Contribute", "Propose to add, change or retire a term.")), "docs/contribute.html")
