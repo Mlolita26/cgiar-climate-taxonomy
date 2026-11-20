@@ -52,13 +52,14 @@ form.search input:focus{outline:2px solid var(--blue);outline-offset:1px;backgro
 
 /* band under the header, with the warming stripes at its foot */
 .band{background:var(--navy);color:#fff;position:relative}
-.band::after{content:"";position:absolute;left:0;right:0;bottom:0;height:8px;background:var(--stripes)}
-.band .wrap{padding-top:28px;padding-bottom:34px}
+.band::after{content:"";position:absolute;left:0;right:0;bottom:0;height:10px;background:var(--stripes)}
+/* every page has the same band: same height, title centred, the same stripes; a term page adds its path above the title */
+.band .wrap{min-height:150px;display:flex;flex-direction:column;justify-content:center;padding-top:20px;padding-bottom:30px}
 .band h1{margin:0;font-size:32px;line-height:1.15;color:#fff}
 .band p{margin:8px 0 0;max-width:70ch;color:#b9c6d9}
 .band .crumbs{font-size:13.5px;margin-bottom:6px;color:#b9c6d9}.band .crumbs a{color:#fff}
 .band .tag{display:inline-block;font-size:12px;border:1px solid currentColor;border-radius:999px;padding:1px 10px;margin-left:10px;vertical-align:middle;opacity:.85}
-.hero .wrap{padding-top:58px;padding-bottom:66px}.hero::after{height:14px}
+.hero .wrap{min-height:290px;padding-top:40px;padding-bottom:60px}
 .hero h1{font-size:44px;font-weight:600;max-width:21ch;letter-spacing:-.02em}.hero p{font-size:18px;max-width:62ch}
 
 body{min-height:100vh;display:flex;flex-direction:column}                /* the footer stays at the bottom of short pages */
@@ -88,6 +89,11 @@ button.copy{font:inherit;font-size:12px;border:1px solid var(--line);background:
 .dot:hover .disc{transform:scale(1.06);box-shadow:0 0 0 6px var(--bg),0 0 0 8px var(--c),0 12px 24px rgba(14,26,43,.18)}
 .dot .txt{font-size:13.5px;line-height:1.4;max-width:15ch}
 .dot:hover{color:var(--ink)}
+/* larger circles on the Contribute page */
+.dots.big{gap:40px 26px;margin-top:20px}
+.dots.big .dot{width:180px;gap:16px}
+.dots.big .disc{width:164px;height:164px;font-size:19px;padding:18px}
+.dots.big .txt{font-size:15px;max-width:17ch}
 
 /* cards (contribute and tools pages) */
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin:12px 0 34px}
@@ -154,4 +160,4 @@ footer p.small{color:#7f8ea6;margin:0}
   table.meta th{width:110px}
   .facets .tree{padding-left:22px}
 }
-@media (max-width:520px){.wrap{padding:0 16px}.dots{gap:24px 18px}header nav a{padding:6px 8px}.bigsearch button{padding:0 16px}}
+@media (max-width:520px){.wrap{padding:0 16px}.dots{gap:24px 18px}.dots.big .dot{width:150px}.dots.big .disc{width:140px;height:140px;font-size:17px}header nav a{padding:6px 8px}.bigsearch button{padding:0 16px}}

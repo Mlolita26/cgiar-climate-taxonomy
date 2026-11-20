@@ -343,7 +343,7 @@ tiles <- tribble(~href, ~title, ~text,
   "brain/",          "Taxonomy brain", "See which words of a text are terms",
   "review/",         "Tagging review", "How CGIAR results were tagged") |>
   mutate(c = c("#08306b", "#08519c", "#1d63a8", "#2f7bbd", "#d94530", "#c3261c", "#a50f15", "#67000d"))
-home_tiles <- paste0('<a class="dot" href="', tiles$href, '" style="--c:', tiles$c, '"><span class="disc">', tiles$title, "</span><span class=\"txt\">", tiles$text, "</span></a>", collapse = "")
+home_tiles <- paste0('<a class="dot" href="', tiles$href, '" title="', tiles$text, '" style="--c:', tiles$c, '"><span class="disc">', tiles$title, "</span></a>", collapse = "")   # the short line shows on hover only
 review_defs <- paste0('<tr><td><span class="status', if_else(names(REVIEW) == names(REVIEW)[1], " ext", ""), '">', names(REVIEW), "</span></td><td>", h(REVIEW), '</td><td class="num">', map_int(names(REVIEW), \(r) sum(concepts$review == r)), "</td></tr>", collapse = "")
 examples <- paste0(glue('<a href="terms/{ids}.html">{h(concepts$term[match(ids, concepts$id)])}</a>', ids = concepts$id[match(c("Drought", "Seed system", "Index insurance", "Agroforestry", "Smallholder farmer"), concepts$term)] |> discard(is.na)), collapse = " · ")
 fair_rows  <- read_csv("source/fair_checklist.csv", show_col_types = FALSE)   # Cox et al. 2021, Table 1, with our status
@@ -393,8 +393,8 @@ forms <- tribble(~file, ~name, ~what,
   "retire-term.yml",  "Retire a term",   "A term that should leave, or merge into another",
   "report-error.yml", "Report an error", "A mistake in the data, a page or a download") |>
   mutate(c = c("#08306b", "#1d63a8", "#2f7bbd", "#d94530", "#a50f15"))
-form_dots <- paste0('<a class="dot" href="', REPO, "/issues/new?template=", forms$file, '" style="--c:', forms$c, '"><span class="disc">', forms$name,
-                    '</span><span class="txt">', forms$what, "</span></a>", collapse = "")
+form_dots <- paste0('<a class="dot" href="', REPO, "/issues/new?template=", forms$file, '" title="', forms$what, '" style="--c:', forms$c, '"><span class="disc">', forms$name,
+                    "</span></a>", collapse = "")
 
 # releases: one short entry per version; the full list of changes is in CHANGELOG.md and in each GitHub release
 releases <- tribble(~version, ~tag, ~when, ~what,
@@ -409,11 +409,11 @@ release_rows <- paste0('<section class="release"><h2>', releases$version, '</h2>
 hero <- glue('<section class="band hero"><div class="wrap"><h1>{h(TITLE)}</h1><p>A controlled vocabulary for describing climate adaptation and mitigation in agricultural research.</p></div></section>')
 write_file(page("Home", template("index.html"), "", "home", hero), "docs/index.html")
 write_file(page("Browse", template("browse.html"), "", "browse", band_html("Browse the taxonomy")), "docs/browse.html")
-write_file(page("Downloads", template("downloads.html"), "", "downloads", band_html("Downloads", "The vocabulary in SKOS (Turtle and JSON-LD) and as a CSV, free to reuse.")), "docs/downloads.html")
+write_file(page("Downloads", template("downloads.html"), "", "downloads", band_html("Downloads")), "docs/downloads.html")
 write_file(page("Releases", template("releases.html"), "", "releases", band_html("Releases")), "docs/releases.html")
 write_file(page("Contribute", template("contribute.html"), "", "contribute", band_html("Contribute")), "docs/contribute.html")
-write_file(page("About", template("about.html"), "", "about", band_html("About the taxonomy", "What it is, who maintains it, how to cite it, and how FAIR it is.")), "docs/about.html")
-write_file(page("Method", template("method.html"), "", "about", band_html("Method", "How the taxonomy became a FAIR vocabulary.")), "docs/method.html")
+write_file(page("About", template("about.html"), "", "about", band_html("About the taxonomy")), "docs/about.html")
+write_file(page("Method", template("method.html"), "", "about", band_html("Method")), "docs/method.html")
 invisible(file.create("docs/.nojekyll"))
 dir.create("docs/dist", showWarnings = FALSE)
 file.copy(list.files("dist", full.names = TRUE), "docs/dist", overwrite = TRUE) |> invisible()
