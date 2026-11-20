@@ -360,9 +360,10 @@ const V6 = (() => {
     const res = S.cur, R = S.rev, submitted = S.mine[res.id] && S.mine[res.id].submitted;
     $("#main").innerHTML = navBar(res) + storeNotice() + (submitted ? `<div class="notice">Submitted. You can still change it until the second reviewer submits.</div>` : "")
     + `<div class="cols">${textBlock(res, R.added_terms, true)}<div class="side v6">
-      <section class="card intro" id="v6-intro"><p><b>Check each answer below.</b> The answers start as extracted from the text: agree, or disagree (choose the right answer where there is a list; the note is optional). Each disagreement shows at once in the yellow box at the end. Then submit.
+      <section class="card intro" id="v6-intro"><p><b>The review follows the four questions of the tagging standard.</b> The answers start as extracted from the text: agree, or disagree (choose the right answer where there is a list; the note is optional). Each disagreement shows at once in the yellow box at the end. Then submit.
         <a href="rules.html#what-to-do" target="_blank" rel="noopener">How to review</a></p>
         <div class="flags small" id="v6-flags"><b>Flags</b> ${help("flags")} ${(res.review_flags || []).length ? res.review_flags.map(f => `<span class="flag">${esc(f)}</span>`).join("") : `<span class="muted">none</span>`}</div></section>
+      ${qHead(1, "What climate-related information does the text contain?", "Section 3, Rules 1 to 3: the taxonomy terms in the text, and whether they concern adaptation, mitigation, both or neither")}
       <section class="card flush" id="v6-tags"></section>
       <section class="card" id="v6-dropped"></section>
       <section class="card" id="v6-add"><h3>Add a term</h3>
@@ -371,9 +372,13 @@ const V6 = (() => {
         <div id="added" class="chips"></div>
         <a href="#" id="brw" class="small">Browse the taxonomy</a>
         <div id="tree" class="tree" hidden></div></section>
+      <section class="card" id="v6-info"></section>
+      ${qHead(2, "What climate pathway does the text describe?", "Section 4, Rules 4 to 6: climate rationale, geography, system or population, intervention and result, and the links between them")}
       <section class="card" id="v6-path"></section>
+      ${qHead(3, "Is the information consistent with the PRMS climate marker?", `Section 5, Rules 7 to 9: the climate objective, measure and purpose described, compared with the PRMS marker <b>${esc(res.marker || "not provided")}</b>. The answer is in the yellow box at the end.`)}
       <section class="card" id="v6-kind"></section>
       ${AREAS.map(ax => `<section class="card area" id="v6-area-${ax}"></section>`).join("")}
+      ${qHead(4, "What gaps or errors in the taxonomy does tagging reveal?", "Section 6, Rules 10 to 12: missing terms or synonyms, doubtful matches, classifications to review")}
       <section class="card" id="v6-props"><h3>Proposed new terms and synonyms ${help("proposals")}</h3><div id="v6-found"></div>
         <div class="small muted" style="margin-top:10px">Your proposals (search under Add a term; if the term is not in the taxonomy, propose it there)</div><div id="props" class="chips"></div></section>
       <section class="card" id="v6-comment"><h3>Comment</h3><textarea id="cm" placeholder="Anything the others should know">${esc(R.comment || "")}</textarea></section>
@@ -382,8 +387,24 @@ const V6 = (() => {
     </div></div>`;
     const mk = $(".nav .meta span");                   // the PRMS marker in the header line, with its "?"
     if (mk) mk.insertAdjacentHTML("beforeend", " " + help("marker"));
-    renderGives(); renderTags(); renderDropped(); renderPath(); renderKind(); AREAS.forEach(renderArea); renderFindings();
+    renderGives(); renderTags(); renderDropped(); renderInfo(); renderPath(); renderKind(); AREAS.forEach(renderArea); renderFindings();
     wire();
+  }
+  // the heading of one of the four questions of the standard
+  const qHead = (n, title, sub) => `<div class="qsec" id="v6-q${n}"><span class="qn">${n}</span><div><h2>${esc(title)}</h2><div class="small muted">${sub}</div></div></div>`;
+  const termList = l => l.length ? l.map(x => `${esc(x.name)} <span class="muted">(${esc(w(x.how))})</span>`).join(", ") : `<span class="muted">none</span>`;
+  // answer to question 1: the terms that count for each area, and whether the text concerns adaptation, mitigation, both or neither
+  function renderInfo() {
+    const res = S.cur, R = S.rev, has = {};
+    const rows = AREAS.map(ax => {
+      const aiT = (res.tags || []).filter(t => counts(t[ax])).map(t => ({ id: t.concept_id, name: t.concept_name, how: t[ax] }));
+      const myT = countsFor(res, R, ax); has[ax] = myT.length > 0;
+      const same = aiT.length === myT.length && aiT.every((x, i) => x.id === myT[i].id && x.how === myT[i].how);
+      return `<tr><th>${AX[ax]}</th><td>${termList(aiT)}${same ? "" : `<div class="small you">With your changes: ${termList(myT)}</div>`}</td></tr>`; }).join("");
+    const area = has.adaptation && has.mitigation ? "adaptation and mitigation" : has.adaptation ? "adaptation" : has.mitigation ? "mitigation" : "neither adaptation nor mitigation";
+    $("#v6-info").innerHTML = `<h3>Climate information found ${help("climate-information")}</h3>
+      <table class="pway small"><thead><tr><th></th><th>Terms that count (stand-alone or anchored)</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="small">The text contains climate information on: <b>${area}</b>. <span class="muted">It follows from the tags above; change them there.</span></div>`;
   }
 
   // near Submit, always open in a yellow frame (the final decision): the levels, marker answer and outcome that follow
@@ -407,16 +428,9 @@ const V6 = (() => {
 
   function renderArea(ax) {
     const res = S.cur, R = S.rev, ai = res[ax] || {}, r = R.areas[ax], me = reviewResult(res, R);
-    const aiTerms = (res.tags || []).filter(t => counts(t[ax])).map(t => ({ id: t.concept_id, name: t.concept_name, how: t[ax] }));
-    const myTerms = countsFor(res, R, ax), info = myTerms.length > 0, live = info || !!ai.information;
-    const termList = l => l.length ? l.map(x => `${esc(x.name)} <span class="muted">(${esc(w(x.how))})</span>`).join(", ") : `<span class="muted">none</span>`;
-    const same = aiTerms.length === myTerms.length && aiTerms.every((x, i) => x.id === myTerms[i].id && x.how === myTerms[i].how);
+    const info = countsFor(res, R, ax).length > 0;
     // every question is shown for both areas, empty when nothing was extracted, so a reviewer can disagree everywhere
-    let h = `<div class="ah"><span class="ax">${AX[ax]}</span></div>
-      <div class="q1"><div class="qh">Climate information ${help("climate-information")} <span class="muted small">terms that count for ${ax}</span></div>
-        <div class="small">${termList(aiTerms)}</div>
-        ${same ? "" : `<div class="small you">With your changes: ${termList(myTerms)}</div>`}
-        <div class="muted small">Change them in the tag table above.</div></div>`;
+    let h = `<div class="ah"><span class="ax">${AX[ax]}</span> <span class="small muted">Rule 7: climate objective, measure and purpose</span></div>`;
     // climate function
     const fv = ai.climate_function || "";
     const fShown = fv ? `<b>${esc(w(fv))}</b>${ai.function_quote ? ` “${esc(cut(ai.function_quote, 220))}”` : ""}` : `<span class="muted">none</span>`;
@@ -587,7 +601,7 @@ const V6 = (() => {
       : `<span class="muted small">None. Search for a term; if it is not in the taxonomy you can propose it.</span>`;
   }
 
-  function refreshAll() { renderGives(); AREAS.forEach(renderArea); }
+  function refreshAll() { renderGives(); renderInfo(); AREAS.forEach(renderArea); }
   function refreshText() {
     const box = $(".text"), y = box.scrollTop;
     box.outerHTML = textBlock(S.cur, S.rev.added_terms, true); $(".text").scrollTop = y; wireMarks();
