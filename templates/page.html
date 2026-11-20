@@ -6,7 +6,7 @@
 <body data-root="<<depth>>" data-page="<<pageid>>">
 <div class="banner">Draft for review. Term identifiers are stable; their web addresses are provisional. Licence proposed: CC BY 4.0.</div>
 <header class="top"><div class="wrap">
-<a class="brand" href="<<depth>>index.html" aria-label="Home"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="11" cy="12" r="5"/><circle cx="29" cy="10" r="4"/><circle cx="20" cy="28" r="7"/><circle cx="33" cy="27" r="3"/><path d="M11 12 20 28M29 10 20 28M20 28 33 27M11 12 29 10"/></svg><span><b>CGIAR Climate</b>Taxonomy</span></a>
+<a class="brand" href="<<depth>>index.html" aria-label="Home"><img src="<<depth>>img/cgiar-logo.svg" alt="CGIAR" width="110" height="40"><span>Climate Adaptation and<br>Mitigation Taxonomy</span></a>
 <nav><<nav_html(pageid, depth)>></nav>
 <form class="search hsearch" action="<<depth>>browse.html" role="search"><<icon("search")>><input name="q" type="search" placeholder="Search a term" aria-label="Search a term or synonym" autocomplete="off"><div class="sugg" hidden></div></form>
 </div></header>
@@ -17,5 +17,5 @@
 <div><h3>Take part</h3><a href="<<depth>>contribute.html">Propose a term</a><a href="<<REPO>>/blob/main/GOVERNANCE.md">Governance</a><a href="<<REPO>>/blob/main/CODE_OF_CONDUCT.md">Code of conduct</a></div>
 <div><h3>About</h3><a href="<<depth>>about.html">About the taxonomy</a><a href="<<depth>>about.html#cite">How to cite</a><a href="<<depth>>method.html">Method</a></div>
 <div><h3>Repository</h3><a href="<<REPO>>">GitHub</a><a href="<<REPO>>/issues">Issues</a><a href="<<REPO>>/blob/main/LICENSE.md">Licence</a></div>
-</div><p class="wrap small"><<h(TITLE)>> · version <<VERSION>> · Custodian: <<h(CUSTODIAN)>></p></footer>
+</div><div class="wrap foot"><img src="<<depth>>img/cgiar-logo-white.svg" alt="CGIAR" width="96" height="35"><p class="small"><<h(TITLE)>> · version <<VERSION>></p></div></footer>
 </body></html>

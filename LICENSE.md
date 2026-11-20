@@ -25,4 +25,8 @@ the vocabulary cites the source of every definition.
 Icons from the Lexicon are **not** part of this vocabulary and are not covered by this licence.
 Where a term carries an icon link, the icon is served by its owner under its own terms.
 
+The CGIAR logo on the web site (`docs/img/`, taken from cgiar.org) belongs to CGIAR and is used
+under CGIAR's brand rules; it is not covered by this licence. The IBM Plex fonts (`docs/fonts/`)
+are under the SIL Open Font License (`docs/fonts/OFL.txt`).
+
 © 2026 Alliance of Bioversity International and CIAT, for the CGIAR MELIAF project.
