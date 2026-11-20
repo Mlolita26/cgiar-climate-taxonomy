@@ -343,7 +343,7 @@ tiles <- tribble(~href, ~title, ~text,
   "brain/",          "Taxonomy brain", "See which words of a text are terms",
   "review/",         "Tagging review", "How CGIAR results were tagged") |>
   mutate(c = c("#08306b", "#08519c", "#1d63a8", "#2f7bbd", "#d94530", "#c3261c", "#a50f15", "#67000d"))
-home_tiles <- paste0('<a class="dot" href="', tiles$href, '" title="', tiles$text, '" style="--c:', tiles$c, '"><span class="disc">', tiles$title, "</span></a>", collapse = "")   # the short line shows on hover only
+home_tiles <- paste0('<a class="dot" href="', tiles$href, '" style="--c:', tiles$c, '"><span class="disc">', tiles$title, '</span><span class="txt">', tiles$text, "</span></a>", collapse = "")
 review_defs <- paste0('<tr><td><span class="status', if_else(names(REVIEW) == names(REVIEW)[1], " ext", ""), '">', names(REVIEW), "</span></td><td>", h(REVIEW), '</td><td class="num">', map_int(names(REVIEW), \(r) sum(concepts$review == r)), "</td></tr>", collapse = "")
 examples <- paste0(glue('<a href="terms/{ids}.html">{h(concepts$term[match(ids, concepts$id)])}</a>', ids = concepts$id[match(c("Drought", "Seed system", "Index insurance", "Agroforestry", "Smallholder farmer"), concepts$term)] |> discard(is.na)), collapse = " · ")
 fair_rows  <- read_csv("source/fair_checklist.csv", show_col_types = FALSE)   # Cox et al. 2021, Table 1, with our status
@@ -393,8 +393,8 @@ forms <- tribble(~file, ~name, ~what,
   "retire-term.yml",  "Retire a term",   "A term that should leave, or merge into another",
   "report-error.yml", "Report an error", "A mistake in the data, a page or a download") |>
   mutate(c = c("#08306b", "#1d63a8", "#2f7bbd", "#d94530", "#a50f15"))
-form_dots <- paste0('<a class="dot" href="', REPO, "/issues/new?template=", forms$file, '" title="', forms$what, '" style="--c:', forms$c, '"><span class="disc">', forms$name,
-                    "</span></a>", collapse = "")
+form_dots <- paste0('<a class="dot" href="', REPO, "/issues/new?template=", forms$file, '" style="--c:', forms$c, '"><span class="disc">', forms$name,
+                    '</span><span class="txt">', forms$what, "</span></a>", collapse = "")
 
 # releases: one short entry per version; the full list of changes is in CHANGELOG.md and in each GitHub release
 releases <- tribble(~version, ~tag, ~when, ~what,
