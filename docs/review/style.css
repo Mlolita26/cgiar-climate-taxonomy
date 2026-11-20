@@ -231,12 +231,9 @@ input.wide { width: 100%; margin-top: 6px; }
 .seg.ch input:checked + span { background: #B7791F; color: #fff; }
 .seg span small { font-size: 10.5px; opacity: .75; margin-left: 3px; }
 
-#v6-pathway > summary, #v6-gives > summary { cursor: pointer; list-style: none; color: var(--green-dk); }
-#v6-pathway > summary::-webkit-details-marker, #v6-gives > summary::-webkit-details-marker { display: none; }
-#v6-pathway > summary::before, #v6-gives > summary::before { content: "▸ "; color: var(--faint); }
-#v6-pathway[open] > summary::before, #v6-gives[open] > summary::before { content: "▾ "; }
-#v6-gives > summary { font-weight: 600; }
-#v6-gives[open] { background: #FAFCFB; }
+/* the final decision: always open, framed in yellow */
+#v6-gives.final { border: 3px solid var(--hl-c); background: #FFFBEA; }
+#v6-gives.final h3 { margin-top: 0; }
 .intro p { margin: 0 0 6px; }
 .intro .flags { margin-top: 4px; }
 

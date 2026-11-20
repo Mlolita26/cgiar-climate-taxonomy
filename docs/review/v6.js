@@ -369,7 +369,7 @@ const V6 = (() => {
       <section class="card" id="v6-props"><h3>Proposed new terms and synonyms ${help("proposals")}</h3><div id="v6-found"></div>
         <div class="small muted" style="margin-top:10px">Your proposals (search under Add a term; if the term is not in the taxonomy, propose it there)</div><div id="props" class="chips"></div></section>
       <section class="card" id="v6-comment"><h3>Comment</h3><textarea id="cm" placeholder="Anything the others should know">${esc(R.comment || "")}</textarea></section>
-      <details class="card gives" id="v6-gives"><summary>What your answers give</summary><div id="v6-gives-b"></div></details>
+      <section class="card gives final" id="v6-gives"><h3>What your answers give <span class="small muted">(the final decision for this result)</span></h3><div id="v6-gives-b"></div></section>
       <div class="actions"><span id="msg" class="small"></span><button id="save">Save draft</button><button class="primary" id="sub">Submit</button></div>
     </div></div>`;
     const mk = $(".nav .meta span");                   // the PRMS marker in the header line, with its "?"
@@ -378,7 +378,8 @@ const V6 = (() => {
     wire();
   }
 
-  // folded near Submit: the levels, marker answer and outcome that follow from the answers (computed, not answered)
+  // near Submit, always open in a yellow frame (the final decision): the levels, marker answer and outcome that follow
+  // from the answers (computed, not answered)
   function renderGives() {
     const res = S.cur, R = S.rev, ai = aiResult(res), me = reviewResult(res, R), box = $("#v6-gives-b");
     if (!box) return;

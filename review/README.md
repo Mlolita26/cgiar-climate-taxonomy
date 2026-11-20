@@ -43,7 +43,7 @@ that count (an area is stand-alone or anchored) and tags that do not count (each
 question and value has a "?" toggle with a short explanation and a link to its section of `rules.html` (anchors:
 what-to-do, climate-information, anchors, tags, kind, function, measure, purpose, levels, marker, marker-answer,
 pathway, terms-not-kept, proposals, outcome, agreement, flags). The list shows the ID, the PRMS marker, the title and
-the description. The levels, marker answer and outcome that follow from the answers are folded near Submit ("What
+the description. The levels, marker answer and outcome that follow from the answers are shown near Submit, always open in a yellow frame as the final decision ("What
 your answers give").
 
 In the v6 form the reviewer never chooses a level. The page works out the level of each area (L0 to L3)
