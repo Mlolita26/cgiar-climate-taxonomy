@@ -252,7 +252,7 @@ else:
     TAG_KEEP = ("concept_id", "concept_name", "facet", "role_adaptation", "role_mitigation", "detection_excerpt",
                 "adaptation", "adaptation_anchor_quote", "mitigation", "mitigation_anchor_quote",
                 "pathway_role", "result_level", "status", "status_quote", "intervention_type", "confidence",
-                "anchored_by_text")                  # r17: the term counts because the work is a climate measure
+                "anchored_by_text", "adaptation_by_text", "mitigation_by_text")   # r17f: counted through the text's anchor, per area
     AREA_KEEP = ("information", "objective", "objective_quote", "measure", "measure_quote", "measure_kind", "purpose",
                  "purpose_basis", "purpose_quote", "claim_without_tags", "level", "rationale", "system_or_population",
                  "intervention", "result", "intervention_type", "link_rationale_intervention", "link_intervention_result",

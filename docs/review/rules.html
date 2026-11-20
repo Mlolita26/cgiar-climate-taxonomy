@@ -137,11 +137,11 @@
   <tr><td>no anchor</td><td>no</td><td>A context-dependent term with no link to climate in the text.</td></tr>
   <tr><td>not relevant</td><td>no</td><td>The taxonomy gives the term no role in this area, or the text does not use it for this area.</td></tr>
 </table></div>
-<p>The anchor is decided by the code, the same way every time (since script r17, 20 Nov 2026):</p>
+<p>The anchor (since script r17f, 20 Nov 2026):</p>
 <ul>
-  <li>A context-dependent term counts for an area when its own sentence holds climate information of that area: a climate word (climate change, drought, flood, heat, emissions, carbon and similar), a stand-alone climate term, or a climate driver said to change ("erratic rainfall").</li>
-  <li>When the AI reading finds a climate measure for the area, every context-dependent term of that area in the text counts: the whole text describes climate work. The tag then shows "anchored by the text".</li>
-  <li>Otherwise only the terms in such a sentence count, so that a passing mention of climate does not make the whole text climate-related.</li>
+  <li>An anchor is a sentence of the text with climate information of the area: a climate word (climate change, drought, flood, heat, emissions, carbon and similar), a stand-alone climate term, or a climate driver said to change ("erratic rainfall").</li>
+  <li>A context-dependent term counts for an area when the text holds an anchor for that area. Its anchor is its own sentence when that sentence holds the climate information, otherwise the first such sentence of the text ("anchored by the text").</li>
+  <li>The AI can veto: when it judges that the term has no climate link in this text (its answer "no anchor" or "not relevant" for the area), the term does not count. This keeps a passing mention of climate from making every term of a long text climate-related.</li>
   <li>A name cannot be an anchor: climate words inside the name of a programme, project, fund or organisation are hidden first.</li>
 </ul>
 </section>
