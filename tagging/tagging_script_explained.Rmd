@@ -9,12 +9,53 @@ output:
     toc_depth: 2
     number_sections: false
     self_contained: true
+    code_folding: hide
     css: explainer.css
 ---
 
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+```{r page-setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+# The code shown under each section is read from the tagging script when this page is rendered, so it always matches the
+# script. Before rendering, the code of the script is extracted (knitr::purl) into a file whose path is given in the
+# environment variable PRMS_CODE. Folder paths and personal names in comments are replaced before the code is shown.
+code_file <- Sys.getenv("PRMS_CODE")
+code_lines <- if (nzchar(code_file) && file.exists(code_file)) readLines(code_file, encoding = "UTF-8", warn = FALSE) else character(0)
+clean <- function(x) {
+  x <- gsub("[A-Za-z]:/Users/[^\"]*MELIAF-Implementation", "<project folder>", x)
+  x <- gsub("\\bLolita\\b", "the project lead", x); x <- gsub("\\bAndreea\\b", "the co-author of the standard", x)
+  gsub("mlolita", "<user>", x)
+}
+starts <- grep("^## ----", code_lines)
+labels <- sub("[,-].*$", "", sub("^## ----", "", code_lines[starts]))
+ends   <- c(starts[-1] - 1, length(code_lines))
+# a whole part of the script (an R chunk), by its name
+part <- function(lab) {
+  k <- which(labels == lab)
+  if (!length(k)) return("# This part of the script was not found when the page was rendered.")
+  clean(code_lines[(starts[k[1]] + 1):ends[k[1]]])
+}
+# one or more functions or values of the script, by their names
+defs <- function(...) {
+  out <- character(0)
+  for (nm in c(...)) {
+    s <- grep(paste0("^", nm, " <- "), code_lines)
+    if (!length(s)) { out <- c(out, paste("#", nm, "was not found when the page was rendered."), ""); next }
+    s <- s[1]; e <- s
+    if (grepl("\\{\\s*(#.*)?$", code_lines[s])) {                         # a function: up to its closing brace
+      e <- s + which(code_lines[(s + 1):length(code_lines)] == "}")[1]
+    } else if (grepl('r"---\\(', code_lines[s])) {                         # a long text: up to its end mark
+      e <- s + which(grepl('\\)---"', code_lines[(s + 1):length(code_lines)]))[1]
+    } else {                                                              # one statement over several lines
+      while (e < length(code_lines) && grepl("^\\s+\\S", code_lines[e + 1])) e <- e + 1
+    }
+    out <- c(out, clean(code_lines[s:e]), "")
+  }
+  out
+}
 ```
+
+<p class="note">Under each section, the button <b>Code</b> opens the part of the script that does the step. The code is
+in R. Lines that start with <code>#</code> are the developers' notes in plain words.</p>
 
 <div class="lead">
 The tagging script reads the title and the description of every result reported in PRMS, the CGIAR performance and
@@ -33,6 +74,12 @@ for readers who do not write code.
 | **Comes out** | Three documents: (1) the tagged results, one row per result, with the tags and links; (2) a diagnosis page to read the run; (3) the taxonomy findings, with a decision column for the taxonomy team. Every record also keeps the AI's answers as received, so that a change to a rule can be replayed later at no cost. |
 
 The AI never sees the PRMS marker, the countries or the program. It sees only the title and the description.
+
+The settings of the script, the provisional choices written down until the standard's authors decide, and the list of
+known names are in the first part of the script:
+
+```{r code-settings, code = part("config")}
+```
 
 # The steps for one result
 
@@ -64,6 +111,9 @@ find it in the code.
 
 <p class="where">In the script: parts <code>data</code>, <code>geography</code>, <code>pipeline</code> (make_ctx)</p>
 
+```{r code-prepare, code = c(part("data"), part("geography"), defs("make_ctx"))}
+```
+
 # 2. Finding the taxonomy terms in the text
 
 The code searches the text for every term and synonym of the taxonomy. The terms it finds are the **candidates** that
@@ -86,6 +136,9 @@ transformation, Green Climate Fund, Avoided deforestation). The taxonomy file it
 
 <p class="where">In the script: parts <code>taxonomy</code>, <code>prefilter</code> (shortlist_ids)</p>
 
+```{r code-search, code = c(part("taxonomy"), part("prefilter"))}
+```
+
 # 3. Skipping texts with no climate information
 
 A text that holds no climate word (climate change, drought, flood, heat, emissions, carbon, methane and similar) and no
@@ -94,6 +147,9 @@ own, such as farmer, training or irrigation, never give climate information (sta
 cannot become climate-related whatever the AI says. On the pilot of 200 results, 132 needed no AI call.
 
 <p class="where">In the script: part <code>pipeline</code> (skip_ai)</p>
+
+```{r code-skip, code = defs("skip_ai", "skipped_v")}
+```
 
 # 4. The tagging call (AI)
 
@@ -110,6 +166,12 @@ rule and use the standard's own worked examples. For each candidate it fills a f
 Every answer carries a quote from the text. Every answer is chosen from a closed list.
 
 <p class="where">In the script: parts <code>schema</code>, <code>prompt</code> (the instructions), <code>client</code> and <code>pipeline</code> (tag_group)</p>
+
+The code below holds the two forms the AI fills, the full instructions for the tagging call and for the reading (step
+6), and the function that sends a group of results to the AI.
+
+```{r code-tagging, code = c(part("schema"), part("prompt"), defs("call_many", "tag_group"))}
+```
 
 # 5. Checks in code
 
@@ -135,6 +197,9 @@ answer that fails a check is cancelled and recorded, never repaired by guessing.
   text.
 
 <p class="where">In the script: part <code>validate</code> (validate_record)</p>
+
+```{r code-checks, code = defs("has_climate_wording", "has_area_wording", "settle", "validate_record")}
+```
 
 # 6. The reading (AI, twice)
 
@@ -163,6 +228,12 @@ The code then decides:
   only when both agree, otherwise "not stated". When the two readings differ, the result is flagged "needs review".
 
 <p class="where">In the script: part <code>prompt</code> (READING_RULES), part <code>validate</code> (apply_reading, use_readings), part <code>pipeline</code> (call_readings)</p>
+
+The instructions for the reading are in the code of step 4. The code below is what the script does with the two
+readings.
+
+```{r code-reading, code = defs("READ_MEASURE_KINDS", "FUNC_RX", "QUAL_PRODUCT_RX", "names_climate_function", "reading_area", "area_answer", "combine_areas", "apply_reading", "use_readings", "good_reading", "call_readings")}
+```
 
 # 7. Decisions: pathway, level and marker answer
 
@@ -207,6 +278,9 @@ countries differ, the text is very short or translated, and others.
 
 <p class="where">In the script: part <code>derive</code> (derive_result, area_level, OUTCOMES)</p>
 
+```{r code-decisions, code = part("derive")}
+```
+
 # 8. Taxonomy findings
 
 Tagging real texts shows where the taxonomy can improve (standard, Rules 10 to 12). Five kinds of finding are collected:
@@ -223,6 +297,9 @@ Document 3 lists every finding with its passage, the number of results, the prop
 decision column. Decisions are kept from one run to the next. Nothing enters the taxonomy by itself.
 
 <p class="where">In the script: parts <code>validate</code> (measure_findings), <code>findings</code></p>
+
+```{r code-findings, code = c(defs("closest_interventions", "measure_findings"), part("findings"))}
+```
 
 # 9. Outputs, running and quality control
 
@@ -244,6 +321,9 @@ written in the script.
 - **Human double review** on the review site: two reviewers per result, blind until both have answered.
 
 <p class="where">In the script: parts <code>tests</code>, <code>selftest</code>, <code>run</code>, <code>results</code>, <code>outputs</code>; tools <code>offline_checks.R</code>, <code>test_cases.json</code></p>
+
+```{r code-run, code = c(part("tests"), part("run"), part("outputs"))}
+```
 
 # Where each rule of the standard is applied
 
