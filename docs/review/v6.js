@@ -530,9 +530,15 @@ const V6 = (() => {
   // why a word found by the term search is not a tag, as a full sentence (reason codes of prms_drops.jsonl)
   function whyNotTagged(z) {
     const d = String(z.detail || ""), q = d ? `“${esc(cut(d, 120))}”` : "";
+    const given = z.why ? ` <span class="muted">Reason given: “${esc(cut(z.why, 220))}”</span>` : "";
+    if (z.narrower) return `A narrower term on the same words is tagged: <b>${esc(z.narrower)}</b>. Only the narrower term is kept, so this broader term is left out (it is not a different meaning).`;
+    return whyText(z, d, q) + given;
+  }
+  function whyText(z, d, q) {
     switch (z.reason) {
-      case "not_kept:other": return "The term does not apply here.";
-      case "not_kept:different_meaning": return "The word has another meaning in this text than the taxonomy term.";
+      case "not_kept:other": return z.why ? "Left out for the reason below." : "Left out with no reason given (the tagging only answered \"other\"). Compare the text with the definition: if the term applies, click + keep.";
+      case "not_kept:narrower_term_tagged": return "A narrower term on the same words is tagged. Only the narrower term is kept.";
+      case "not_kept:different_meaning": return "The words mean something else in this text than the definition, or they are part of a longer expression that means something else.";
       case "not_kept:part_of_a_name": return "The words are part of a name (a programme, project, organisation, event or publication), so they are not climate information about the work.";
       case "not_kept:too_generic": return "The word is too general to say anything about this work.";
       case "broader_term_of_a_kept_tag": return `A narrower term on the same words is already tagged${d ? `: ${esc(d)}` : ""}. Only the narrower term is kept.`;

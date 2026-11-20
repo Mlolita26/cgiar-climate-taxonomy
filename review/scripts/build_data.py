@@ -291,6 +291,15 @@ else:
             tags.append(x)
         kept = {t["concept_id"] for t in tags}
         dropped, seen_d = [], {}
+        def narrower_kept(name, words, tags):
+            # a kept tag whose name holds every word of this term (first six letters) and more, on the same words of the text
+            w6 = lambda s: [w[:6] for w in re.findall(r"[a-z]+", s.lower())]
+            dn, wl = w6(name), words.lower()
+            for t in tags:
+                kn, ex = w6(t.get("concept_name") or ""), (t.get("detection_excerpt") or "").lower()
+                if wl and ex and len(kn) > len(dn) and all(w in kn for w in dn) and (wl in ex or ex in wl):
+                    return t.get("concept_name") or ""
+            return ""
         for d in drops.get(uid, []):
             cid = str(d.get("concept_id") or "")
             if not cid or cid in kept or d.get("reason") in NOT_TERM:
@@ -298,11 +307,20 @@ else:
             if cid not in seen_d:
                 seen_d[cid] = {"concept_id": cid, "concept_name": tname.get(cid, cid), "reasons": []}
                 dropped.append(seen_d[cid])
-            seen_d[cid]["reasons"].append({"reason": d.get("reason") or "", "detail": d.get("detail") or ""})
+            z = {"reason": d.get("reason") or "", "detail": d.get("detail") or ""}
+            if d.get("why"):                         # script r17g: the AI's one-sentence reason
+                z["why"] = d["why"]
+            seen_d[cid]["reasons"].append(z)
         full = (r.get("title_en") or r.get("title") or "") + " / " + (r.get("description_en") or r.get("description") or "")
         for x in dropped:                            # where the words are in the text, for the reviewer
             given = next((z["detail"] for z in x["reasons"] if z["reason"].startswith("not_kept:") and z["detail"]), "")
             x["found_as"], x["context"] = where_in(full, x["concept_id"], given)
+            nk = narrower_kept(x["concept_name"], given or x["found_as"] or "", tags)
+            if nk:                                   # a narrower term is kept on the same words (Greenhouse gas emissions)
+                for z in x["reasons"]:
+                    if z["reason"] in ("not_kept:different_meaning", "not_kept:other", "not_kept:too_generic", "not_kept:narrower_term_tagged"):
+                        z["narrower"] = nk
+                continue
             if given and any(z["reason"] in ("not_kept:different_meaning", "not_kept:other", "not_kept:too_generic") for z in x["reasons"]):
                 b = closest(given, own=x["concept_id"], kept=kept, head=True)
                 if b:
