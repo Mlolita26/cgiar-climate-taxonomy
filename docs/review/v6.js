@@ -112,9 +112,6 @@ const V6 = (() => {
                   ["not_this_work", "not about this work"], ["other", "other (say why in the note)"]];
   // Every question is answered the same way: Agree, or Disagree with a note; where the answer is a value from a list,
   // Disagree also asks for the right value. The answers start as extracted from the text (decision of 19 Nov 2026).
-  const KIND = { P: "product developed or tested", D: "product or practice delivered or scaled", T: "training given", E: "event organised",
-                 R: "study of responses", S: "study of a condition", G: "policy, plan or recommendation", O: "other" };
-  const KIND_OPTS = Object.entries(KIND);
   const FUNC_OPTS = [["specific", "specific"], ["label", "label only"], ["context", "context only"], ["none", "none"]];
   const PURPOSE_OPTS = [["main", "main"], ["additional", "additional"], ["not_stated", "not stated"]];
   const Q = () => ({ d: "agree", value: "", note: "" });
@@ -125,7 +122,7 @@ const V6 = (() => {
   const dropWord = r => DROP_WORDS[r] || String(r || "").replace(/^second_check:/, "second check: ").replace(/^not_kept:/, "").replace(/_/g, " ");
   const fkey = f => [f.finding_type || "", f.concept_id || "", f.phrase || ""].join("|");
 
-  // the answers: kind {d, value, note}; path {d, note}; per area fn {d, value, note}, me {d, note}, pu {d, value, note}
+  // the answers: path {d, note}; per area fn {d, value, note}, me {d, note}, pu {d, value, note}
   function norm(a, res) {
     a = a && typeof a === "object" ? JSON.parse(JSON.stringify(a)) : {};
     a.areas = a.areas || {};
@@ -137,7 +134,7 @@ const V6 = (() => {
       ["measure", "measure_reason", "measure_quote", "purpose", "purpose_basis"].forEach(k => delete r[k]);
       ["fn", "me", "pu"].forEach(k => { r[k] = Object.assign(Q(), r[k] || {}); });
     });
-    a.kind = Object.assign(Q(), a.kind || {});
+    delete a.kind;                               // the kind of work is no longer asked (decision of 20 Nov 2026)
     a.path = Object.assign(Q(), a.path || {});
     if (a.pathway_note && !a.path.note) a.path = { d: "disagree", value: "", note: a.pathway_note };
     delete a.pathway_note;
@@ -181,7 +178,6 @@ const V6 = (() => {
     (res.tags || []).forEach(t => { const d = dec(R, t); if (tagChanged(t, d)) out.push(`Tag ${t.concept_name}: ${tagText(t, d)}`); });
     (R.added_terms || []).forEach(id => out.push(`Term added: ${(S.terms[id] || {}).term || id} (${addedHow(R, id)})`));
     if (R.path.d === "disagree") out.push("Climate pathway" + nt(R.path));
-    if (R.kind.d === "disagree") out.push(`Kind of work: ${KIND[R.kind.value] || "disagree"}${nt(R.kind)}`);
     AREAS.forEach(ax => { const r = R.areas[ax];
       if (r.fn.d === "disagree") out.push(`${AX[ax]}, climate function: ${r.fn.value ? w(r.fn.value) : "disagree"}${nt(r.fn)}`);
       if (r.me.d === "disagree") out.push(`${AX[ax]}, climate measure: ${extMeasure(res, ax) ? "no measure" : "a measure"}${nt(r.me)}`);
@@ -198,7 +194,7 @@ const V6 = (() => {
       else {
         const purposeDiff = AREAS.some(ax => A[ax].measure === "described" && extMeasure(res, ax) && A[ax].purpose !== extPurpose(res, ax));
         const minor = (res.tags || []).some(t => tagChanged(t, (R.tags || {})[t.concept_id])) || (R.added_terms || []).length > 0
-          || R.path.d === "disagree" || R.kind.d === "disagree" || AREAS.some(ax => R.areas[ax].fn.d === "disagree") || purposeDiff;
+          || R.path.d === "disagree" || AREAS.some(ax => R.areas[ax].fn.d === "disagree") || purposeDiff;
         review = minor ? "minor gap" : "captured well";
       }
     }
@@ -220,9 +216,8 @@ const V6 = (() => {
         <tr><td>L2</td><td>describes a climate measure; climate is an additional purpose, or the purpose is not stated.</td></tr>
         <tr><td>L3</td><td>describes a climate measure, and climate is the main purpose.</td></tr></table>`],
     "climate-information": ["climate information", "The taxonomy terms that count for this area: stand-alone terms, and context-dependent terms whose own sentence holds climate words of the area, or all of them when the work is a climate measure for the area. If no term counts, the area holds no climate information. Change them in the tag table."],
-    kind: ["kind of work", "What the result is: a product developed or tested; a product or practice delivered or scaled; a training given; an event organised; a study of responses; a study of a condition; a policy, plan or recommendation; or other (speaking at an event of others, describing a programme or the work of others). A study of a condition and other work are never a climate measure."],
     function: ["climate function", "Specific: the text says the work's own product or action addresses a climate problem of this area, or the product's name states its climate function (drought-tolerant variety, early warning system). Label only: climate words qualify a broad goal (\"towards climate-resilient food systems\"). Context only: climate is background, a study variable, a finding or a name. None: no climate words of the area. Only a specific function can give a climate measure."],
-    measure: ["climate measure", "Yes when the kind of work can be a measure and the climate function is specific. A study that only describes a climate condition, speaking at an event of others, the work of others, or climate words used only as a label or as context are not a measure. The text is read twice; a measure is kept only when both readings find one. Agree, or disagree (the note is optional)."],
+    measure: ["climate measure", "Yes when the text describes an action of this work (a product, a practice delivered or scaled, a training, an event it organised, a study of responses, a policy or recommendation) and its climate function is specific (Rule 7). A study that only describes a climate condition, speaking at an event of others, the work of others, or climate words used only as a label or as context are not a measure. The text is read twice; a measure is kept only when both readings find one. Agree, or disagree (the note is optional)."],
     purpose: ["purpose", "Main, additional or not stated, by the first rule that applies: the text says main or also; the title presents the work by its climate function alone (main) or with other aims (additional); the description names climate among other benefits (additional); otherwise not stated. When the two readings differ, the purpose is not stated. The purpose counts only when there is a climate measure."],
     tags: ["tags", "Each taxonomy term tagged in the text, with the words it was found as, its value for each area, its role in the text and whether the work is planned or done. Agree, or disagree to correct a value, remove the tag or write a note."],
     anchors: ["tag values", "Stand-alone: the term is climate information on its own. Anchored: a context-dependent term that counts, because its own sentence holds climate words of the area (shown in quotes) or because the work is a climate measure for the area (anchored by the text). No anchor: a context-dependent term without such a link, so it does not count. Not relevant: the term does not concern this area."],
@@ -230,7 +225,7 @@ const V6 = (() => {
     pathway: ["climate pathway", "The parts of the climate pathway for each area, from the tags that count: reason, where, who, what was done, what came out, the links between them, and whether the work is planned or done. Who is the system or population affected or targeted; an organisation that carries out the work is not the who. Agree, or disagree (a note on which part is wrong is optional)."],
     flags: ["flags", "Points the tagging script asks a person to look at first, for example two readings of the text that differ on the climate measure or the purpose. A flag is not an error."],
     "marker-answer": ["marker answer", "The comparison of the PRMS marker with the stronger area: aligned, marker higher, marker lower, cannot determine (with its reason) or no comparison. It is worked out from the levels with the table of the tagging script."],
-    outcome: ["outcome of the review", "Worked out from your answers. Wrong when a level or the marker answer differs from the extracted one; minor gap when only tags, terms, the pathway, the kind of work, the climate function or the purpose differ; captured well when nothing differs."],
+    outcome: ["outcome of the review", "Worked out from your answers. Wrong when a level or the marker answer differs from the extracted one; minor gap when only tags, terms, the pathway, the climate function or the purpose differ; captured well when nothing differs."],
     proposals: ["proposed terms", "Wording that the taxonomy lacks, as a new term or as a synonym of an existing term: the ones found in the text (accept or reject each) and your own. They go to the people who maintain the taxonomy and do not change the outcome of your review."],
   };
   // "?" boxes open on hover where the screen has a mouse; a click keeps one open; on touch screens a tap opens it.
@@ -258,8 +253,8 @@ const V6 = (() => {
   const markerCell = (o, d) => o ? `<span class="oc oc-${esc(o.replace(/ /g, "-"))}">${esc(outcomeLabel(o, d))}</span>` : "";
   const storeNotice = () => S.storeOk === false ? `<div class="notice bad">The review store does not take reviews of this batch yet (the worker is older than the page). You can read the results; nothing can be saved until the worker is updated.</div>` : "";
   // One question: what was extracted, then Agree / Disagree. Disagree opens the right value (when the answer comes from a
-  // list) and a note. key: "kind", "path", or "fn-", "me-", "pu-" followed by the area.
-  const qref = (R, key) => key === "kind" ? R.kind : key === "path" ? R.path : R.areas[key.slice(3)][key.slice(0, 2)];
+  // list) and a note. key: "path", or "fn-", "me-", "pu-" followed by the area.
+  const qref = (R, key) => key === "path" ? R.path : R.areas[key.slice(3)][key.slice(0, 2)];
   function question(key, title, helpKey, shown, q, opts) {
     const dis = q.d === "disagree";
     return `<div class="q1">${title ? `<div class="qh">${title} ${helpKey ? help(helpKey) : ""}</div>` : ""}
@@ -376,7 +371,6 @@ const V6 = (() => {
       ${qHead(2, "What climate pathway does the text describe?", "Section 4, Rules 4 to 6: climate rationale, geography, system or population, intervention and result, and the links between them")}
       <section class="card" id="v6-path"></section>
       ${qHead(3, "Is the information consistent with the PRMS climate marker?", `Section 5, Rules 7 to 9: the climate objective, measure and purpose described, compared with the PRMS marker <b>${esc(res.marker || "not provided")}</b>. The answer is in the yellow box at the end.`)}
-      <section class="card" id="v6-kind"></section>
       ${AREAS.map(ax => `<section class="card area" id="v6-area-${ax}"></section>`).join("")}
       ${qHead(4, "What gaps or errors in the taxonomy does tagging reveal?", "Section 6, Rules 10 to 12: missing terms or synonyms, doubtful matches, classifications to review")}
       <section class="card" id="v6-props"><h3>Proposed new terms and synonyms ${help("proposals")}</h3><div id="v6-found"></div>
@@ -387,7 +381,7 @@ const V6 = (() => {
     </div></div>`;
     const mk = $(".nav .meta span");                   // the PRMS marker in the header line, with its "?"
     if (mk) mk.insertAdjacentHTML("beforeend", " " + help("marker"));
-    renderGives(); renderTags(); renderDropped(); renderInfo(); renderPath(); renderKind(); AREAS.forEach(renderArea); renderFindings();
+    renderGives(); renderTags(); renderDropped(); renderInfo(); renderPath(); AREAS.forEach(renderArea); renderFindings();
     wire();
   }
   // the heading of one of the four questions of the standard
@@ -450,15 +444,6 @@ const V6 = (() => {
       + (me.A[ax].measure !== "described" ? `<div class="small muted">The purpose counts only when there is a climate measure.</div>` : "");
     h += question("pu-" + ax, "Purpose", "purpose", pShown, r.pu, PURPOSE_OPTS);
     $("#v6-area-" + ax).innerHTML = h;
-  }
-  // kind of work: one answer for the whole result (it is read once per text, for both areas)
-  function renderKind() {
-    const res = S.cur, rd = res.reading;
-    const kd = rd ? (((rd.readings || []).length > 1 && rd.readings.some(x => x.kind !== rd.readings[0].kind)) ? rd.readings.map(x => KIND[x.kind] || x.kind).join(" and ") : "") : "";
-    const shown = rd ? `<b>${esc(rd.kind_name || KIND[rd.kind] || "")}</b>${rd.work_words ? ` “${esc(cut(rd.work_words, 200))}”` : ""}`
-        + (kd ? `<div class="small muted">The two readings differ: ${esc(kd)}.</div>` : "")
-      : `<span class="muted">not read: the text holds no climate words</span>`;
-    $("#v6-kind").innerHTML = `<h3>Kind of work ${help("kind")}</h3>` + question("kind", "", null, shown, S.rev.kind, KIND_OPTS);
   }
   function renderPath() { $("#v6-path").innerHTML = pathwayHtml(S.cur) + question("path", "", null, "", S.rev.path, null); }
 
@@ -621,7 +606,7 @@ const V6 = (() => {
     side.addEventListener("change", e => {
       const el = e.target, n = el.name || "", k = el.dataset.k || "";
       if (n.startsWith("q-")) { const key = n.slice(2), q = qref(R, key); q.d = el.value; if (el.value === "agree") q.value = "";
-        if (key === "kind") renderKind(); else if (key === "path") renderPath(); refreshAll(); }
+        if (key === "path") renderPath(); refreshAll(); }
       else if (el.dataset.q && el.dataset.f === "value") { qref(R, el.dataset.q).value = el.value; refreshAll(); }
       else if (n.startsWith("d-")) { const id = n.slice(2), old = R.tags[id] || {};
         R.tags[id] = el.value === "agree" ? { d: "agree" } : { d: "change", note: old.note || "" }; renderTags(); refreshAll(); }
@@ -722,7 +707,6 @@ const V6 = (() => {
     if (c.A[ax].measure !== "described") return "";
     return qText(r.pu, w(extPurpose(res, ax)), w(r.pu.value));
   }
-  const kindText = (res, a) => qText(a.kind, (res.reading || {}).kind_name || "", KIND[a.kind.value] || "");
   const functionText = (res, a, ax) => qText(a.areas[ax].fn, w((res[ax] || {}).climate_function || "none"), w(a.areas[ax].fn.value));
   const pathText = a => qText(a.path, "", "");
   function tagText(t, d) {
@@ -731,7 +715,7 @@ const V6 = (() => {
     const ch = TAG_FIELDS.filter(f => d[f] != null && d[f] !== t[f]).map(f => `${FIELD_WORDS[f]} ${w(t[f]) || "none"} → ${w(d[f]) || "none"}`).join("; ");
     return "changed: " + (ch || "disagree") + (d.note ? ` (${d.note})` : "");
   }
-  const aiMeasure = (res, ax) => { const a = res[ax] || {}; return !a.information ? "" : a.measure === "described" ? `“${a.measure_quote || ""}”${a.measure_kind ? " (" + w(a.measure_kind) + ")" : ""}` : "no measure"; };
+  const aiMeasure = (res, ax) => { const a = res[ax] || {}; return !a.information ? "" : a.measure === "described" ? `“${a.measure_quote || ""}”` : "no measure"; };
   const aiPurpose = (res, ax) => { const a = res[ax] || {}; return !a.information ? "" : w(a.purpose || "not_stated"); };
   const proposalText = p => p.kind === "new" ? `new term: ${p.label}${p.facet ? " (" + p.facet + ")" : ""}` : `synonym: ${p.label} -> ${(S.terms[p.of_id] || {}).term || p.of_id}`;
   const addedHow = (a, id) => { const c = (a.added_counts || {})[id] || {}, f = [c.adaptation ? "adaptation" : "", c.mitigation ? "mitigation" : ""].filter(Boolean).join(" and ");
@@ -752,7 +736,6 @@ const V6 = (() => {
       ${AREAS.map(ax => row(AX[ax] + " level" + (ax === "adaptation" ? " " + help("levels") : ""), levelCell(ai[ax], ai.purpose[ax]), C.map(c => levelCell(c[ax], c.purpose[ax])), C.map(c => c[ax]))).join("")}
       ${row("Marker answer " + help("marker-answer"), markerCell(ai.marker, ai.detail), C.map(c => markerCell(c.marker, c.detail)), C.map(c => c.marker))}
       ${row("Outcome of the review " + help("outcome"), "", C.map(c => esc(c.review || "incomplete")))}
-      ${row("Kind of work", esc((res.reading || {}).kind_name || ""), A.map(a => esc(kindText(res, a))))}
       ${AREAS.map(ax => sec(AX[ax]) + row("Climate function", esc(w((res[ax] || {}).climate_function || "none")), A.map(a => esc(functionText(res, a, ax))))
         + row("Climate measure", esc(aiMeasure(res, ax)), A.map(a => esc(measureText(res, a, ax))))
         + row("Purpose", esc(aiPurpose(res, ax)), A.map((a, i) => esc(purposeText(res, a, ax, C[i]) || "not needed")))).join("")}
@@ -778,7 +761,7 @@ const V6 = (() => {
     try { [revs] = await Promise.all([api(`/export?batch=${encodeURIComponent(S.batch)}`), loadXlsx(), S.termsReady]); }
     catch (e) { link.textContent = lab; return alert(e.message); }
     const by = {}; revs.forEach(r => (by[r.result_id] ||= []).push(r));
-    const RV = ["reviewer", "status", "adaptation level", "mitigation level", "marker answer", "review outcome", "kind of work",
+    const RV = ["reviewer", "status", "adaptation level", "mitigation level", "marker answer", "review outcome",
                 "adaptation climate function", "mitigation climate function", "adaptation climate measure", "mitigation climate measure",
                 "adaptation purpose", "mitigation purpose", "tags removed", "tags changed", "terms added",
                 "proposals accepted", "proposals rejected", "proposals with no answer", "climate pathway", "proposed new terms / synonyms", "comment", "date"];
@@ -789,7 +772,7 @@ const V6 = (() => {
       const fd = x => f.filter(z => fdec(a, z) === x).map(z => `${w(z.finding_type)}: ${z.phrase || z.concept_name || ""}`).join("; ");
       return [r.reviewer, r.submitted ? "submitted" : "draft",
         c.complete ? c.adaptation : "incomplete", c.complete ? c.mitigation : "incomplete", c.complete ? outcomeLabel(c.marker, c.detail) : "incomplete", c.review,
-        kindText(res, a), functionText(res, a, "adaptation"), functionText(res, a, "mitigation"),
+        functionText(res, a, "adaptation"), functionText(res, a, "mitigation"),
         measureText(res, a, "adaptation"), measureText(res, a, "mitigation"), purposeText(res, a, "adaptation", c), purposeText(res, a, "mitigation", c),
         (res.tags || []).filter(t => dec(a, t).d === "refuse").map(t => `${t.concept_name}: ${tagText(t, dec(a, t)).replace(/^removed:? ?/, "") || "no reason"}`).join("; "),
         (res.tags || []).filter(t => dec(a, t).d === "change" && tagChanged(t, dec(a, t))).map(t => `${t.concept_name}: ${tagText(t, dec(a, t)).replace(/^changed: /, "")}`).join("; "),
@@ -829,9 +812,9 @@ const V6 = (() => {
       ["levels", "L0 no climate information; L1 climate context only; L2 climate measure, purpose additional or not stated; L3 climate measure, climate the main purpose"],
       ["marker answer", "aligned, marker higher, marker lower, cannot determine (with its reason), no comparison"],
       ["reviewer levels and marker answer", "worked out from the reviewer's answers with the table of the tagging script; the reviewer does not choose them. 'incomplete' = a draft with questions not answered"],
-      ["review outcome", "wrong when a level or the marker answer differs from the extracted one; minor gap when only tags, terms, the pathway, the kind of work, the climate function or the purpose differ; captured well when nothing differs"],
+      ["review outcome", "wrong when a level or the marker answer differs from the extracted one; minor gap when only tags, terms, the pathway, the climate function or the purpose differ; captured well when nothing differs"],
       ["reviewers agree", "yes when both reviewers end with the same levels and the same marker answer"],
-      ["kind of work, climate function, climate measure, purpose, pathway", "agree, or disagree with the right answer where there is one and the reviewer's note in brackets"],
+      ["climate function, climate measure, purpose, pathway", "agree, or disagree with the right answer where there is one and the reviewer's note in brackets"],
       ["tags removed / changed", "tags the reviewer removed (with the reason) or corrected (stand-alone, anchored, no anchor, not relevant; role in the text; planned or done)"],
       ["terms added", "taxonomy terms the reviewer added, including terms found but not kept, and for which area they count"],
       ["proposals", "terms and synonyms proposed from the text: accepted, rejected or no answer. Detail on the 'findings' sheet"],
