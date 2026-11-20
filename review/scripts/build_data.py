@@ -265,7 +265,9 @@ else:
                "review_flags": aslist(r.get("review_flags")),
                "findings": [{k: f.get(k) for k in FIND_KEEP} for f in r.get("taxonomy_findings") or []],
                "dropped": dropped}
-        if res["translated"]:                        # the term search and the excerpts are on the English text
+        if r.get("english_kept"):                     # r17e: English and Spanish in the field; only the English was used
+            res["english_kept"] = True
+        if res["translated"] or res.get("english_kept"):   # the term search and the excerpts are on the English text
             res["title_en"], res["description_en"] = r.get("title_en") or "", r.get("description_en") or ""
         for k in TOP_KEEP:
             res[k] = r.get(k)

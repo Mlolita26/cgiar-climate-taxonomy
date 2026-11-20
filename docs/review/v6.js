@@ -309,11 +309,11 @@ const V6 = (() => {
     return html + esc(text.slice(at));
   }
   function textBlock(res, added, editable) {
-    const tr = res.translated && (res.title_en || res.description_en);
+    const tr = (res.translated || res.english_kept) && (res.title_en || res.description_en);
     const title = tr ? res.title_en || res.title : res.title, desc = tr ? res.description_en || res.description : res.description;
     return `<div class="text card" ${editable ? "data-edit" : ""}><div class="legend"><span class="k hc">counts</span><span class="k hg">found, does not count</span><span class="k ha">${editable ? "added by you" : "added by a reviewer"}</span></div>
       ${editable ? `<div class="hint small">Select a word or phrase in the text to tag it.</div>` : ""}
-      ${tr ? `<div class="hint small">Translated into English for the tagging. The original text is at the end.</div>` : ""}
+      ${tr ? `<div class="hint small">${res.english_kept ? "The PRMS text gives the same text in English and in Spanish: only the English is used." : "Translated into English for the tagging."} The original text is at the end.</div>` : ""}
       <h2>${hlHtml(title, res, added)}</h2><p>${hlHtml(desc, res, added)}</p>
       ${tr ? `<details class="orig"><summary class="small">Original text</summary><h4>${esc(res.title)}</h4><p>${esc(res.description)}</p></details>` : ""}</div>`;
   }
@@ -393,7 +393,7 @@ const V6 = (() => {
     if (!box) return;
     const d = (a, b) => a !== b ? "diff" : "", dis = disagreements(res, R);
     box.innerHTML = `<p class="small muted">Worked out from your answers with the table of the tagging script. You do not set these.</p>
-      <table class="lvl"><thead><tr><th></th><th>Extracted</th><th>Your answers</th></tr></thead><tbody>
+      <table class="lvl"><thead><tr><th></th><th>Tagged by AI</th><th>Your answers</th></tr></thead><tbody>
       ${AREAS.map(ax => `<tr><th>${AX[ax]} ${ax === "adaptation" ? help("levels") : ""}</th><td>${levelCell(ai[ax], ai.purpose[ax])}</td><td class="${d(ai[ax], me[ax])}">${levelCell(me[ax], me.purpose[ax])}</td></tr>`).join("")}
       <tr class="pm"><th>PRMS marker ${help("marker")}</th><td colspan="2"><b>${esc(res.marker || "not provided")}</b> <span class="muted small">(the same for both; compared with the stronger area)</span></td></tr>
       <tr><th>Marker answer ${help("marker-answer")}</th><td>${markerCell(ai.marker, ai.detail)}</td><td class="${d(ai.marker, me.marker)}">${markerCell(me.marker, me.detail)}</td></tr>
