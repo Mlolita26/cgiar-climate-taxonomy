@@ -468,11 +468,10 @@ const V6 = (() => {
   }
 
   function areaCell(t, ax, d) {
-    const v = t[ax], role = t["role_" + ax], mine = d.d === "change" && d[ax] != null && d[ax] !== v ? d[ax] : null, q = t[ax + "_anchor_quote"];
-    return `<span class="cv cv-${esc(v)}">${esc(w(v))}</span>${mine ? ` → <span class="you">${esc(w(mine))}</span>` : ""}
-      ${role && role !== "n/a" && role !== w(v) ? `<div class="muted">${esc(role)}</div>` : ""}
-      ${v === "anchored" && t.anchored_by_text ? `<div class="muted">anchored by the text: the work is a climate measure for ${esc(ax)}</div>`
-        : v === "anchored" && q ? `<div class="q" title="${esc(q)}">“${esc(cut(q, 110))}”</div>` : ""}`;
+    // one line per value (decision of 20 Nov 2026): the anchor is shown when pointing at "anchored", not under it
+    const v = t[ax], mine = d.d === "change" && d[ax] != null && d[ax] !== v ? d[ax] : null, q = t[ax + "_anchor_quote"];
+    const tip = v === "anchored" ? (t.anchored_by_text ? `anchored by the text: the work is a climate measure for ${ax}` : q ? `anchor: “${q}”` : "") : "";
+    return `<span class="cv cv-${esc(v)}"${tip ? ` title="${esc(tip)}"` : ""}>${esc(w(v))}${tip ? " ⓘ" : ""}</span>${mine ? ` → <span class="you">${esc(w(mine))}</span>` : ""}`;
   }
   function tagRow(t, d, extra = "") {
     const id = t.concept_id, cls = [d.d === "refuse" ? "disagree" : "", d.d === "change" ? "changed" : ""].join(" ");
