@@ -49,7 +49,7 @@ your answers give").
 In the v6 form the reviewer never chooses a level. The page works out the level of each area (L0 to L3)
 and the marker answer (aligned, marker higher, marker lower, cannot determine with its reason, no
 comparison) from the answers, with the rules and the comparison table of the tagging script
-(`area_level`, `area_rank` and `OUTCOMES` in `Taxonomy/3_Tagging/script/PRMS_Tagging.Rmd`, copied in
+(`area_level`, `area_rank` and `OUTCOMES` in `Taxonomy/3_Tagging/PRMS/script/PRMS_Tagging.Rmd`, copied in
 `v6.js`; change both together). Climate information for an area means at least one tag that counts for
 it (stand-alone or anchored) after the reviewer's changes, or an added term marked as counting for it.
 It also works out the outcome of the review: wrong when a level or the marker answer differs from the
@@ -58,7 +58,7 @@ differ; captured well when nothing differs. The taxonomy findings and the propos
 when they end with the same levels and the same marker answer.
 
 Highlighting in the v6 form: only the taxonomy term or synonym found inside each tag's excerpt (the rule
-of `term_in()` in `Taxonomy/3_Tagging/script/tools/gen_diag.py`, applied by `build_data.py`, field `hl`),
+of `term_in()` in `Taxonomy/3_Tagging/PRMS/script/tools/gen_diag.py`, applied by `build_data.py`, field `hl`),
 at the place of the excerpt in the text, so that the same word elsewhere (for example inside a name) is not
 marked. When the excerpt is not found word for word in the text, every occurrence of the term is marked; when
 no term or synonym of the concept is in the excerpt, the excerpt itself is marked if it has 160 characters or
@@ -136,6 +136,15 @@ v6 records (default input: the 2025 pilot of 200 results; another run with `--ta
 
 ```
 python scripts/build_data.py --form v6 --batch pilot-2025-v6 --name "Pilot 2025, 200 results, taxonomy v6" --n 0
+```
+
+A ToC and PORB run (script `Taxonomy/3_Tagging/PORBs & TOCs/script/PORB_TOC_Tagging.Rmd`) is a v6 batch too. Its records
+have the same form; the batch is listed under the dataset "ToC and PORB" in the list at the top of the page, and the
+page shows the part of the plan and the program where a PRMS result shows its marker (a plan carries no marker, so the
+marker answer is "no comparison"). The budget is not written to the batch file.
+
+```
+python scripts/build_data.py --form v6 --batch toc-porb-<scope> --name "ToC and PORB, <scope>" --n 0 --tags "<run folder>/_working/toc_porb_tags.jsonl"
 ```
 
 `--n 0` keeps every result. The form is read from the records when `--form` is not given. For v6 the script also

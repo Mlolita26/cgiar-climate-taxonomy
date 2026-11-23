@@ -52,7 +52,10 @@ async function boot() {
   }
 
   const sel = $("#batch");
-  sel.innerHTML = S.batches.map(b => `<option value="${esc(b.id)}">${esc(b.name || b.id)} · ${b.n}</option>`).join("");
+  const opt = b => `<option value="${esc(b.id)}">${esc(b.name || b.id)} · ${b.n}</option>`;
+  const sets = [...new Set(S.batches.map(b => b.dataset || "PRMS"))];        // datasets: PRMS results, ToC and PORB texts
+  sel.innerHTML = sets.length < 2 ? S.batches.map(opt).join("")
+    : sets.map(d => `<optgroup label="${esc(d)}">${S.batches.filter(b => (b.dataset || "PRMS") === d).map(opt).join("")}</optgroup>`).join("");
   sel.value = S.batch;
   sel.onchange = async () => { S.batch = sel.value; try { localStorage.setItem("rv_batch", S.batch); } catch (e) {} pageMsg("Loading…");
     const nb = S.batches.find(b => b.id === S.batch) || {}; S.form = nb.form || "v4"; loadTerms(nb); $("#rules").hidden = S.form !== "v6";

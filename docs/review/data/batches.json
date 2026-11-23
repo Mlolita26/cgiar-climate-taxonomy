@@ -10,6 +10,18 @@
   "tv": "75ec94054a"
  },
  {
+  "id": "toc-porb-climate-action-v6",
+  "name": "ToC and PORB: Climate Action, 179 texts, taxonomy v6",
+  "form": "v6",
+  "taxonomy": "taxonomy_v6.json",
+  "taxonomy_file": "taxonomy-v6.json",
+  "n": 179,
+  "v": "d7c5ee1995",
+  "tv": "18cd5dc4b5",
+  "prompt": "prms-standard-2026-11-10.r17g+plan2",
+  "dataset": "ToC and PORB"
+ },
+ {
   "id": "pilot-2025-v6",
   "name": "Pilot 2025, 200 results, taxonomy v6",
   "form": "v6",

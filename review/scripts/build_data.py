@@ -16,9 +16,9 @@ import argparse, hashlib, json, os, random, re, sys
 # The project folder that holds Taxonomy/: four levels above this script (Taxonomy/4_Climate_taxonomy_repository/review/
 # scripts/), or the folder given in the environment variable MELIAF_ROOT.
 ROOT = os.environ.get("MELIAF_ROOT") or os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", ".."))
-DEFAULT_TAGS = os.path.join(ROOT, r"Taxonomy\3_Tagging\outputs\2026-08 2025 marked - 4343 results - v4\_working\prms_tags.jsonl")
+DEFAULT_TAGS = os.path.join(ROOT, r"Taxonomy\3_Tagging\PRMS\outputs\2026-08 2025 marked - 4343 results - v4\_working\prms_tags.jsonl")
 DEFAULT_TAX = os.path.join(ROOT, r"Taxonomy\1_Versions\v4 - Aug 2026\machine_readable\taxonomy_v4_plus.json")
-DEFAULT_V6_TAGS = os.path.join(ROOT, r"Taxonomy\3_Tagging\outputs\2026-11 2025 pilot - 200 results - v6\_working\prms_tags.jsonl")
+DEFAULT_V6_TAGS = os.path.join(ROOT, r"Taxonomy\3_Tagging\PRMS\outputs\2026-11 2025 pilot - 200 results - v6\_working\prms_tags.jsonl")
 DEFAULT_V6_TAX = os.path.join(ROOT, r"Taxonomy\1_Versions\v6 - Oct 2026\machine_readable\taxonomy_v6.json")
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "docs", "review", "data")
 
@@ -27,8 +27,8 @@ ap.add_argument("--batch", required=True)
 ap.add_argument("--name", default="")
 ap.add_argument("--n", type=int, default=60)
 ap.add_argument("--form", choices=["auto", "v4", "v6"], default="auto", help="auto = read it from the records")
-ap.add_argument("--tags", default=None, help="prms_tags.jsonl of the run")
-ap.add_argument("--drops", default=None, help="v6 only: prms_drops.jsonl (default: next to the tags file)")
+ap.add_argument("--tags", default=None, help="prms_tags.jsonl of the run, or toc_porb_tags.jsonl of a ToC and PORB run")
+ap.add_argument("--drops", default=None, help="v6 only: prms_drops.jsonl or toc_porb_drops.jsonl (default: next to the tags file)")
 ap.add_argument("--taxonomy", default=None)
 ap.add_argument("--seed", type=int, default=42)
 ap.add_argument("--out", default=OUT, help="output folder (default docs/review/data); another folder for a test")
@@ -136,7 +136,7 @@ else:
         recs = pick
 
     # Highlighting: the taxonomy term or synonym as written inside each tag's excerpt (the excerpt can be a whole
-    # passage). Same rule as term_in() in Taxonomy/3_Tagging/script/tools/gen_diag.py; the full excerpt is used only
+    # passage). Same rule as term_in() in Taxonomy/3_Tagging/PRMS/script/tools/gen_diag.py; the full excerpt is used only
     # when no term or synonym of the concept is found in it.
     FORMS = {}
     for c in concepts:
@@ -191,7 +191,9 @@ else:
     # Terms found but not kept: prms_drops.jsonl, one line per result. Only refusals of a whole term whose concept is
     # not among the kept tags; refused anchors, links and statuses of kept tags are shown on the tags themselves.
     NOT_TERM = {"link_not_valid", "finding_excerpt_not_in_text"}
-    dpath = a.drops or os.path.join(os.path.dirname(a.tags), "prms_drops.jsonl")
+    # the drops file has the prefix of the tags file: prms_drops.jsonl, or toc_porb_drops.jsonl for a ToC and PORB run
+    dpath = a.drops or os.path.join(os.path.dirname(a.tags), os.path.basename(a.tags).replace("_tags.jsonl", "_drops.jsonl")
+                                    if os.path.basename(a.tags).endswith("_tags.jsonl") else "prms_drops.jsonl")
     drops = {}
     if os.path.exists(dpath):
         for l in open(dpath, encoding="utf-8"):
@@ -337,6 +339,11 @@ else:
                                     and closest(f.get("proposed_label") or f.get("phrase") or "") else {}))
                             for f in r.get("taxonomy_findings") or []],
                "dropped": dropped}
+        if r.get("source") == "toc_porb":             # a text of a program plan (PORBs & TOCs/script/PORB_TOC_Tagging.Rmd): no marker;
+            res["part"] = r.get("component") or r.get("part") or "Plan text"     # the page shows the part of the plan and the program
+            res["program"] = ("%s %s" % (r.get("program_code") or "", r.get("program") or "")).strip()
+            res["area_of_work"] = r.get("area_of_work") or ""
+            res["level"], res["type"] = res["part"], " · ".join(x for x in (res["program"], res["area_of_work"]) if x)
         if r.get("english_kept"):                     # r17e: English and Spanish in the field; only the English was used
             res["english_kept"] = True
         if res["translated"] or res.get("english_kept"):   # the term search and the excerpts are on the English text
@@ -368,6 +375,8 @@ entry = {"id": a.batch, "name": a.name or (old or {}).get("name") or a.batch, "f
          "taxonomy_file": tfile, "n": len(results), "v": stamp(f"batch-{a.batch}.json"), "tv": stamp(tfile)}
 if prompts:
     entry["prompt"] = prompts
+if form == "v6" and any(r.get("part") for r in results):   # the page groups the batches by dataset in its list
+    entry["dataset"] = "ToC and PORB"
 if old:                                              # same place in the list
     batches[batches.index(old)] = entry
 else:

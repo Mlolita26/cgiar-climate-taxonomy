@@ -338,11 +338,12 @@ const V6 = (() => {
     const done = S.tab === "agree" || S.tab === "disagree";
     const who = id => (S.others[id] || []).map(v => esc(v.reviewer)).join(", ");
     const you = r => { const m = S.mine[r.id]; return m ? (m.submitted ? "submitted" : "draft") : ""; };
-    $("#main").innerHTML = storeNotice() + (rows.length ? `<p class="hint">Each row is one PRMS result with its PRMS climate marker. Click a row to open it${done ? " and see both reviews" : " and review it"}.</p><div class="card flush"><table class="list">
+    const plan = S.list.some(r => r.part);            // a ToC and PORB batch: texts of program plans, with no marker
+    $("#main").innerHTML = storeNotice() + (rows.length ? `<p class="hint">${plan ? "Each row is one text of a program plan: a ToC result, a PORB KPI line, the research questions of an area of work or an assumption" : "Each row is one PRMS result with its PRMS climate marker"}. Click a row to open it${done ? " and see both reviews" : " and review it"}.</p><div class="card flush"><table class="list">
       <thead><tr><th><button type="button" class="sorth ${s === "id" ? "on" : ""}" data-sort="id" title="Sort by ID">ID</button></th>
-        <th><button type="button" class="sorth ${s !== "id" ? "on" : ""}" data-sort="marker" title="Sort by PRMS marker: Principal, Significant, Not targeted, not provided; click again to reverse">PRMS marker${arrow}</button></th>
+        ${plan ? "<th>Part of the plan</th>" : `<th><button type="button" class="sorth ${s !== "id" ? "on" : ""}" data-sort="marker" title="Sort by PRMS marker: Principal, Significant, Not targeted, not provided; click again to reverse">PRMS marker${arrow}</button></th>`}
         <th>Title</th><th>Description</th><th>${done ? "Reviewers" : "You"}</th></tr></thead><tbody>
-      ${rows.map(r => `<tr data-id="${esc(r.id)}"><td class="mono">${esc(r.id)}</td><td class="nowrap">${esc(r.marker || "not provided")}</td>
+      ${rows.map(r => `<tr data-id="${esc(r.id)}"><td class="mono">${esc(r.id)}</td><td class="nowrap">${r.part ? esc(r.part) + '<div class="small muted">' + esc(r.program || "") + "</div>" : esc(r.marker || "not provided")}</td>
         <td>${esc(r.title)}</td><td class="small muted">${esc(cut(r.description, 220))}</td><td class="muted small nowrap">${done ? who(r.id) : you(r)}</td></tr>`).join("")}</tbody></table></div>`
       : `<div class="empty">Nothing here.</div>`);
     $$("tr[data-id]").forEach(tr => tr.onclick = () => location.hash = "#/r/" + encodeURIComponent(tr.dataset.id));
@@ -418,7 +419,7 @@ const V6 = (() => {
     box.innerHTML = `<p class="small muted">Worked out from your answers with the table of the tagging script. You do not set these.</p>
       <table class="lvl"><thead><tr><th></th><th>Tagged by AI</th><th>Your answers</th></tr></thead><tbody>
       ${AREAS.map(ax => `<tr><th>${AX[ax]} ${ax === "adaptation" ? help("levels") : ""}</th><td>${levelCell(ai[ax], ai.purpose[ax])}</td><td class="${d(ai[ax], me[ax])}">${levelCell(me[ax], me.purpose[ax])}</td></tr>`).join("")}
-      <tr class="pm"><th>PRMS marker ${help("marker")}</th><td>${esc(res.marker || "not provided")}</td><td>${esc(res.marker || "not provided")}</td></tr>
+      <tr class="pm"><th>PRMS marker ${help("marker")}</th><td>${esc(res.marker || (res.part ? "none: a plan carries no marker" : "not provided"))}</td><td>${esc(res.marker || (res.part ? "none: a plan carries no marker" : "not provided"))}</td></tr>
       <tr><th>Marker answer ${help("marker-answer")}</th><td>${markerCell(ai.marker, ai.detail)}</td><td class="${d(ai.marker, me.marker)}">${markerCell(me.marker, me.detail)}</td></tr>
       </tbody></table>
       <div class="small dis"><b>${dis.length ? `You disagree on ${dis.length} point${dis.length > 1 ? "s" : ""}` : "You agree with everything extracted"}</b>
