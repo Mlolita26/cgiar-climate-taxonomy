@@ -16,7 +16,7 @@ TITLE     <- "CGIAR Climate Adaptation and Mitigation Taxonomy"
 DOI       <- ""                                                        # none for v6 yet (the Zenodo Sandbox test DOI 10.5072/zenodo.607948 belonged to the v5 draft release)
 PUBLISHED <- "2026-11-09"                                              # first publication of this version
 REPO      <- "https://github.com/Mlolita26/cgiar-climate-taxonomy"
-TODAY     <- format(Sys.Date())
+UPDATED   <- "2026-11-20"                                              # last change to the vocabulary itself; change by hand (site-only changes do not count)
 # review status of each term, from the column "Final verdict" of the v6 master (rules in Climate Master v6.docx)
 REVIEW    <- c("awaiting external validation" = "Selected for validation by the climate community under the version 6 rules: every stand-alone term, and the context-dependent terms whose meaning the climate community sets (for example Rainfall) or that name a broad category of systems (for example Crop system).",
                "awaiting internal review"     = "Not part of the external validation. Reviewed internally, by mapping the term to CGIAR domains.",
@@ -98,7 +98,7 @@ scheme_ttl <- glue('
     dcterms:creator {lit(CUSTODIAN)} ;
     dcterms:publisher {lit("Alliance of Bioversity International and CIAT, for the CGIAR MELIAF project")} ;
     dcterms:created "{str_sub(raw$meta$built_at, 1, 10)}"^^xsd:date ;
-    dcterms:modified "{TODAY}"^^xsd:date ;
+    dcterms:modified "{UPDATED}"^^xsd:date ;
     dcterms:license <{LICENCE}> ;
     dcterms:rights {lit("Licence proposed (CC BY 4.0), pending confirmation by the custodian.")} ;
     owl:versionInfo "{VERSION}" ;
@@ -210,7 +210,7 @@ concept_json <- function(id, term, synonyms, facet, parent_id, definition, sourc
 }
 graph <- c(
   list(compact(list(id = SCHEME, type = "skos:ConceptScheme", "dcterms:title" = TITLE, "dcterms:creator" = CUSTODIAN,
-                    "dcterms:license" = list("@id" = LICENCE), "owl:versionInfo" = VERSION, "dcterms:modified" = TODAY,
+                    "dcterms:license" = list("@id" = LICENCE), "owl:versionInfo" = VERSION, "dcterms:modified" = UPDATED,
                     note = paste("Status:", STATUS)))),
   pmap(facets, \(facet, facet_def, slug) list(id = paste0("ct:facet-", slug), type = "skos:Collection", prefLabel = facet,
                                               definition = facet_def, member = I(paste0("ct:", concepts$id[concepts$facet == facet])))),
@@ -239,7 +239,7 @@ listed <- function(kind) tc |> filter(change %in% kind) |> distinct(ID, term, fa
 old_log <- read_lines("CHANGELOG.md")
 old_log <- old_log[seq(match(TRUE, str_starts(old_log, "## 5.0.0-draft")), length(old_log))]   # keep the version 5 entry below
 write_lines(c(
-  glue("# Changelog\n\n## {VERSION} (published {PUBLISHED}, updated {TODAY})\n"),
+  glue("# Changelog\n\n## {VERSION} (published {PUBLISHED}, updated {UPDATED})\n"),
   glue("Content is version 6 of the taxonomy (master_v6.csv, revision of 16 October 2026). Draft status.\n"),
   glue("Update of 2026-11-20: every concept now carries a review status (`meliaf:reviewStatus`), taken from the column Final verdict of the version 6 master: {paste0(names(REVIEW), ' (', map_int(names(REVIEW), \\(r) sum(concepts$review == r)), ')', collapse = ', ')}. No term is validated yet. The web site was redesigned, with a search box on every page, a term browser and pages for downloads, releases, contributing and about. No concept, identifier or definition changed.\n"),
   "Version 6 replaced the per-axis columns (climate scope, adaptation tag and condition, mitigation tag and condition) with three: climate area, tagging role (stand-alone or context-dependent) and context rule. The vocabulary publishes these as `meliaf:climateArea`, `meliaf:taggingRole` and `meliaf:contextRule`.\n",
@@ -339,10 +339,8 @@ tiles <- tribble(~href, ~title, ~text,
   "contribute.html", "Propose a term", "Add, change or retire a term",
   "about.html#cite", "Cite",           "How to cite the taxonomy",
   "releases.html",   "Release notes",  "What changed in each version",
-  "about.html",      "About",          "Who maintains it, and how FAIR it is",
-  "brain/",          "Taxonomy brain", "See which words of a text are terms",
-  "review/",         "Tagging review", "How CGIAR results were tagged") |>
-  mutate(c = c("#08306b", "#08519c", "#1d63a8", "#2f7bbd", "#d94530", "#c3261c", "#a50f15", "#67000d"))
+  "about.html",      "About",          "Who maintains it, and how FAIR it is") |>
+  mutate(c = c("#08306b", "#1d63a8", "#2f7bbd", "#d94530", "#c3261c", "#a50f15"))
 home_tiles <- paste0('<a class="dot" href="', tiles$href, '" style="--c:', tiles$c, '"><span class="disc">', tiles$title, '</span><span class="txt">', tiles$text, "</span></a>", collapse = "")
 review_defs <- paste0('<tr><td><span class="status', if_else(names(REVIEW) == names(REVIEW)[1], " ext", ""), '">', names(REVIEW), "</span></td><td>", h(REVIEW), '</td><td class="num">', map_int(names(REVIEW), \(r) sum(concepts$review == r)), "</td></tr>", collapse = "")
 examples <- paste0(glue('<a href="terms/{ids}.html">{h(concepts$term[match(ids, concepts$id)])}</a>', ids = concepts$id[match(c("Drought", "Seed system", "Index insurance", "Agroforestry", "Smallholder farmer"), concepts$term)] |> discard(is.na)), collapse = " · ")
@@ -398,7 +396,7 @@ form_dots <- paste0('<a class="dot" href="', REPO, "/issues/new?template=", form
 
 # releases: one short entry per version; the full list of changes is in CHANGELOG.md and in each GitHub release
 releases <- tribble(~version, ~tag, ~when, ~what,
-  VERSION, paste0("v", VERSION), glue("Published {PUBLISHED}, updated {TODAY}"),
+  VERSION, paste0("v", VERSION), glue("Published {PUBLISHED}, updated {UPDATED}"),
   "Content of the taxonomy version 6. Each term has a climate area, a tagging role, a context rule and a review status.",
   "5.0.0-draft", "v5.0.0-draft", "Published 2026-09-23",
   "First publication of the taxonomy as a FAIR vocabulary, with the content of version 5.")
