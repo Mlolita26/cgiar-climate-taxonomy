@@ -304,3 +304,8 @@ table.drops td { font-size: 12.5px; }
 .chip.add label { display: inline-flex; align-items: center; gap: 3px; color: var(--muted); }
 .text details.orig { margin-top: 12px; border-top: 1px solid var(--rule); padding-top: 8px; color: var(--muted); }
 .text details.orig h4 { margin: 6px 0; }
+/* the list of texts (form v7): the verdict of each area and the comparison with the assigned marker */
+.lvrow { margin: 1px 0; white-space: nowrap; }
+.lvrow .small { display: inline-block; min-width: 68px; }
+table.list td .oc { white-space: nowrap; }
+.lv-cannot { background: var(--amber-lt); color: #7A5A00; }

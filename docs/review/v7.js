@@ -221,7 +221,7 @@ const V7 = (() => {
     return `<details class="hlp"><summary aria-label="Explain: ${esc(h[0])}" title="What is this?">?</summary><span class="hlp-b">${esc(h[1])}${h[2] || ""} <a href="rules7.html#${esc(key)}" target="_blank" rel="noopener">More information</a></span></details>`; };
 
   // ---------------------------------------------------------------- small pieces of display
-  const VD_CLASS = { "Principal (2)": "L3", "Significant (1)": "L2", "Not targeted (0)": "L0" };          // the colours of the page, reused
+  const VD_CLASS = { "Principal (2)": "L3", "Significant (1)": "L2", "Not targeted (0)": "L0", "Cannot be determined": "cannot" };          // the colours of the page, reused
   const verdictCell = (label, rule) => label ? `<span class="lv lv-${VD_CLASS[label] || "L1"}">${esc(label)}</span>${rule && rule !== label ? ` <span class="small">by ${esc(rule)}</span>` : ""}` : "";
   const CMP_CLASS = { "Consistent": "aligned", "The text supports a lower marker": "marker-higher", "The text supports a higher marker": "marker-lower", "Marker missing": "no-comparison", "Not compared": "cannot-determine" };
   const cmpCell = o => o ? `<span class="oc oc-${CMP_CLASS[o] || "no-comparison"}">${esc(o)}</span>` : "";
@@ -302,6 +302,9 @@ const V7 = (() => {
     const dir = s === "marker_asc" ? 1 : -1;
     return rows.slice().sort((a, b) => dir * (markerRank(a) - markerRank(b)) || pos.get(a.id) - pos.get(b.id));
   }
+  // the list: the verdict of each area (Rule 8) and the comparison with the assigned marker (Rule 9), as extracted,
+  // with the colours of the form (verdictCell, cmpCell)
+  const listVerdict = (lab, a) => `<div class="lvrow"><span class="small muted">${lab}</span> ${a && a.verdict ? verdictCell(a.verdict, "") : '<span class="small muted">no verdict</span>'}</div>`;
   function list() {
     const rows = sorted(S.list.filter(r => bucket(r) === S.tab)), s = getSort();
     const arrow = s === "marker_desc" ? " ▼" : s === "marker_asc" ? " ▲" : "";
@@ -312,9 +315,10 @@ const V7 = (() => {
     $("#main").innerHTML = storeNotice() + (rows.length ? `<p class="hint">${plan ? "Each row is one text of a program plan: a ToC result, a PORB KPI line, the research questions of an area of work or an assumption" : "Each row is one text (a PRMS result) with its assigned marker"}. Click a row to open it${done ? " and see both reviews" : " and review it"}.</p><div class="card flush"><table class="list">
       <thead><tr><th><button type="button" class="sorth ${s === "id" ? "on" : ""}" data-sort="id" title="Sort by ID">ID</button></th>
         ${plan ? "<th>Part of the plan</th>" : `<th><button type="button" class="sorth ${s !== "id" ? "on" : ""}" data-sort="marker" title="Sort by assigned marker: Principal, Significant, Not targeted, not provided; click again to reverse">Assigned marker${arrow}</button></th>`}
-        <th>Title</th><th>Description</th><th>${done ? "Reviewers" : "You"}</th></tr></thead><tbody>
+        <th>Verdict</th><th>Comparison with the assigned marker</th><th>Title</th><th>Description</th><th>${done ? "Reviewers" : "You"}</th></tr></thead><tbody>
       ${rows.map(r => `<tr data-id="${esc(r.id)}"><td class="mono">${esc(r.id)}</td><td class="nowrap">${r.part ? esc(r.part) + '<div class="small muted">' + esc(r.program || "") + "</div>" : esc(r.marker || "not provided")}</td>
-        <td>${esc(r.title)}</td><td class="small muted">${esc(cut(r.description, 220))}</td><td class="muted small nowrap">${done ? who(r.id) : you(r)}</td></tr>`).join("")}</tbody></table></div>`
+        <td class="nowrap">${listVerdict("Adaptation", r.adaptation)}${listVerdict("Mitigation", r.mitigation)}</td><td>${cmpCell(r.comparison_result)}</td>
+        <td>${esc(r.title)}</td><td class="small muted">${esc(cut(r.description, 160))}</td><td class="muted small nowrap">${done ? who(r.id) : you(r)}</td></tr>`).join("")}</tbody></table></div>`
       : `<div class="empty">Nothing here.</div>`);
     $$("tr[data-id]").forEach(tr => tr.onclick = () => location.hash = "#/r/" + encodeURIComponent(tr.dataset.id));
     $$("button.sorth").forEach(b => b.onclick = () => {

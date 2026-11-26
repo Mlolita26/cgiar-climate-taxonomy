@@ -234,7 +234,7 @@ sub('''<a href="rules.html#${esc(key)}" target="_blank" rel="noopener">More info
 sub('''  const lvPill =(lv, purpose) => lv ? `<span class="lv lv-${esc(lv)}" title="${esc(levelWords(lv, purpose))}">${esc(lv)}</span>` : "";
   const levelCell = (lv, purpose) => `${lvPill(lv, purpose)} <span class="small">${esc(levelWords(lv, purpose))}</span>`;
   const markerCell = (o, d) => o ? `<span class="oc oc-${esc(o.replace(/ /g, "-"))}">${esc(outcomeLabel(o, d))}</span>` : "";''',
-    '''  const VD_CLASS = { "Principal (2)": "L3", "Significant (1)": "L2", "Not targeted (0)": "L0" };          // the colours of the page, reused
+    '''  const VD_CLASS = { "Principal (2)": "L3", "Significant (1)": "L2", "Not targeted (0)": "L0", "Cannot be determined": "cannot" };          // the colours of the page, reused
   const verdictCell = (label, rule) => label ? `<span class="lv lv-${VD_CLASS[label] || "L1"}">${esc(label)}</span>${rule && rule !== label ? ` <span class="small">by ${esc(rule)}</span>` : ""}` : "";
   const CMP_CLASS = { "Consistent": "aligned", "The text supports a lower marker": "marker-higher", "The text supports a higher marker": "marker-lower", "Marker missing": "no-comparison", "Not compared": "cannot-determine" };
   const cmpCell = o => o ? `<span class="oc oc-${CMP_CLASS[o] || "no-comparison"}">${esc(o)}</span>` : "";''')
@@ -529,6 +529,19 @@ sub('''const SORT_KEY = "v6-list-sort";''', '''const SORT_KEY = "v7-list-sort";'
 sub('''const getSort = () => { if (!S.sortV6) { try { S.sortV6 = localStorage.getItem(SORT_KEY) || "id"; } catch (e) { S.sortV6 = "id"; } } return S.sortV6; };
   const setSort = v => { S.sortV6 = v;''', '''const getSort = () => { if (!S.sortV7) { try { S.sortV7 = localStorage.getItem(SORT_KEY) || "id"; } catch (e) { S.sortV7 = "id"; } } return S.sortV7; };
   const setSort = v => { S.sortV7 = v;''')
+
+# ---- the list of texts: the verdict of each area and the comparison with the assigned marker (list-columns, 26 Nov 2026)
+sub('''  function list() {
+''', '''  // the list: the verdict of each area (Rule 8) and the comparison with the assigned marker (Rule 9), as extracted,
+  // with the colours of the form (verdictCell, cmpCell)
+  const listVerdict = (lab, a) => `<div class="lvrow"><span class="small muted">${lab}</span> ${a && a.verdict ? verdictCell(a.verdict, "") : '<span class="small muted">no verdict</span>'}</div>`;
+  function list() {
+''')
+sub('''<th>Title</th><th>Description</th><th>${done ? "Reviewers" : "You"}</th></tr></thead><tbody>''',
+    '''<th>Verdict</th><th>Comparison with the assigned marker</th><th>Title</th><th>Description</th><th>${done ? "Reviewers" : "You"}</th></tr></thead><tbody>''')
+sub('''<td>${esc(r.title)}</td><td class="small muted">${esc(cut(r.description, 220))}</td>''',
+    '''<td class="nowrap">${listVerdict("Adaptation", r.adaptation)}${listVerdict("Mitigation", r.mitigation)}</td><td>${cmpCell(r.comparison_result)}</td>
+        <td>${esc(r.title)}</td><td class="small muted">${esc(cut(r.description, 160))}</td>''')
 
 for bad in ("levelWords", "outcomeLabel", "areaLevel", "extMeasure", "measureText", "functionText", "FUNC_OPTS", "L2_additional", "marker_outcome", "climate information", "PRMS marker", "Planned or done"):
     if bad in s:
