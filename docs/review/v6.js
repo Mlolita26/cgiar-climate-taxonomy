@@ -369,6 +369,7 @@ const V6 = (() => {
       <section class="card flush" id="v6-tags"></section>
       <section class="card" id="v6-dropped"></section>
       <section class="card" id="v6-add"><h3>Add a term</h3>
+        <div class="small muted">For a taxonomy term that is in the text and was not tagged. Search the taxonomy, click + add, then tick the area for which the term counts.</div>
         <input id="q" class="search" placeholder="Search terms and synonyms" autocomplete="off">
         <div id="hits" class="hits"></div>
         <div id="added" class="chips"></div>
