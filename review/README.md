@@ -180,3 +180,20 @@ database), then `npx wrangler dev --local --port 8788` (with a `worker/.dev.vars
 it will run on the live database, create the local copy from the `schema.sql` of before 19 Nov 2026 (git history)
 and run `npx wrangler d1 execute tagging-review --local --file=migrations/0001_reviews_v6.sql`. The local copy
 lives in `worker/.wrangler/` (ignored by git; delete it after the test, with `.dev.vars`).
+
+## Form v7: batches tagged with the rules of 25 November 2026 (prepared 26 Nov 2026, not published)
+
+- `docs/review/v7.js` is the review form for batches tagged by the script `r18` and later (CGIAR Standard for Tagging
+  Climate-Related Work as revised on 24 and 25 November 2026). It is built from `v6.js` by `review/scripts/make_v7.py`
+  (run it from the repository root after a change to `v6.js` that v7 should also get). Question 3 asks, per area, whether
+  a purpose is shown (Rule 7) and which rule of Rule 8 decides; the page works out the verdict and the comparison with
+  the assigned marker (Rule 9). The words are the standard's.
+- `docs/review/rules7.html` holds, in this order: how to review a text, the definitions, the twelve rules with the numbers
+  and titles of the standard, and the guide to the page. The header shows "Definitions" and "Rules" for a v7 batch.
+- `build_data.py` reads the form from the records (`comparison_result` in a record means v7) or takes `--form v7`.
+- The forms v6 and v7 share the review store (`reviews_v6`, keyed by text, batch and reviewer), so the worker is unchanged.
+- Published on 26 Nov 2026: the batch `pilot-2025-v7` (the 200 pilot results under the rules of 25 November 2026; tagging
+  of the evening run, purpose and verdict from the second set of readings of that night). It is listed before the earlier
+  pilot, so a new visitor still starts on `pilot-2025-v6`; choose it in the batch list. Climate Action is not read with the
+  new rules yet.
+  A local test: build a batch into a copy of `docs/review` with `--out`, and serve that copy.

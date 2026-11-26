@@ -7,7 +7,9 @@
 Writes docs/review/data/taxonomy-v<N>.json (one file per taxonomy version), docs/review/data/batch-<batch>.json and
 updates docs/review/data/batches.json. Each batch names its taxonomy file and its form there:
   form v4  records of the v4 decision rules (verdicts Full / Partial / Minimal / None), the first review form
-  form v6  records of the CGIAR tagging standard (levels L0 to L3, marker answer), the review form by area
+  form v6  records of the CGIAR tagging standard of 10 Nov 2026 (levels L0 to L3, marker answer), the review form by area
+  form v7  records of the standard as revised on 24 and 25 Nov 2026 (script r18 and later): purpose, verdict and rule per
+           area, comparison with the assigned marker. Same builder as v6; the page uses v7.js
 The form is read from the records when --form is not given. The script can be run again at any time: it replaces the
 batch file and the batch's entry in batches.json. Reviews are not here: they are stored by the worker (worker/).
 """
@@ -26,20 +28,22 @@ ap = argparse.ArgumentParser()
 ap.add_argument("--batch", required=True)
 ap.add_argument("--name", default="")
 ap.add_argument("--n", type=int, default=60)
-ap.add_argument("--form", choices=["auto", "v4", "v6"], default="auto", help="auto = read it from the records")
+ap.add_argument("--form", choices=["auto", "v4", "v6", "v7"], default="auto", help="auto = read it from the records")
 ap.add_argument("--tags", default=None, help="prms_tags.jsonl of the run, or toc_porb_tags.jsonl of a ToC and PORB run")
 ap.add_argument("--drops", default=None, help="v6 only: prms_drops.jsonl or toc_porb_drops.jsonl (default: next to the tags file)")
 ap.add_argument("--taxonomy", default=None)
 ap.add_argument("--seed", type=int, default=42)
 ap.add_argument("--out", default=OUT, help="output folder (default docs/review/data); another folder for a test")
 a = ap.parse_args()
-a.tags = a.tags or (DEFAULT_V6_TAGS if a.form == "v6" else DEFAULT_TAGS)
+a.tags = a.tags or (DEFAULT_V6_TAGS if a.form in ("v6", "v7") else DEFAULT_TAGS)
 OUT = a.out
 os.makedirs(OUT, exist_ok=True)
 
 recs = [json.loads(l) for l in open(a.tags, encoding="utf-8") if l.strip()]
-form = a.form if a.form != "auto" else ("v6" if any("marker_outcome" in r or "comparison_level" in r for r in recs) else "v4")
-a.taxonomy = a.taxonomy or (DEFAULT_V6_TAX if form == "v6" else DEFAULT_TAX)   # default taxonomy follows the form
+form = a.form if a.form != "auto" else ("v7" if any("comparison_result" in r for r in recs)
+                                         else "v6" if any("marker_outcome" in r or "comparison_level" in r for r in recs) else "v4")
+STD = form in ("v6", "v7")                           # records of the CGIAR tagging standard
+a.taxonomy = a.taxonomy or (DEFAULT_V6_TAX if STD else DEFAULT_TAX)   # default taxonomy follows the form
 
 tax = json.load(open(a.taxonomy, encoding="utf-8"))
 tver = os.path.basename(a.taxonomy)
@@ -127,7 +131,8 @@ else:
     if a.n and a.n < len(recs):                      # spread over the marker answers and the levels
         rnd, groups = random.Random(a.seed), {}
         for r in recs:
-            groups.setdefault((r.get("marker_outcome"), r.get("comparison_level")), []).append(r)
+            groups.setdefault((r.get("comparison_result"), r.get("comparison_verdict")) if form == "v7"
+                              else (r.get("marker_outcome"), r.get("comparison_level")), []).append(r)
         pick, keys = [], sorted(groups, key=str)
         while len(pick) < a.n and any(groups.values()):
             for k in keys:
@@ -255,11 +260,19 @@ else:
                 "adaptation", "adaptation_anchor_quote", "mitigation", "mitigation_anchor_quote",
                 "pathway_role", "result_level", "status", "status_quote", "intervention_type", "confidence",
                 "anchored_by_text", "adaptation_by_text", "mitigation_by_text")   # r17f: counted through the text's anchor, per area
+    if form == "v7":                                  # r18: area unclear (Rule 2), a term inside a name, area from the text
+        TAG_KEEP += ("area_unclear", "inside_a_name", "area_from_text")
     AREA_KEEP = ("information", "objective", "objective_quote", "measure", "measure_quote", "measure_kind", "purpose",
                  "purpose_basis", "purpose_quote", "claim_without_tags", "level", "rationale", "system_or_population",
                  "intervention", "result", "intervention_type", "link_rationale_intervention", "link_intervention_result",
                  "climate_function", "function_quote")   # r16: the climate function read by the AI, with its words
     RD_AREA = ("function_class", "function_words", "measure", "purpose")
+    if form == "v7":                                  # r18: the purpose (Rule 7) and the verdict (Rule 8) of each area
+        AREA_KEEP = ("information", "purpose", "ways", "way_quotes", "rationale_quote", "policy_quote", "scope", "other_purpose_quote",
+                     "verdict", "verdict_code", "rule", "rule_quote", "verdict_reason", "cannot_reason", "rule_named_by_reading",
+                     "rationale", "system_or_population", "intervention", "result", "intervention_type",
+                     "link_rationale_intervention", "link_intervention_result")
+        RD_AREA = ("rationale_quote", "way1_quote", "way2_quote", "way3_quote", "policy_quote", "scope", "rule")
 
     def reading_of(r):
         """r16 and later: the kind of work and, when there are two readings, what each said per area"""
@@ -276,6 +289,9 @@ else:
                  "facet", "area", "proposed_value", "reason", "climate_wording")
     TOP_KEEP = ("climate_area", "geography", "geography_source", "countries_in_text", "intervention_status", "result_status",
                 "comparison_area", "comparison_level", "marker_outcome", "marker_outcome_reason", "marker_outcome_quote")
+    if form == "v7":                                  # r18: Rule 9
+        TOP_KEEP = ("climate_area", "geography", "geography_source", "countries_in_text", "intervention_status", "result_status",
+                    "comparison_verdict", "comparison_area", "comparison_result", "comparison_reason", "comparison_quote")
     hl_all, hl_fallback, prompt_set = 0, 0, set()
     results = []
     for r in recs:
@@ -362,7 +378,7 @@ else:
 
 results.sort(key=lambda r: (not r["id"].isdigit(), int(r["id"]) if r["id"].isdigit() else 0, r["id"]))
 batch_doc = {"batch": a.batch, "taxonomy": tver, "results": results}          # v4 batches: layout unchanged
-if form == "v6":
+if STD:
     batch_doc = {"batch": a.batch, "form": form, "taxonomy": tver, "prompt": prompts, "results": results}
 json.dump(batch_doc, open(os.path.join(OUT, f"batch-{a.batch}.json"), "w", encoding="utf-8"), ensure_ascii=False)
 
@@ -375,7 +391,7 @@ entry = {"id": a.batch, "name": a.name or (old or {}).get("name") or a.batch, "f
          "taxonomy_file": tfile, "n": len(results), "v": stamp(f"batch-{a.batch}.json"), "tv": stamp(tfile)}
 if prompts:
     entry["prompt"] = prompts
-if form == "v6" and any(r.get("part") for r in results):   # the page groups the batches by dataset in its list
+if STD and any(r.get("part") for r in results):   # the page groups the batches by dataset in its list
     entry["dataset"] = "ToC and PORB"
 if old:                                              # same place in the list
     batches[batches.index(old)] = entry

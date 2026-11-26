@@ -22,6 +22,17 @@
   "dataset": "ToC and PORB"
  },
  {
+  "id": "pilot-2025-v7",
+  "name": "Pilot 2025, 200 results, rules of 25 Nov 2026, taxonomy v6",
+  "form": "v7",
+  "taxonomy": "taxonomy_v6.json",
+  "taxonomy_file": "taxonomy-v6.json",
+  "n": 200,
+  "v": "65d5334ca8",
+  "tv": "18cd5dc4b5",
+  "prompt": "prms-standard-2026-11-25.r24"
+ },
+ {
   "id": "pilot-2025-v6",
   "name": "Pilot 2025, 200 results, taxonomy v6",
   "form": "v6",

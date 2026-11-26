@@ -14,7 +14,9 @@ const Tour = (() => {
   function pickResult() {
     // v6 batches: a result with climate information, so that the area cards have questions to show
     const lv = x => (x.adaptation || {}).level || "";
-    const r = (S.form === "v6" && (S.list.find(x => bucket(x) === "todo" && (lv(x) === "L2" || lv(x) === "L3"))
+    const shown = x => (x.adaptation || {}).purpose === "shown" || (x.mitigation || {}).purpose === "shown";     // v7: a text with a purpose
+    const r = (S.form === "v7" && (S.list.find(x => bucket(x) === "todo" && shown(x)) || S.list.find(x => bucket(x) === "todo" && (x.tags || []).length)))
+      || (S.form === "v6" && (S.list.find(x => bucket(x) === "todo" && (lv(x) === "L2" || lv(x) === "L3"))
                                    || S.list.find(x => bucket(x) === "todo" && lv(x) && lv(x) !== "L0")))
       || S.list.find(x => bucket(x) === "todo") || S.list.find(x => bucket(x) === "waiting");
     return r && r.id;
@@ -27,6 +29,7 @@ const Tour = (() => {
   async function openList() { if (!location.hash.startsWith("#/list")) location.hash = "#/list/todo"; await until("#tabs .tab"); }
 
   function build() {
+    if (S.form === "v7") { steps = stepsV7(); return; }
     if (S.form === "v6") { steps = stepsV6(); return; }
     steps = [
       { title: "Welcome", text: "You will check how the AI tagged PRMS results against the climate taxonomy. Each result is reviewed by two people. You do not see the other person's answers until you have both submitted.", at: openList },
@@ -50,6 +53,38 @@ const Tour = (() => {
       { el: ".actions", title: "5. Save or submit", text: "Save draft keeps your answers and lets you come back. Submit sends them and takes you to the next result. You can change a submitted review until the second reviewer submits.", at: openReview },
       { el: "#exp", title: "The file", text: "Download file gives one Excel sheet: one row per result, the AI's answer, then each reviewer's answers side by side.", at: openList },
       { title: "That's it", text: "You can replay this tour with How to review, at the top right.", at: openList, last: true },
+    ];
+  }
+
+  // the tour of the form for batches under the standard as revised on 24 and 25 November 2026 (form "v7")
+  function stepsV7() {
+    return [
+      { title: "Welcome", text: "You will check what was extracted from texts under the CGIAR Standard for Tagging Climate-Related Work, with taxonomy v6. Each text is reviewed by two people. You do not see the other person's answers until you have both submitted.", at: openList },
+      { el: "#namebar", title: "First, your name", text: "Type your first and last name and press Start. It identifies your reviews and is shown to the other reviewers. This browser remembers you next time.", at: openList,
+        skipIf: () => !!S.code, demo: async () => { const n = document.querySelector("#nm"); await typeInto(n, "Jane Doe"); }, undo: () => { const n = document.querySelector("#nm"); if (n) n.value = ""; } },
+      { el: "#who", title: "That's you", text: "Your name stays here. If it is not you, for example on a shared computer, click change.", at: openList, skipIf: () => !S.code },
+      { el: "#tabs", title: "Your queues", text: "To review: texts waiting for you. Waiting for 2nd review: you submitted, the other reviewer has not. Done: both reviews are in, split into agree and disagree on the verdicts and the comparison with the assigned marker.", at: openList },
+      { el: "table.list tbody tr:first-child", title: "This is one text to review", text: "Each row is one text: its assigned marker, title and description. Click on a row to open it. We will open one for you.", at: openList,
+        pulse: "table.list tbody tr:first-child", demo: async () => { await wait(1400); const r = document.querySelector("table.list tbody tr:first-child"); if (r && running) { r.classList.add("tour-press"); await wait(260); r.classList.remove("tour-press"); } } },
+      { el: ".text", title: "The text", text: "The title and description as recorded in the source. Yellow: tags that count as climate-related information (stand-alone or anchored). Grey: tags that do not count (no climate anchor, or an unclear area). Blue: terms you add. Purple, dotted: proposed tags, words that no taxonomy term covers. The ? next to the colours explains them. Click a colour to find its row in the tag table.", at: openReview, side: "right" },
+      { el: "#v6-intro", title: "What to do", text: "The form follows the four questions of the standard. The answers start as extracted from the text: Agree, or Disagree (choose the right answer where there is a list; the note is optional), then submit. The flags are points to look at first.", at: openReview },
+      { el: "#v6-tags .hlp", title: "The ? buttons", text: "Each ? opens a short explanation of the question or the value next to it, with a link to the Rules page for more. Click it again to close it.", at: openReview,
+        demo: async () => { const d = document.querySelector("#v6-tags .hlp"); if (d) { await wait(600); d.open = true; } }, undo: () => { const d = document.querySelector("#v6-tags .hlp"); if (d) d.open = false; } },
+      { el: "#v6-tags", title: "Question 1: the tags", text: "Each taxonomy term found in the text, with its value for adaptation and for mitigation (Rules 1 to 3), its pathway role (Rule 4) and, for an intervention or a result, whether it is intended or realized (Rule 6). Tags that count: an area says stand-alone or anchored. Tags that do not count: no anchor, not relevant or unclear, and the row says why. Every tag starts as Agree. Disagree opens the values to correct, a box to remove the tag, and an optional reason and note.", at: openReview, pulse: "table.v6t tbody tr:first-child .segs" },
+      { el: "#v6-dropped", title: "Words found but not tagged", text: "Words the term search found that are not a tag here, with the reason. Click + keep to add one as your tag.", at: openReview },
+      { el: "#v6-add", title: "Add a term", text: "For a taxonomy term that is in the text and was not tagged. Search by term or synonym, click + add, and tick the area for which it counts.", at: openReview,
+        demo: async () => { const q = document.querySelector("#q"); q.scrollIntoView({ block: "center" }); await typeInto(q, "drought"); }, undo: () => clear("#q") },
+      { el: ".text", title: "Or tag straight from the text", text: "Select a word or phrase in the title or description (double-click a word, or drag over several). A box opens with the matching terms: click + add. If nothing fits, propose it from there.", at: openReview, side: "right",
+        demo: async () => { await wait(300); demoPick(); }, undo: () => { closePick(); getSelection().removeAllRanges(); } },
+      { el: "#v6-path", title: "Question 2: the climate pathway", text: "Climate rationale, geography, system or population, intervention and result, and the links between them, for each area, from the tags that count (Rules 4 and 5). Agree, or Disagree and write which part is wrong.", at: openReview },
+      { el: "#v6-area-adaptation", title: "Question 3: purpose and verdict", text: "One card per area. First, whether the text shows an adaptation or a mitigation purpose, with the way that shows it and the words of the text (Rule 7). Then the verdict, Not targeted (0), Significant (1), Principal (2) or Cannot be determined, with the rule that decides (Rule 8). Agree, or Disagree and choose the right answer. The comparison with the assigned marker (Rule 9) is in the yellow box at the end.", at: openReview },
+      { el: "#v6-props", title: "Question 4: the taxonomy", text: "Terms or synonyms that the text suggests the taxonomy lacks (Rules 10 to 12): accept or reject each one. Point at a line to see the passage. Your own proposals are listed below. These answers go to the people who maintain the taxonomy and do not change the outcome of your review.", at: openReview },
+      { el: "#v6-comment", title: "Comment", text: "Anything the other reviewer and the taxonomy team should know: why you disagree, a doubt, a pattern you notice.", at: openReview },
+      { el: "#v6-gives", title: "What your answers give", text: "The final decision for this text, in the yellow frame: the verdict of each area and the comparison with the assigned marker that follow from your answers, next to the extracted ones; a summary of your answers by question; the list of every point where you disagree; and the outcome of your review. You do not set them; they change as you answer.", at: openReview },
+      { el: ".actions", title: "Save or submit", text: "Save draft keeps your answers and lets you come back. Submit checks that every question that applies is answered, sends your review and takes you to the next text. You can change a submitted review until the second reviewer submits.", at: openReview },
+      { el: "#rules", title: "Rules and Definitions", text: "Rules opens a page, in a new tab, with how to review a text, the definitions and the twelve rules of the standard. Definitions opens the same page at its definitions. The ? buttons link to its sections.", at: openReview },
+      { el: "#exp", title: "The file", text: "Download file gives one Excel file: one row per text with the extracted verdicts and comparison, then each reviewer's answers side by side, plus a sheet of tags and a sheet of proposed terms.", at: openList },
+      { title: "That's it", text: "You can replay this tour with How to review, at the top right. Definitions and Rules are next to it.", at: openList, last: true },
     ];
   }
 

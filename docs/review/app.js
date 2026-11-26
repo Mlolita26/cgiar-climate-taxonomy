@@ -1,7 +1,18 @@
 // Tagging review. Plain JS, no build step. The taxonomy and the results are static files in data/;
 // the reviews are stored by a small worker (worker/), which knows the reviewer from their personal link (?r=code).
 // Each batch in data/batches.json names its form: "v4" (this file: verdicts Full / Partial / Minimal / None) or "v6"
-// (v6.js: the CGIAR tagging standard, a card per area, levels worked out from the answers).
+// (v6.js: the CGIAR tagging standard of 10 Nov 2026, a card per area, levels worked out from the answers) or "v7" (v7.js:
+// the standard as revised on 24 and 25 Nov 2026: purpose, verdict and comparison with the assigned marker). The forms v6
+// and v7 keep their reviews in the same store (the worker's table for the standard), so the worker is told "form=v6".
+const STD = () => S.form === "v6" || S.form === "v7";                       // a batch tagged under the CGIAR tagging standard
+const FORM = () => S.form === "v7" ? V7 : V6;                               // the code of its review form
+const RULES = () => S.form === "v7" ? "rules7.html" : "rules.html";         // the page that explains it
+// the links to the Rules page and, for the form v7, to its Definitions section
+function setRules() {
+  const r = $("#rules"), d = $("#defs"); if (!r) return;
+  r.hidden = !STD(); r.href = RULES();
+  if (d) { d.hidden = S.form !== "v7"; d.href = "rules7.html#definitions"; }
+}
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -20,7 +31,7 @@ const S = {
 // GET with the code in the URL and POST as text/plain: both count as "simple" requests, so the browser
 // does not send a permission check before each call.
 async function api(path, body) {
-  const url = CONFIG.api + path + (path.includes("?") ? "&" : "?") + "r=" + encodeURIComponent(S.code) + (S.form === "v6" ? "&form=v6" : "");
+  const url = CONFIG.api + path + (path.includes("?") ? "&" : "?") + "r=" + encodeURIComponent(S.code) + (STD() ? "&form=v6" : "");
   const r = await fetch(url, body ? { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(body) } : {});
   const out = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(out.error || r.statusText);
@@ -58,13 +69,13 @@ async function boot() {
     : sets.map(d => `<optgroup label="${esc(d)}">${S.batches.filter(b => (b.dataset || "PRMS") === d).map(opt).join("")}</optgroup>`).join("");
   sel.value = S.batch;
   sel.onchange = async () => { S.batch = sel.value; try { localStorage.setItem("rv_batch", S.batch); } catch (e) {} pageMsg("Loading…");
-    const nb = S.batches.find(b => b.id === S.batch) || {}; S.form = nb.form || "v4"; loadTerms(nb); $("#rules").hidden = S.form !== "v6";
+    const nb = S.batches.find(b => b.id === S.batch) || {}; S.form = nb.form || "v4"; loadTerms(nb); setRules();
     await loadBatch(true); location.hash = "#/list/todo"; route(); };
   whoBar();
   window.onhashchange = route;
   route();
   $("#help").hidden = false; $("#help").onclick = () => Tour.start();
-  $("#rules").hidden = S.form !== "v6";                     // rules.html explains the v6 form
+  setRules();                                               // the Rules page of the form (and its Definitions, for v7)
   Tour.maybeStart();
 }
 
@@ -130,7 +141,7 @@ async function loadBatch(withResults) {
 }
 function setState(st) {
   // a worker that predates the v6 form answers without "form": reviews of v6 batches are then not saved
-  if (S.code) S.storeOk = S.form !== "v6" || st.form === "v6";
+  if (S.code) S.storeOk = !STD() || st.form === "v6";
   S.status = st.counts || {};
   S.mine = {}; (st.mine || []).forEach(r => S.mine[r.result_id] = r);
   S.others = {}; (st.done || []).forEach(v => (S.others[v.result_id] ||= []).push(v));
@@ -147,7 +158,7 @@ function finalOf(rev, res) {
   return { a: yes(rev.adaptation_ok) ? res.ai_a : rev.adaptation_verdict, m: yes(rev.mitigation_ok) ? res.ai_m : rev.mitigation_verdict, tags };
 }
 function reviewersAgree(id) {
-  if (S.form === "v6") return V6.agree(id);
+  if (STD()) return FORM().agree(id);
   const v = S.others[id] || [], res = S.byId[id]; if (v.length < 2 || !res) return null;
   const [x, y] = v.map(r => finalOf(r, res));
   return x.a === y.a && x.m === y.m && x.tags.size === y.tags.size && [...x.tags].every(t => y.tags.has(t));
@@ -179,7 +190,7 @@ function tabs() {
 const pill = v => `<span class="pill v-${esc(String(v || "").toLowerCase())}">${esc(v || "—")}</span>`;
 function listView() {
   tabs();
-  if (S.form === "v6") return V6.list();
+  if (STD()) return FORM().list();
   const rows = S.list.filter(r => bucket(r) === S.tab);
   const done = S.tab === "agree" || S.tab === "disagree";
   const who = id => (S.others[id] || []).map(v => esc(v.reviewer)).join(", ");
@@ -235,7 +246,7 @@ async function openResult(id) {
   if (!res) return pageMsg("Not found.");
   if (!S.termList.length) { pageMsg("Loading the taxonomy…"); await S.termsReady; }
   S.cur = res;
-  if (S.form === "v6") { if (n2(id) >= 2) return V6.compare(res); V6.open(res); window.scrollTo(0, 0); return; }
+  if (STD()) { if (n2(id) >= 2) return FORM().compare(res); FORM().open(res); window.scrollTo(0, 0); return; }
   if (n2(id) >= 2) return compareView(res);
   const m = S.mine[id], b = v => (yes(v) ? true : no(v) ? false : null);
   S.rev = m ? { ...JSON.parse(JSON.stringify(m)), adaptation_ok: b(m.adaptation_ok), mitigation_ok: b(m.mitigation_ok) }
@@ -246,7 +257,7 @@ async function openResult(id) {
 }
 
 function navBar(res) {
-  const base = S.form === "v6" && typeof V6 !== "undefined" ? V6.sorted(S.list) : S.list;   // v6: the order chosen in the list
+  const base = STD() && typeof V6 !== "undefined" ? FORM().sorted(S.list) : S.list;   // v6 and v7: the order chosen in the list
   const ids = base.filter(r => bucket(r) === S.tab).map(r => r.id), i = ids.indexOf(res.id);
   const prev = i > 0 ? ids[i - 1] : null, next = i >= 0 && i < ids.length - 1 ? ids[i + 1] : null;
   return `<div class="nav"><a href="#/list/${S.tab}" class="back">← ${TABS[S.tab] || "list"}</a>
@@ -538,7 +549,7 @@ function loadXlsx() {
 }
 async function exportFile() {
   if (needName()) return;
-  if (S.form === "v6") return V6.exportFile();
+  if (STD()) return FORM().exportFile();
   const link = $("#exp"), label = link.textContent; link.textContent = "Preparing…";
   let revs;
   try { [revs] = await Promise.all([api(`/export?batch=${encodeURIComponent(S.batch)}`), loadXlsx(), S.termsReady]); }
