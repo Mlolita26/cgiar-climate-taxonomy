@@ -367,6 +367,7 @@ const V6 = (() => {
         <div class="flags small" id="v6-flags"><b>Flags</b> ${help("flags")} ${(res.review_flags || []).length ? res.review_flags.map(f => `<span class="flag">${esc(f)}</span>`).join("") : `<span class="muted">none</span>`}</div></section>
       ${qHead(1, "What climate-related information does the text contain?", "Section 3, Rules 1 to 3: the taxonomy terms in the text, and whether they concern adaptation, mitigation, both or neither")}
       <section class="card flush" id="v6-tags"></section>
+      <section class="card" id="v6-info"></section>
       <section class="card" id="v6-dropped"></section>
       <section class="card" id="v6-add"><h3>Add a term</h3>
         <div class="small muted">For a taxonomy term that is in the text and was not tagged. Search the taxonomy, click + add, then tick the area for which the term counts.</div>
@@ -375,15 +376,14 @@ const V6 = (() => {
         <div id="added" class="chips"></div>
         <a href="#" id="brw" class="small">Browse the taxonomy</a>
         <div id="tree" class="tree" hidden></div></section>
-      <section class="card" id="v6-info"></section>
-      <section class="card" id="v6-props"><h3>Proposed tags and new terms ${help("proposals")}</h3>
-        <div class="small muted">Words of the text that no taxonomy term covers, found by the tagging (question 4 of the standard). They do not count as climate information. Decide each one here.</div><div id="v6-found"></div>
-        <div class="small muted" style="margin-top:10px">Your proposals (search under Add a term; if the term is not in the taxonomy, propose it there)</div><div id="props" class="chips"></div></section>
       ${qHead(2, "What climate pathway does the text describe?", "Section 4, Rules 4 to 6: climate rationale, geography, system or population, intervention and result, and the links between them")}
       <section class="card" id="v6-path"></section>
       ${qHead(3, "Is the information consistent with the PRMS climate marker?", `Section 5, Rules 7 to 9: the climate objective, measure and purpose described, compared with the PRMS marker <b>${esc(res.marker || "not provided")}</b>. The answer is in the yellow box at the end.`)}
       ${AREAS.map(ax => `<section class="card area" id="v6-area-${ax}"></section>`).join("")}
-      ${qHead(4, "What gaps or errors in the taxonomy does tagging reveal?", "Section 6, Rules 10 to 12: missing terms or synonyms, doubtful matches, classifications to review. Decided above, under question 1 (Proposed tags and new terms), so that each proposal is judged while reading the climate information.")}
+      ${qHead(4, "What gaps or errors in the taxonomy does tagging reveal?", "Section 6, Rules 10 to 12: missing terms or synonyms, doubtful matches, classifications to review. Accept or reject each proposal found in the text, and add your own.")}
+      <section class="card" id="v6-props"><h3>Proposed tags and new terms ${help("proposals")}</h3>
+        <div class="small muted">Words of the text that no taxonomy term covers, found by the tagging. They do not count as climate information. Decide each one here.</div><div id="v6-found"></div>
+        <div class="small muted" style="margin-top:10px">Your proposals (search under Add a term in question 1; if the term is not in the taxonomy, propose it there)</div><div id="props" class="chips"></div></section>
       <section class="card" id="v6-comment"><h3>Comment</h3><textarea id="cm" placeholder="Anything the others should know">${esc(R.comment || "")}</textarea></section>
       <section class="card gives final" id="v6-gives"><h3>What your answers give <span class="small muted">(the final decision for this result)</span></h3><div id="v6-gives-b"></div></section>
       <div class="actions"><span id="msg" class="small"></span><button id="save">Save draft</button><button class="primary" id="sub">Submit</button></div>
