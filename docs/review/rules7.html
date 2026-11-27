@@ -50,14 +50,18 @@
 <div class="part" id="how">1. How to review a text</div>
 <section id="what-to-do">
 <h2>How to review a text</h2>
-<p>You check what was extracted from one text. A text is a written record: a PRMS result (title and description), a part of a plan, an abstract. The tagging records what the text says. It does not judge the work, and it adds no outside knowledge. Review it the same way: use only what the text says.</p>
-<p>The form follows the four questions of the standard. Every answer starts as extracted from the text. For each one, choose Agree, or Disagree and give the right answer where there is a list. A note is optional.</p>
+<p>You check what the tagging found in one text. A text is a written record: a PRMS result (its title and description), a part of a plan, an abstract. Use only what the text says. Do not add what you know from elsewhere, and do not judge the work.</p>
+<p>The form follows the four questions of the standard. Every answer is already filled in from the tagging. For each one, choose Agree, or choose Disagree and fix it. A note is always optional.</p>
+<p>A word in pink and underlined has an explanation: point at it, or tap it.</p>
 <ol>
-  <li><b>Question 1, climate-related information (Rules 1 to 3).</b> Read the text on the left, then the tag table. For each tag, check its value for adaptation and for mitigation (stand-alone, anchored, no anchor, not relevant, unclear), its pathway role (Rule 4), and, for an intervention or a result, whether it is intended or realized (Rule 6). Check the words found but not tagged. Add a taxonomy term that is in the text and was missed.</li>
-  <li><b>Question 2, climate pathway (Rules 4 and 5).</b> Check the five components for each area: climate rationale, geography, system or population, intervention, result, and the links between them.</li>
-  <li><b>Question 3, purpose and verdict (Rules 7 to 9).</b> For adaptation, then for mitigation: does the text show a purpose, and in which way (Rule 7)? Which rule of Rule 8 decides, and so which verdict? The comparison with the assigned marker (Rule 9) is worked out for you in the yellow box.</li>
-  <li><b>Question 4, taxonomy (Rules 10 to 12).</b> Accept or reject each proposed term or synonym found in the text. Add your own proposals.</li>
-  <li><b>Check the yellow box, then submit.</b> It shows the verdicts and the comparison that follow from your answers, a summary by question, and every point where you disagree.</li>
+  <li><b>Question 1, the terms.</b> Read the text on the left. On the right there are two tables.
+    <ul><li><b>Terms that count.</b> They say that the text holds climate-related information. A term counts when it is a stand-alone term, or when it is anchored.</li>
+    <li><b>Terms that do not count.</b> They are in the text, but they do not say that it is about climate. The reason is on each line: most often the text gives no climate anchor. Words that were found and not tagged are in the same table.</li></ul>
+    If a line is wrong, choose Disagree and fix it. For a word that was not tagged, click + keep. If a taxonomy term is missing, add it under Add a term. The pink box gives the answer to question 1.</li>
+  <li><b>Question 2, the climate pathway.</b> The climate story of the text, part by part: climate rationale, geography, system or population, intervention, result, and the relationships between them. Agree with each part, or disagree and say what is wrong in your own words.</li>
+  <li><b>Question 3, purpose and verdict.</b> One card for adaptation and one for mitigation. First: does the text show a purpose? Then: which marker does the text support? That is the verdict. If you disagree, pick the right answer in the list.</li>
+  <li><b>Question 4, the taxonomy.</b> Words of the text that the taxonomy does not have yet. Say yes or no to each one, and add your own. This does not change the result for the text.</li>
+  <li><b>Look at the yellow box, then submit.</b> It shows the result for the text: the verdicts and the comparison with the assigned marker, as the tagging gives them and as your answers give them. Below, it lists the points where you disagree.</li>
 </ol>
 <p>Each text is reviewed by two people. You do not see the other person's answers until both of you have submitted.</p>
 </section>
@@ -209,24 +213,44 @@
   <li><mark class="ha">Blue</mark>: a term added by you.</li>
   <li><mark class="hp">Purple, dotted</mark>: a proposed tag, words that no taxonomy term covers (decided under question 4).</li>
 </ul>
-<p>Only the taxonomy term or synonym is coloured, at its place in the text. Click a colour to find its row in the tag table. Words found but not tagged are not coloured.</p>
+<p>Only the taxonomy term or synonym is coloured, at its place in the text. Click a colour to find its line on the right. Words that were found and not tagged are not coloured.</p>
 </section>
 <section id="terms-not-kept">
-<h2>Words found in the text but not tagged</h2>
-<p>A search marks every word of the text that matches a taxonomy term or synonym, by its words only. Each match is then compared with the definition. Some are left out: the words have a different meaning in this text, or a narrower term on the same words is already tagged. They are listed with the reason and the taxonomy definition. If one should be a tag, click + keep.</p>
+<h2>Terms that do not count</h2>
+<p>One table holds everything that is in the text and does not count as climate-related information. The column "Why it does not count" gives the reason.</p>
+<ul>
+  <li><b>A tag with no climate anchor.</b> The term is in the text with its taxonomy meaning (maize is maize), but the text does not link it to climate. It stays a general tag.</li>
+  <li><b>A word that was not tagged.</b> A search found the word, and it was left out: the words mean something else here, or a more precise term is already tagged on the same words. The line starts with "Not tagged".</li>
+</ul>
+<p>Point at a term to read its taxonomy definition. If a tag should count, choose Disagree and change its value. If a word that was not tagged should be a tag, click + keep.</p>
 </section>
 <section id="add-term">
 <h2>Add a term</h2>
 <p>Use it when the text holds a taxonomy term that was not tagged. Search the taxonomy by term or synonym, or select the words in the text; click + add; then tick the area for which the term counts. If the words are not in the taxonomy, propose them as a new term or as a synonym: the proposal goes to question 4.</p>
 </section>
 <section id="flags">
-<h2>Flags</h2>
-<p>Points the tagging script asks a person to look at first. A flag is not an error. The main ones: low confidence; an area that rests on climate anchors only; a verdict that cannot be determined, with its reason; two readings that lead to different verdicts; Principal for both areas; the rule named by the reading differs from the rule applied; a purpose shown with no taxonomy term that counts for the area; climate-related information with an unclear area; climate wording with no taxonomy term; reading not done; very short text; translated.</p>
+<h2>Flags ("To look at first")</h2>
+<p>Points to look at first. A flag is not an error. The line appears only when a text has flags. The main ones:</p>
+<ul>
+  <li>the text was read twice and the two readings lead to different verdicts;</li>
+  <li>a verdict cannot be determined, with the reason;</li>
+  <li>adaptation or mitigation rests on climate anchors only;</li>
+  <li>climate-related information with an unclear area;</li>
+  <li>Principal for both areas;</li>
+  <li>answers adjusted by code: a check changed an answer of the tagging, for example a quote that was not in the text;</li>
+  <li>translated, or a very short text;</li>
+  <li>the countries recorded in PRMS differ from the countries named in the text.</li>
+</ul>
 </section>
 <section id="outcome">
-<h2>What your answers give, and the outcome of the review</h2>
-<p>The yellow box at the end shows, for the extracted answers and for yours: the verdict of each area, the assigned marker and the comparison result. It then gives a summary of your answers by question and lists every point where you disagree. You do not set these values: they follow from your answers.</p>
-<p>The outcome of your review is worked out from your answers: <b>wrong</b> when a verdict or the comparison result differs from the extracted one; <b>minor gap</b> when only tags, terms, the pathway, the purpose or the rule differ; <b>captured well</b> when nothing differs.</p>
+<h2>The result for this text, and what your review says</h2>
+<p>The yellow box at the end shows, for the tagging and for your answers: the verdict for adaptation, the verdict for mitigation, the assigned marker and the comparison. Under each verdict a few words say why. You do not fill in these values: the page works them out from your answers. Below, it lists the points where you disagree.</p>
+<p>The last line says what your review means for the tagging of this text:</p>
+<ul>
+  <li><b>right</b>: you agree with everything;</li>
+  <li><b>nearly right</b>: you corrected tags, the pathway or the purpose, and the verdicts and the comparison stay the same;</li>
+  <li><b>wrong</b>: with your answers a verdict or the comparison changes.</li>
+</ul>
 </section>
 <section id="agreement">
 <h2>Two reviewers</h2>

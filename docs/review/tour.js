@@ -59,12 +59,12 @@ const Tour = (() => {
   // the tour of the form for batches under the standard as revised on 24 and 25 November 2026 (form "v7")
   function stepsV7() {
     return [
-      { title: "Welcome", text: "You will check what was extracted from texts under the CGIAR Standard for Tagging Climate-Related Work, with taxonomy v6. Each text is reviewed by two people. You do not see the other person's answers until you have both submitted.", at: openList },
+      { title: "Welcome", text: "You will check what the tagging found in texts, under the CGIAR Standard for Tagging Climate-Related Work. Each text is reviewed by two people. You do not see the other person's answers until you have both submitted.", at: openList },
       { el: "#namebar", title: "First, your name", text: "Type your first and last name and press Start. It identifies your reviews and is shown to the other reviewers. This browser remembers you next time.", at: openList,
         skipIf: () => !!S.code, demo: async () => { const n = document.querySelector("#nm"); await typeInto(n, "Jane Doe"); }, undo: () => { const n = document.querySelector("#nm"); if (n) n.value = ""; } },
       { el: "#who", title: "That's you", text: "Your name stays here. If it is not you, for example on a shared computer, click change.", at: openList, skipIf: () => !S.code },
       { el: "#tabs", title: "Your queues", text: "To review: texts waiting for you. Waiting for 2nd review: you submitted, the other reviewer has not. Done: both reviews are in, split into agree and disagree on the verdicts and the comparison with the assigned marker.", at: openList },
-      { el: "table.list tbody tr:first-child", title: "This is one text to review", text: "Each row is one text: its assigned marker, title and description. Click on a row to open it. We will open one for you.", at: openList,
+      { el: "table.list tbody tr:first-child", title: "This is one text to review", text: "Each row is one text: its assigned marker, the verdict for adaptation and for mitigation, the comparison with the assigned marker, the title and the description. Click on a row to open it. We will open one for you.", at: openList,
         pulse: "table.list tbody tr:first-child", demo: async () => { await wait(1400); const r = document.querySelector("table.list tbody tr:first-child"); if (r && running) { r.classList.add("tour-press"); await wait(260); r.classList.remove("tour-press"); } } },
       { el: ".text", title: "The text", text: "The title and description, as recorded. Yellow: terms that count. Grey: terms that do not count. Blue: terms you add. Purple, dotted: words the taxonomy does not have yet. Click a colour to find its line on the right.", at: openReview },
       { el: "#v6-q1", title: "Four questions", text: "The form follows the four questions of the standard. Every answer is already filled in from the tagging. Agree, or disagree and fix it. Then submit.", at: openReview },
@@ -82,7 +82,7 @@ const Tour = (() => {
       { el: "#v6-gives", title: "The result for this text", text: "The page works this out from your answers: the verdict for adaptation and for mitigation, next to what the tagging says, and the comparison with the assigned marker. Below, the points where you disagree.", at: openReview },
       { el: ".actions", title: "Save or submit", text: "Save draft keeps your answers and lets you come back. Submit checks that every question that applies is answered, sends your review and takes you to the next text. You can change a submitted review until the second reviewer submits.", at: openReview },
       { el: "#rules", title: "Rules and Definitions", text: "Rules opens a page, in a new tab, with how to review a text, the definitions and the twelve rules of the standard. Definitions opens the same page at its definitions. The pink words link to its sections.", at: openReview },
-      { el: "#exp", title: "The file", text: "Download file gives one Excel file: one row per text with the extracted verdicts and comparison, then each reviewer's answers side by side, plus a sheet of tags and a sheet of proposed terms.", at: openList },
+      { el: "#exp", title: "The file", text: "Download file gives one Excel file: one row per text with the verdicts and the comparison from the tagging, then each reviewer's answers side by side, plus a sheet of tags and a sheet of proposals for the taxonomy.", at: openList },
       { title: "That's it", text: "You can replay this tour with How to review, at the top right. Definitions and Rules are next to it.", at: openList, last: true },
     ];
   }
