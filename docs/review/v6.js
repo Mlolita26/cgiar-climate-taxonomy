@@ -117,7 +117,7 @@ const V6 = (() => {
   const Q = () => ({ d: "agree", value: "", note: "" });
   const label = (list, v) => (list.find(x => x[0] === v) || [v, w(v)])[1];
   const DROP_WORDS = { "not_kept:other": "not kept", "not_kept:part_of_a_name": "part of a name", "not_kept:different_meaning": "different meaning in this text",
-    "not_kept:too_generic": "too generic", broader_term_of_a_kept_tag: "broader term of a kept tag", excerpt_not_in_text: "wording not found in the text",
+    "not_kept:too_generic": "too generic", no_ai_call: "not compared with its definition (no AI call)", broader_term_of_a_kept_tag: "broader term of a kept tag", excerpt_not_in_text: "wording not found in the text",
     "second_check:not_present": "second check: not in the text", anchor_without_climate_information: "anchor without climate wording" };
   const dropWord = r => DROP_WORDS[r] || String(r || "").replace(/^second_check:/, "second check: ").replace(/^not_kept:/, "").replace(/_/g, " ");
   const fkey = f => [f.finding_type || "", f.concept_id || "", f.phrase || ""].join("|");
@@ -543,6 +543,7 @@ const V6 = (() => {
       case "not_kept:different_meaning": return "The words mean something else in this text than the definition, or they are part of a longer expression that means something else.";
       case "not_kept:part_of_a_name": return "The words are part of a name (a programme, project, organisation, event or publication), so they are not climate information about the work.";
       case "not_kept:too_generic": return "The word is too general to say anything about this work.";
+      case "no_ai_call": return "Not compared with its definition: the text was not sent to the AI. A context-dependent term with no climate anchor does not count (Rule 3).";
       case "broader_term_of_a_kept_tag": return `A narrower term on the same words is already tagged${d ? `: ${esc(d)}` : ""}. Only the narrower term is kept.`;
       case "excerpt_not_in_text": return `The words given for this term, ${q}, are not in the text word for word, so the tag was refused.`;
       case "second_check:not_present": return `A second check said the term is not in the text${d ? `: ${esc(cut(d, 140))}` : "."}`;
@@ -557,7 +558,9 @@ const V6 = (() => {
       const c = x.context, w = x.found_as || "", i = w ? c.toLowerCase().indexOf(w.toLowerCase()) : -1;
       return i < 0 ? esc(c) : esc(c.slice(0, i)) + `<b class="hl-g">${esc(c.slice(i, i + w.length))}</b>` + esc(c.slice(i + w.length)); };
     $("#v6-dropped").innerHTML = `<h3>Words found in the text but not tagged <span class="muted">${l.length}</span> ${help("terms-not-kept")}</h3>
-      <p class="hint small">A search marks every word of the text that matches a taxonomy term or synonym, by its words only. Each word was then compared with the taxonomy definition and left out: it is not that concept here (random forest is an algorithm, not a forest), it is part of a name, or a narrower term on the same words is already tagged. These words are <b>not tags</b> and play no part in the answers. The taxonomy definition is shown so that you can compare. If one should be a tag, click + keep; when a closer term exists for the same words, it is proposed with + add.</p>` + (l.length
+      ${l.length && l.every(x => (x.reasons || []).every(z => z.reason === "no_ai_call"))
+        ? `<p class="hint small">A search marks every word of the text that matches a taxonomy term or synonym, by its words only. This text has no stand-alone term and no climate wording that could be a climate anchor, so it was not sent to the AI: the words below were <b>not compared with the taxonomy definition</b>, and some may mean something else here or be part of a name. They are context-dependent terms with no climate anchor, so they are <b>not tags</b> and play no part in the answers (Rule 3). The taxonomy definition is shown so that you can compare. If one should be a tag, click + keep.</p>`
+        : `<p class="hint small">A search marks every word of the text that matches a taxonomy term or synonym, by its words only. Each word was then compared with the taxonomy definition and left out: it is not that concept here (random forest is an algorithm, not a forest), it is part of a name, or a narrower term on the same words is already tagged. These words are <b>not tags</b> and play no part in the answers. The taxonomy definition is shown so that you can compare. If one should be a tag, click + keep; when a closer term exists for the same words, it is proposed with + add.</p>`}` + (l.length
       ? `<table class="tags drops"><thead><tr><th>Term</th><th>Where in the text</th><th>Why it is not a tag</th><th></th></tr></thead><tbody>${l.map(x => { const kept = R.added_terms.includes(x.concept_id), def = (S.terms[x.concept_id] || {}).definition || "", b = x.better;
           return `<tr><td><b>${esc(x.concept_name)}</b><div class="mono muted">${esc(x.concept_id)}${(S.terms[x.concept_id] || {}).facet ? " · " + esc(S.terms[x.concept_id].facet) : ""}</div></td>
             <td class="small">${ctx(x)}</td>
