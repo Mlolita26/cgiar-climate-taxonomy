@@ -523,7 +523,11 @@ const V7 = (() => {
   // two tables: the terms that count (an area is stand-alone or anchored), and the terms that do not count, which are the
   // tags with no climate anchor and the words found by the term search and not tagged (same end, another reason)
   function renderTags() {
-    const res = S.cur, R = S.rev, all = res.tags || [], left = res.dropped || [];
+    const res = S.cur, R = S.rev, all = res.tags || [];
+    // a broader term left out because a more precise term is tagged on the same words ("greenhouse gas" inside "greenhouse
+    // gas emissions") is not a term that does not count: its words are tagged. It is listed apart, under the tables.
+    const precise = x => (x.reasons || []).some(z => z.narrower || z.reason === "not_kept:narrower_term_tagged" || z.reason === "broader_term_of_a_kept_tag");
+    const prec = (res.dropped || []).filter(precise), left = (res.dropped || []).filter(x => !precise(x));
     const counting = t => counts(val(R, t, "adaptation")) || counts(val(R, t, "mitigation"));
     const yes = all.filter(counting), no = all.filter(t => !counting(t));
     const none = n => `<tr><td colspan="${n}"><strong>None.</strong></td></tr>`;
@@ -545,7 +549,13 @@ const V7 = (() => {
       <h4 class="pad grp">Terms that do not count <span class="muted">${no.length + left.length}</span></h4>
       <div class="hint small pad">These terms are in the text, but they do not say that it is about climate. Most often the text gives no ${tip("climate anchor", "climate-anchor")} for them. The reason is on each line. Point at a term to read its definition. If a term should count, choose Disagree, or + keep for a word that was not tagged.</div>
       <table class="tags v6t nocount"><thead><tr><th>Term</th><th>Found as</th><th>Why it does not count</th><th></th></tr></thead>
-        <tbody>${no.map(t => tagRow(t, dec(R, t), "", true)).join("")}${left.map(leftRow).join("")}${no.length + left.length ? "" : none(4)}</tbody></table>`;
+        <tbody>${no.map(t => tagRow(t, dec(R, t), "", true)).join("")}${left.map(leftRow).join("")}${no.length + left.length ? "" : none(4)}</tbody></table>
+      ${prec.length ? `<details class="prec small"><summary>${prec.length} broader term${prec.length > 1 ? "s" : ""} left out, because a more precise term is tagged on the same words</summary>
+        ${prec.map(x => { const kept = R.added_terms.includes(x.concept_id), T = S.terms[x.concept_id] || {}, nk = ((x.reasons || []).find(z => z.narrower) || {}).narrower,
+            why = ((x.reasons || []).find(z => z.why) || {}).why;
+          return `<div class="precrow"><strong${T.definition ? ` title="${esc("Taxonomy definition: " + T.definition)}"` : ""}>${esc(x.concept_name)}</strong>${x.found_as ? ` <span class="muted">(found as “${esc(x.found_as)}”)</span>` : ""}:
+            ${nk ? `<strong>${esc(nk)}</strong> is tagged instead.` : why ? `<span class="muted">“${esc(cut(why, 220))}”</span>` : "a more precise term is tagged instead."}
+            ${kept ? `<span class="c-yes">kept by you</span>` : `<button class="add" data-keep="${esc(x.concept_id)}">+ keep</button>`}</div>`; }).join("")}</details>` : ""}`;
   }
 
   // why a word found by the term search is not a tag, as a full sentence (reason codes of prms_drops.jsonl)

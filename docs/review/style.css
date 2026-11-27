@@ -322,3 +322,7 @@ details.hlp.term .hlp-b { font-weight: 400; color: var(--ink); }
 table.lvl .vwhy { display: block; margin-top: 2px; }
 table.pway td.nowrap { width: 1%; }
 table.v6t.nocount tr.left td:first-child strong { color: var(--muted); font-weight: 600; cursor: help; }
+details.prec { padding: 8px 16px 12px; }
+details.prec > summary { cursor: pointer; color: var(--muted); }
+.precrow { padding: 4px 0; }
+.precrow strong[title] { cursor: help; }
