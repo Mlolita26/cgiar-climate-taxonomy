@@ -543,6 +543,13 @@ sub('''<td>${esc(r.title)}</td><td class="small muted">${esc(cut(r.description, 
     '''<td class="nowrap">${listVerdict("Adaptation", r.adaptation)}${listVerdict("Mitigation", r.mitigation)}</td><td>${cmpCell(r.comparison_result)}</td>
         <td>${esc(r.title)}</td><td class="small muted">${esc(cut(r.description, 160))}</td>''')
 
+# ---- the plain form (27 Nov 2026, Lolita): short sentences, words to point at instead of "?", one table for the terms that
+# do not count, the pathway answered part by part, the result in words. The changes are in v7_plain.py, next to this file.
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import v7_plain
+s = v7_plain.apply(s)
+
 for bad in ("levelWords", "outcomeLabel", "areaLevel", "extMeasure", "measureText", "functionText", "FUNC_OPTS", "L2_additional", "marker_outcome", "climate information", "PRMS marker", "Planned or done"):
     if bad in s:
         k = s.index(bad)

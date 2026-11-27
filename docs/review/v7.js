@@ -42,9 +42,29 @@ const V7 = (() => {
     S1: "S1: the purpose concerns one component of work whose stated purpose is something else",
     S2: "S2: the purpose is shown only by a reported result (way 3)",
     [CANNOT]: "Cannot be determined: a person decides using additional documents" };
-  const RULE_OPTS = ax => ["N1", "P1", "P2", ax === "adaptation" ? "P3" : "P4", "S1", "S2", CANNOT].map(k => [k, RULE_WORDS[k]]);
-  const WAY_WORDS = { 1: "way 1: the text states what the intervention or work is for", 2: "way 2: the intervention is described by the climate rationale",
-    3: "way 3: a result of the intervention is reported in relation to the climate rationale", 4: "way 4: a named national or subnational climate plan" };
+  // the same rules in plain words, shown instead of the code; the code stays in the list of answers and on hover
+  const RULE_PLAIN = {
+    N1: "the text shows no purpose",
+    P1: "the purpose comes from a named climate plan",
+    P2: "the work produces or supports a climate plan, strategy or policy, or builds capacity, tools or finance for it",
+    P3: "the adaptation purpose is shown for the work, not only for one component",
+    P4: "the mitigation purpose is shown for the work, not only for one component",
+    S1: "the purpose is shown only for one component of work that is for something else",
+    S2: "the purpose is shown only by a reported result",
+    [CANNOT]: "a person must decide with other documents" };
+  const RULE_OPTS = ax => ["N1", "P1", "P2", ax === "adaptation" ? "P3" : "P4", "S1", "S2", CANNOT]
+    .map(k => [k, k === CANNOT ? `${CANNOT}: ${RULE_PLAIN[k]}` : `${VERDICT[RULE_CODE[k]]}: ${RULE_PLAIN[k]} (${k})`]);
+  // question 2 is answered part by part: the five components of the climate pathway and the relationships between them
+  const PATH_PARTS = [["rationale", "Climate rationale"], ["geography", "Geography"], ["system", "System or population"], ["intervention", "Intervention"],
+                      ["result", "Result"], ["links", "Relationships"]];
+  const syncPath = p => { p.d = Object.values(p.parts || {}).some(q => q.d === "disagree") ? "disagree" : "agree"; };
+  const pathDisputes = a => [...PATH_PARTS, ["whole", "Whole pathway"]].filter(([k]) => (((a.path || {}).parts || {})[k] || {}).d === "disagree").map(([k, l]) => [l, a.path.parts[k]]);
+  // a reviewer's change to a tag, in words
+  const youText = (t, d) => tagText(t, d).replace(/^changed: disagree/, "you disagree").replace(/^changed: /, "you changed ").replace(/^removed/, "you removed it");
+  const OUT_PLAIN = { "captured well": "right: you agree with everything", "minor gap": "nearly right: small corrections, the result stays the same",
+                      wrong: "wrong: with your answers the result changes" };
+  const WAY_WORDS = { 1: "the text says what the intervention or the work is for", 2: "the intervention is described by the climate rationale",
+    3: "the text reports a result of the intervention against the climate rationale", 4: "the work comes from a named national or subnational climate plan" };
   const verdictOfRule = rule => rule === CANNOT ? { label: CANNOT, code: null } : Object.prototype.hasOwnProperty.call(RULE_CODE, rule)
     ? { label: VERDICT[RULE_CODE[rule]], code: RULE_CODE[rule] } : { label: NOT_ASSESSED, code: null };
   // "(2) Principal" -> 2, "(1) Significant" -> 1, "(0) Not targeted" -> 0, no marker -> null (never converted to 0)
@@ -108,6 +128,10 @@ const V7 = (() => {
     AREAS.forEach(ax => { const r = a.areas[ax] = a.areas[ax] || {}; ["pu", "vd"].forEach(k => { r[k] = Object.assign(Q(), r[k] || {}); });
       r.wy = (Array.isArray(r.wy) ? r.wy : ((res || {})[ax] || {}).ways || []).map(String); });
     a.path = Object.assign(Q(), a.path || {});
+    const hadParts = !!a.path.parts; a.path.parts = a.path.parts || {};
+    PATH_PARTS.forEach(([k]) => { a.path.parts[k] = Object.assign({ d: "agree", note: "" }, a.path.parts[k] || {}); });
+    if (!hadParts && a.path.d === "disagree") a.path.parts.whole = { d: "disagree", note: a.path.note || "" };   // an answer saved on the whole pathway
+    syncPath(a.path);
     a.tags = a.tags || {}; a.added_terms = a.added_terms || []; a.added_counts = a.added_counts || {}; a.findings = a.findings || {};
     a.proposals = a.proposals || []; a.comment = a.comment || "";
     (res.tags || []).forEach(t => { if (!a.tags[t.concept_id]) a.tags[t.concept_id] = { d: "agree" }; });
@@ -135,13 +159,13 @@ const V7 = (() => {
       const r = R.areas[ax], er = extRule(res, ax);
       const purpose = r.pu.d === "disagree" ? (r.pu.value || (extPurpose(res, ax) === "shown" ? "not shown" : "shown")) : extPurpose(res, ax);
       let rule = r.vd.d === "disagree" ? r.vd.value : er;
-      if (r.vd.d === "disagree" && !r.vd.value) missing.push(`${AX[ax]}, verdict: choose the rule of Rule 8 that decides.`);
-      else if (!rule) missing.push(`${AX[ax]}: the verdict was not assessed. Choose Disagree on the verdict, then the rule of Rule 8 that decides.`);
+      if (r.vd.d === "disagree" && !r.vd.value) missing.push(`${AX[ax]}: you disagree on the verdict. Choose the right answer in the list.`);
+      else if (!rule) missing.push(`${AX[ax]}: there is no verdict yet. Choose Disagree on the verdict, then the right answer in the list.`);
       else if (purpose === "not shown" && RULE_CODE[rule] > 0) {
-        if (r.vd.d === "disagree") missing.push(`${AX[ax]}: you say that no purpose is shown, so only N1 or Cannot be determined can decide.`);
+        if (r.vd.d === "disagree") missing.push(`${AX[ax]}: you say that no purpose is shown, so the verdict can only be Not targeted (0) or Cannot be determined.`);
         else rule = "N1";                                    // no purpose: N1 follows (Rule 8)
       }
-      else if (purpose === "shown" && rule === "N1") missing.push(`${AX[ax]}: you say that a purpose is shown, so N1 cannot decide. Choose the rule of Rule 8 that decides.`);
+      else if (purpose === "shown" && rule === "N1") missing.push(`${AX[ax]}: you say that a purpose is shown, so the verdict cannot be Not targeted (0). Choose the right answer in the list.`);
       P[ax] = purpose; V[ax] = { ...verdictOfRule(rule || ""), rule: rule || "" };
     });
     return { V, P, missing };
@@ -149,12 +173,12 @@ const V7 = (() => {
   // every point where the reviewer disagrees, in words, by question of the standard, for the box "What your answers give"
   function disagreements(res, R) {
     const out = [], nt = q => q.note ? ` (“${q.note}”)` : "";
-    (res.tags || []).forEach(t => { const d = dec(R, t); if (tagChanged(t, d)) out.push(`Question 1, tag ${t.concept_name}: ${tagText(t, d)}`); });
+    (res.tags || []).forEach(t => { const d = dec(R, t); if (tagChanged(t, d)) out.push(`Question 1, ${t.concept_name}: ${youText(t, d)}`); });
     (R.added_terms || []).forEach(id => out.push(`Question 1, term added: ${(S.terms[id] || {}).term || id} (${addedHow(R, id)})`));
-    if (R.path.d === "disagree") out.push("Question 2, climate pathway" + nt(R.path));
+    pathDisputes(R).forEach(([l, q]) => out.push(`Question 2, ${l.toLowerCase()}${nt(q)}`));
     AREAS.forEach(ax => { const r = R.areas[ax];
-      if (r.pu.d === "disagree") out.push(`Question 3, ${ax} purpose (Rule 7): ${r.pu.value || (extPurpose(res, ax) === "shown" ? "not shown" : "shown")}${nt(r.pu)}`);
-      if (r.vd.d === "disagree") out.push(`Question 3, ${ax} verdict (Rule 8): ${r.vd.value ? `${r.vd.value}, ${verdictOfRule(r.vd.value).label}` : "choose the rule that decides"}${nt(r.vd)}`); });
+      if (r.pu.d === "disagree") out.push(`Question 3, ${ax} purpose: ${r.pu.value || (extPurpose(res, ax) === "shown" ? "not shown" : "shown")}${nt(r.pu)}`);
+      if (r.vd.d === "disagree") out.push(`Question 3, ${ax} verdict: ${r.vd.value ? `${verdictOfRule(r.vd.value).label}, ${RULE_PLAIN[r.vd.value] || r.vd.value}` : "not chosen yet"}${nt(r.vd)}`); });
     return out;
   }
   // captured well / minor gap / wrong: wrong when a verdict or the comparison result differs from the AI's; minor gap when
@@ -179,27 +203,30 @@ const V7 = (() => {
   }
 
   // ---------------------------------------------------------------- "?" toggles: a short explanation and a link to rules.html
+  // [title, text, optional table, section of rules7.html when it is not the key]
   const HELP = {
-    marker: ["assigned marker", "The OECD-DAC climate marker recorded for the work by the person reporting, here in PRMS: Principal (2), Significant (1) or Not targeted (0). PRMS records one marker for adaptation and mitigation together. A missing marker is never treated as 0. The review does not change it; the verdict is compared with it."],
-    verdict: ["verdict", "The outcome of Rule 8 for this area: the marker that the text supports. You do not choose it directly: it follows from the rule of Rule 8 that decides.",
-      `<table class="hlp-t"><tr><th>Verdict</th><th>Rule</th></tr>
-        <tr><td>Not targeted (0)</td><td>N1: no purpose is shown.</td></tr>
-        <tr><td>Principal (2)</td><td>P1: the purpose comes from a named climate plan. P2: the work produces or supports a climate plan, strategy or policy, or builds capacity or tools or finance to include climate change in policy, planning or investment. P3 (adaptation), P4 (mitigation): the purpose is shown through way 1 or 2 and is not limited to one component of the work.</td></tr>
-        <tr><td>Significant (1)</td><td>S1: the purpose concerns one component of work whose stated purpose is something else. S2: the purpose is shown only by a reported result (way 3).</td></tr>
-        <tr><td>Cannot be determined</td><td>The text does not describe what the work did; it can be read in two ways that lead to different verdicts; or it names a climate plan that covers both areas without saying which part.</td></tr></table>`],
-    "climate-information": ["climate-related information", "The taxonomy terms that count for this area: stand-alone terms (Rule 2), and context-dependent terms when the text gives a climate anchor for the area (Rule 3). If no term counts, the text holds no climate-related information for the area. A term that is stand-alone for both areas, in a text that does not show which area it concerns, has the area “unclear” and counts for neither. Change the values in the tag table."],
-    purpose: ["purpose", "Rule 7. The text has an adaptation (or mitigation) purpose when it shows it in one of four ways. Way 1: the text states what the intervention or work is for. Way 2: the intervention is described by the climate rationale (“drought-tolerant maize”). Way 3: the text reports a result of the intervention in relation to the climate rationale. Way 4: the work arises from, implements or contributes to a named national or subnational climate plan. No purpose: no climate rationale; a climate rationale with no connection to an intervention; a general label (climate-smart, climate action, resilient) or a general claim (climate benefits) that names no climate rationale; a plan that is not a climate plan."],
-    rule: ["rule that decides", "Rule 8. The first rule that applies gives the verdict: N1, then P1, P2, P3 or P4, then S1, S2, otherwise Cannot be determined. When two independent readings of the text lead to different verdicts, the verdict is Cannot be determined. Principal for both areas is accepted only when each rests on different quoted words."],
-    tags: ["tags", "Each taxonomy term tagged in the text, with the words it was found as, its value for each area (Rules 1 to 3), its pathway role (Rule 4) and, for an intervention or a result, whether it is intended or realized (Rule 6). Agree, or disagree to correct a value, remove the tag or write a note."],
-    anchors: ["tag values", "Stand-alone: the term is climate-related information on its own. Anchored: a context-dependent term that counts because the text gives a climate anchor for the area; point at the value to see the sentence. No anchor: the text gives no climate anchor for the area. Not relevant: the term does not concern this area. Unclear: a term that is stand-alone for both areas, in a text that does not show which area it concerns."],
-    colours: ["colours in the text", "Yellow: a tag that counts as climate-related information (a stand-alone term, or a context-dependent term with a climate anchor). Grey: a tag that does not count (a context-dependent term with no climate anchor, or a term with an unclear area). Blue: a term added by you. Purple, dotted: a proposed tag, words that no taxonomy term covers (decided under question 4). Words found but not tagged are not coloured. Only the taxonomy term or synonym is coloured, at its place in the text; click a colour to find its row."],
-    "terms-not-kept": ["words found but not tagged", "A search marks every word of the text that matches a taxonomy term or synonym. Some become tags, others are left out. These are the ones left out, with where they are in the text and why. If one should be a tag, click + keep."],
-    "add-term": ["add a term", "Use this when the text holds a taxonomy term that was not tagged. Search the taxonomy by term or synonym (or select the words in the text), click + add, then tick the area for which the term counts. If the words are not in the taxonomy, propose them: they go to question 4."],
-    pathway: ["climate pathway", "Rules 4 and 5. The five components of the climate pathway for each area, from the tags that count: climate rationale, geography, system or population, intervention and result, and the relationships (links) the text gives between them. The system or population is the one exposed or vulnerable to the climate issue; an organisation that carries out the work is not the system or population. Agree, or disagree (a note on which part is wrong is optional)."],
-    flags: ["flags", "Points the tagging script asks a person to look at first, for example two readings of the text that lead to different verdicts. A flag is not an error."],
-    comparison: ["comparison with the assigned marker", "Rule 9. Consistent: the verdict and the assigned marker are the same. The text supports a lower marker: the assigned marker is higher. The text supports a higher marker: the assigned marker is lower. Marker missing: no marker is assigned. Not compared: the verdict cannot be determined. PRMS records one marker for both areas, so it is compared with the higher of the two verdicts. The result is a signal for review; it does not replace the assigned marker."],
-    outcome: ["outcome of the review", "Worked out from your answers. Wrong when a verdict or the comparison result differs from the extracted one; minor gap when only tags, terms, the pathway, the purpose or the rule differ; captured well when nothing differs."],
-    proposals: ["proposed terms", "Rules 10 to 12. Wording that the taxonomy lacks, as a new term or as a synonym of an existing term: the ones found in the text (accept or reject each) and your own. They go to the people who maintain the taxonomy and do not change the outcome of your review."],
+    marker: ["assigned marker", "The climate marker already recorded for this work, here in PRMS: Principal (2), Significant (1) or Not targeted (0). PRMS has one marker for adaptation and mitigation together. You do not change it here. The page only compares it with the verdict. When no marker is recorded, it is not counted as 0."],
+    verdict: ["verdict", "The marker that the text supports, for adaptation and for mitigation. You do not pick it yourself: it follows from your answer on the purpose.",
+      `<table class="hlp-t"><tr><th>Verdict</th><th>When</th></tr>
+        <tr><td>Not targeted (0)</td><td>The text shows no purpose.</td></tr>
+        <tr><td>Principal (2)</td><td>The purpose comes from a named climate plan. Or the work produces or supports a climate plan, strategy or policy. Or the purpose is shown for the work, not only for one component.</td></tr>
+        <tr><td>Significant (1)</td><td>The purpose is shown only for one component of work that is for something else. Or it is shown only by a reported result.</td></tr>
+        <tr><td>Cannot be determined</td><td>The text does not say what the work did, or it can be read in two ways. A person decides with other documents.</td></tr></table>`],
+    "climate-information": ["climate-related information", "The terms that count for adaptation or for mitigation: stand-alone terms, and context-dependent terms that the text anchors. If no term counts, the text holds no climate-related information."],
+    purpose: ["purpose", "What the text says the work is for. A text can show a climate purpose in four ways. One: it says what the intervention or the work is for. Two: it describes the intervention by the climate rationale, as in “drought-tolerant maize”. Three: it reports a result of the intervention against the climate rationale. Four: the work comes from a named national or subnational climate plan. A general label alone, such as “climate-smart” or “resilient”, shows no purpose."],
+    "climate-rationale": ["climate rationale", "The climate hazard or the emission source that the work responds to. For example drought, or methane from livestock.", "", "pathway"],
+    rule: ["verdict", "The first situation that fits gives the verdict: no purpose, then Principal, then Significant, otherwise Cannot be determined. When the text was read twice and the two readings do not agree, the verdict is Cannot be determined.", "", "rule"],
+    "stand-alone": ["stand-alone term", "A term whose meaning is already about climate, such as drought or greenhouse gas inventory. It counts on its own.", "", "anchors"],
+    anchored: ["anchored", "Some terms are also used outside climate work: irrigation, yield, maize. They are context-dependent. Such a term counts only when the text gives it a climate anchor. Then it is anchored. Point at the value in the table to see the sentence.", "", "anchors"],
+    "climate-anchor": ["climate anchor", "The words in the text that link a context-dependent term to climate: a climate hazard, an emission source, a greenhouse gas. For example, a text that speaks of drought and then of irrigation anchors irrigation to adaptation.", "", "anchors"],
+    tags: ["tags", "Each taxonomy term found in the text, with the words it was found as. Agree, or disagree to fix a value, remove the tag or write a note."],
+    colours: ["colours in the text", "Yellow: a term that counts. Grey: a term that does not count. Blue: a term you added. Purple, dotted: a proposal, words that the taxonomy does not have yet. Click a colour to find its line on the right."],
+    "add-term": ["add a term", "Use this when a taxonomy term is in the text and is not in the tables above. Search for it, or select the words in the text. Click + add, then tick adaptation or mitigation. If the words are not in the taxonomy, you can propose them: they go to question 4."],
+    pathway: ["climate pathway", "The climate story the text tells, in five parts: the climate rationale (why action is needed), the geography, the system or population exposed, the intervention (what is done) and the result (what comes out of it), with the relationships the text gives between them. The system or population is who or what is exposed to the climate issue, not the organisation that does the work."],
+    flags: ["flags", "Points to look at first. For example, the text was read twice and the two readings do not agree. A flag is not an error."],
+    comparison: ["comparison with the assigned marker", "Consistent: the verdict and the assigned marker are the same. The text supports a lower marker: the assigned marker is higher than the verdict. The text supports a higher marker: it is lower. Marker missing: no marker is recorded. Not compared: the verdict cannot be determined. PRMS has one marker for both areas, so it is compared with the higher of the two verdicts. This is a signal to look closer. It does not say the assigned marker is wrong."],
+    outcome: ["what your review says", "Right: you agree with everything. Nearly right: you corrected tags, the pathway or the purpose, and the verdicts and the comparison stay the same. Wrong: with your answers a verdict or the comparison changes."],
+    proposals: ["proposals for the taxonomy", "Words of the text that the taxonomy does not have yet, as a new term or as a synonym of a term it has. Say yes or no to each one, and add your own. They go to the people who look after the taxonomy. They do not change the result for this text."],
   };
   // "?" boxes open on hover where the screen has a mouse; a click keeps one open; on touch screens a tap opens it.
   if (typeof window !== "undefined" && typeof document !== "undefined" && !window.__hlpHover) {
@@ -220,9 +247,13 @@ const V7 = (() => {
     // h[2]: an optional table, fixed text written in this file (not data), shown under the explanation
     return `<details class="hlp"><summary aria-label="Explain: ${esc(h[0])}" title="What is this?">?</summary><span class="hlp-b">${esc(h[1])}${h[2] || ""} <a href="rules7.html#${esc(key)}" target="_blank" rel="noopener">More information</a></span></details>`; };
 
+  // a word of the standard in pink and underlined: point at it (or tap it) and its explanation opens. It replaces the "?".
+  const tip = (label, key) => { const h = HELP[key] || [key, ""];
+    return `<details class="hlp term"><summary aria-label="Explain: ${esc(h[0])}">${label}</summary><span class="hlp-b">${esc(h[1])}${h[2] || ""} <a href="rules7.html#${esc(h[3] || key)}" target="_blank" rel="noopener">More on the Rules page</a></span></details>`; };
+
   // ---------------------------------------------------------------- small pieces of display
   const VD_CLASS = { "Principal (2)": "L3", "Significant (1)": "L2", "Not targeted (0)": "L0", "Cannot be determined": "cannot" };          // the colours of the page, reused
-  const verdictCell = (label, rule) => label ? `<span class="lv lv-${VD_CLASS[label] || "L1"}">${esc(label)}</span>${rule && rule !== label ? ` <span class="small">by ${esc(rule)}</span>` : ""}` : "";
+  const verdictCell = (label, rule) => label ? `<span class="lv lv-${VD_CLASS[label] || "L1"}">${esc(label)}</span>${rule && RULE_PLAIN[rule] ? ` <span class="small vwhy" title="${esc(RULE_WORDS[rule] || "")}">${esc(RULE_PLAIN[rule])}</span>` : ""}` : "";
   const CMP_CLASS = { "Consistent": "aligned", "The text supports a lower marker": "marker-higher", "The text supports a higher marker": "marker-lower", "Marker missing": "no-comparison", "Not compared": "cannot-determine" };
   const cmpCell = o => o ? `<span class="oc oc-${CMP_CLASS[o] || "no-comparison"}">${esc(o)}</span>` : "";
   const storeNotice = () => S.storeOk === false ? `<div class="notice bad">The review store does not take reviews of this batch yet (the worker is older than the page). You can read the texts; nothing can be saved until the worker is updated.</div>` : "";
@@ -235,7 +266,7 @@ const V7 = (() => {
       ${shown ? `<div class="small">${shown}</div>` : ""}
       <div class="decide"><span class="segs">${segD("q-" + key, "agree", "Agree", !dis, "ok")}${segD("q-" + key, "disagree", "Disagree", dis, "ko")}</span>
         ${dis && opts ? `<select data-q="${esc(key)}" data-f="value"><option value="">the right answer…</option>${opts.map(([v, l]) => opt(v, l, q.value === v)).join("")}</select>` : ""}</div>
-      ${dis ? `<input class="wide" data-q="${esc(key)}" data-f="note" placeholder="note (optional): what is wrong, with the words of the text" value="${esc(q.note || "")}">` : ""}</div>`;
+      ${dis ? `<input class="wide" data-q="${esc(key)}" data-f="note" placeholder="What is wrong? You can quote the text (optional)" value="${esc(q.note || "")}">` : ""}</div>`;
   }
   // what the two readings gave for one area, when they lead to different verdicts
   function readingsDiffer(res, ax) {
@@ -282,7 +313,7 @@ const V7 = (() => {
   function textBlock(res, added, editable) {
     const tr = (res.translated || res.english_kept) && (res.title_en || res.description_en);
     const title = tr ? res.title_en || res.title : res.title, desc = tr ? res.description_en || res.description : res.description;
-    return `<div class="text card" ${editable ? "data-edit" : ""}><div class="legend"><span class="k hc">tag that counts</span><span class="k hg">tag that does not count</span><span class="k ha">${editable ? "added by you" : "added by a reviewer"}</span>${proposedOf(res).length ? `<span class="k hp">proposed tag (no term yet)</span>` : ""} ${help("colours")}</div>
+    return `<div class="text card" ${editable ? "data-edit" : ""}><div class="legend"><span class="k hc">tag that counts</span><span class="k hg">tag that does not count</span><span class="k ha">${editable ? "added by you" : "added by a reviewer"}</span>${proposedOf(res).length ? `<span class="k hp">proposed tag (no term yet)</span>` : ""} ${tip("what the colours mean", "colours")}</div>
       ${editable ? `<div class="hint small">Select a word or phrase in the text to tag it.</div>` : ""}
       ${tr ? `<div class="hint small">${res.english_kept ? "The source gives the same text in English and in Spanish: only the English is used." : "Translated into English for the tagging."} The original text is at the end.</div>` : ""}
       <h2>${hlHtml(title, res, added)}</h2><p>${hlHtml(desc, res, added)}</p>
@@ -336,34 +367,31 @@ const V7 = (() => {
     const res = S.cur, R = S.rev, submitted = S.mine[res.id] && S.mine[res.id].submitted;
     $("#main").innerHTML = navBar(res) + storeNotice() + (submitted ? `<div class="notice">Submitted. You can still change it until the second reviewer submits.</div>` : "")
     + `<div class="cols">${textBlock(res, R.added_terms, true)}<div class="side v6">
-      <section class="card intro" id="v6-intro"><p><b>The review follows the four questions of the tagging standard.</b> The answers start as extracted from the text: agree, or disagree (choose the right answer where there is a list; the note is optional). Each disagreement shows at once in the yellow box at the end. Then submit.
-        <a href="rules7.html#what-to-do" target="_blank" rel="noopener">How to review a text</a> · <a href="rules7.html#definitions" target="_blank" rel="noopener">Definitions</a></p>
-        <div class="flags small" id="v6-flags"><b>Flags</b> ${help("flags")} ${(res.review_flags || []).length ? res.review_flags.map(f => `<span class="flag">${esc(f)}</span>`).join("") : `<span class="muted">none</span>`}</div></section>
-      ${qHead(1, "What climate-related information does the text contain?", "Rules 1 to 3: the taxonomy terms in the text, and whether they concern adaptation, mitigation, both or neither. The table also gives the pathway role of each term (Rule 4) and, for an intervention or a result, whether it is intended or realized (Rule 6).")}
+      ${(res.review_flags || []).length ? `<div class="card flags small" id="v6-flags"><b>${tip("To look at first", "flags")}</b> ${res.review_flags.map(f => `<span class="flag">${esc(f)}</span>`).join("")}</div>` : ""}
+      ${qHead(1, "What climate-related information does the text contain?", "These are the taxonomy terms found in the text. For each one: does it say the text is about adaptation, about mitigation, or neither?")}
       <section class="card flush" id="v6-tags"></section>
-      <section class="card" id="v6-dropped"></section>
-      <section class="card" id="v6-add"><h3>Add a term ${help("add-term")}</h3>
-        <div class="small muted">For a taxonomy term that is in the text and was not tagged. Search the taxonomy, click + add, then tick the area for which the term counts.</div>
+      <section class="card" id="v6-add"><h3>${tip("Add a term", "add-term")}</h3>
+        <div class="small muted">Is a taxonomy term in the text missing above? Search for it, click + add, then tick adaptation or mitigation.</div>
         <input id="q" class="search" placeholder="Search terms and synonyms" autocomplete="off">
         <div id="hits" class="hits"></div>
         <div id="added" class="chips"></div>
         <a href="#" id="brw" class="small">Browse the taxonomy</a>
         <div id="tree" class="tree" hidden></div></section>
-      <section class="card" id="v6-info"></section>
-      ${qHead(2, "What climate pathway does the text describe?", "Rules 4 and 5: climate rationale, geography, system or population, intervention and result, and the relationships between them")}
+      <section class="card answer" id="v6-info"></section>
+      ${qHead(2, "What climate pathway does the text describe?", "The climate story of the text, in five parts. Check each part.")}
       <section class="card" id="v6-path"></section>
-      ${qHead(3, "Is the information consistent with the assigned climate marker?", `Rules 7 to 9, for adaptation and for mitigation: whether the text shows a purpose (Rule 7), the verdict and the rule that decides (Rule 8), then the comparison of the verdict with the assigned marker <b>${esc(res.marker || (res.part ? "none: a plan carries no marker" : "not provided"))}</b> (Rule 9). The comparison is in the yellow box at the end.`)}
+      ${qHead(3, "Is the information consistent with the assigned climate marker?", `Does the text show an adaptation purpose, or a mitigation purpose? From your answer the page works out the verdict, then compares it with the assigned marker <b>${esc(res.marker || (res.part ? "none: a plan carries no marker" : "not provided"))}</b>. The comparison is in the yellow box at the end.`)}
       ${AREAS.map(ax => `<section class="card area" id="v6-area-${ax}"></section>`).join("")}
-      ${qHead(4, "What gaps or errors in the taxonomy does tagging reveal?", "Rules 10 to 12: wording of the text that the taxonomy lacks, as a new term or as a synonym. Accept or reject each proposal found in the text, and add your own. Proposals go to the taxonomy reviewers; they are not tags and do not change the verdict.")}
-      <section class="card" id="v6-props"><h3>Proposed tags and new terms ${help("proposals")}</h3>
-        <div class="small muted">Words of the text that no taxonomy term covers, found by the tagging. They do not count as climate-related information. Decide each one here.</div><div id="v6-found"></div>
-        <div class="small muted" style="margin-top:10px">Your proposals (search under Add a term in question 1; if the term is not in the taxonomy, propose it there)</div><div id="props" class="chips"></div></section>
+      ${qHead(4, "What gaps or errors in the taxonomy does tagging reveal?", "Words of the text that the taxonomy does not have yet. Say yes or no to each one, and add your own. This does not change the result for this text.")}
+      <section class="card" id="v6-props"><h3>${tip("Proposals for the taxonomy", "proposals")}</h3>
+        <div id="v6-found"></div>
+        <div class="small muted" style="margin-top:10px">Your own proposals. To add one, search under Add a term in question 1: when the word is not in the taxonomy, you can propose it there.</div><div id="props" class="chips"></div></section>
       <section class="card" id="v6-comment"><h3>Comment</h3><textarea id="cm" placeholder="Anything the others should know">${esc(R.comment || "")}</textarea></section>
-      <section class="card gives final" id="v6-gives"><h3>What your answers give <span class="small muted">(the final decision for this text)</span></h3><div id="v6-gives-b"></div></section>
+      <section class="card gives final" id="v6-gives"><h3>The result for this text</h3><div id="v6-gives-b"></div></section>
       <div class="actions"><span id="msg" class="small"></span><button id="save">Save draft</button><button class="primary" id="sub">Submit</button></div>
     </div></div>`;
     const mk = $(".nav .meta span");                   // the assigned marker in the header line, with its "?"
-    if (mk) mk.insertAdjacentHTML("beforeend", " " + help("marker"));
+    if (mk) mk.insertAdjacentHTML("beforeend", " " + tip("what is this?", "marker"));
     renderGives(); renderTags(); renderDropped(); renderInfo(); renderPath(); AREAS.forEach(renderArea); renderFindings();
     wire();
   }
@@ -376,8 +404,8 @@ const V7 = (() => {
     const has = Object.fromEntries(AREAS.map(ax => [ax, countsFor(res, R, ax).length > 0])), unc = unclearOf(res, R);
     const area = has.adaptation && has.mitigation ? "adaptation and mitigation" : has.adaptation ? "adaptation" : has.mitigation ? "mitigation"
       : unc.length ? "an unclear area" : "neither adaptation nor mitigation";
-    $("#v6-info").innerHTML = `<div class="small">Answer to question 1 ${help("climate-information")}: the text contains climate-related information on <b>${area}</b>. <span class="muted">It follows from the tags above; change them there.</span>
-      ${unc.length ? `<div class="muted">Stand-alone terms with an unclear area (Rule 2): ${unc.map(t => esc(t.concept_name)).join(", ")}.</div>` : ""}</div>`;
+    $("#v6-info").innerHTML = `<b>Answer to question 1: the text contains climate-related information on ${area}.</b>
+      ${unc.length ? `<div class="small">The area is not clear for: ${unc.map(t => esc(t.concept_name)).join(", ")}.</div>` : ""}`;
   }
 
   // near Submit, always open in a yellow frame (the final decision): the verdicts and the comparison that follow from the
@@ -387,70 +415,71 @@ const V7 = (() => {
     if (!box) return;
     const d = (a, b) => a !== b ? "diff" : "", dis = disagreements(res, R);
     const marker = esc(res.marker || (res.part ? "none: a plan carries no marker" : "not provided"));
-    const nTags = (res.tags || []).length, nTagCh = (res.tags || []).filter(t => tagChanged(t, (R.tags || {})[t.concept_id])).length;
-    const f = res.findings || [], nDec = f.filter(z => (R.findings || {})[fkey(z)]).length;
-    const q3 = AREAS.map(ax => { const r = R.areas[ax], n = (r.pu.d === "disagree") + (r.vd.d === "disagree"); return `${ax}: ${n ? `you disagree on ${n === 2 ? "the purpose and the verdict" : r.pu.d === "disagree" ? "the purpose" : "the verdict"}` : "you agree"}`; }).join("; ");
-    box.innerHTML = `<p class="small muted">The verdicts and the comparison are worked out from your answers with the rules of the standard (Rules 8 and 9). You do not set them here.</p>
-      <table class="lvl"><thead><tr><th></th><th>Tagged by AI</th><th>Your answers</th></tr></thead><tbody>
-      ${AREAS.map(ax => `<tr><th>${AX[ax]} verdict ${ax === "adaptation" ? help("verdict") : ""}</th><td>${verdictCell(ai[ax], extRule(res, ax))}</td><td class="${d(ai[ax], me[ax])}">${verdictCell(me[ax], me.V[ax].rule)}</td></tr>`).join("")}
-      <tr class="pm"><th>Assigned marker ${help("marker")}</th><td>${marker}</td><td>${marker}</td></tr>
-      <tr><th>Comparison ${help("comparison")}</th><td>${cmpCell(ai.result)}</td><td class="${d(ai.result, me.result)}">${cmpCell(me.result)}</td></tr>
+    box.innerHTML = `<p class="small muted">The page works this out from your answers. You do not fill it in.</p>
+      <table class="lvl"><thead><tr><th></th><th>The tagging says</th><th>You say</th></tr></thead><tbody>
+      ${AREAS.map(ax => `<tr><th>${AX[ax]} ${ax === "adaptation" ? tip("verdict", "verdict") : "verdict"}</th><td>${verdictCell(ai[ax], extRule(res, ax))}</td><td class="${d(ai[ax], me[ax])}">${verdictCell(me[ax], me.V[ax].rule)}</td></tr>`).join("")}
+      <tr class="pm"><th>${tip("Assigned marker", "marker")}</th><td>${marker}</td><td>${marker}</td></tr>
+      <tr><th>${tip("Comparison", "comparison")}</th><td>${cmpCell(ai.result)}</td><td class="${d(ai.result, me.result)}">${cmpCell(me.result)}</td></tr>
       </tbody></table>
       <p class="small">${esc(me.reason)}</p>
-      ${me.V.adaptation.code === 2 && me.V.mitigation.code === 2 ? `<div class="notice small">Principal for both is accepted only if each rests on different quoted words.</div>` : ""}
-      <div class="small"><b>Summary of your answers</b>
-        <ul><li>Question 1, climate-related information: ${nTags} tag${nTags === 1 ? "" : "s"}, ${nTagCh ? `${nTagCh} corrected or removed` : "all agreed"}${(R.added_terms || []).length ? `, ${R.added_terms.length} term${R.added_terms.length > 1 ? "s" : ""} added` : ""}.</li>
-        <li>Question 2, climate pathway: ${R.path.d === "disagree" ? "you disagree" : "you agree"}.</li>
-        <li>Question 3, purpose and verdict: ${q3}.</li>
-        <li>Question 4, taxonomy: ${f.length ? `${nDec} of ${f.length} proposal${f.length > 1 ? "s" : ""} found in the text decided` : "no proposal found in the text"}${(R.proposals || []).length ? `, ${R.proposals.length} of your own` : ""}.</li></ul></div>
-      <div class="small dis"><b>${dis.length ? `You disagree on ${dis.length} point${dis.length > 1 ? "s" : ""}` : "You agree with everything extracted"}</b>
+      ${me.V.adaptation.code === 2 && me.V.mitigation.code === 2 ? `<div class="notice small">Principal for both adaptation and mitigation is accepted only when each one rests on different words of the text.</div>` : ""}
+      <div class="small dis"><b>${dis.length ? `You disagree on ${dis.length} point${dis.length > 1 ? "s" : ""}:` : "You agree with everything."}</b>
         ${dis.length ? `<ul>${dis.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}</div>
-      ${me.missing.length ? `<div class="small bad"><b>Still to answer before submitting</b><ul class="missing">${me.missing.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
-      ${me.complete ? `<div class="outcome">Outcome of your review: <span class="rv rv-${esc(me.review.replace(/ /g, "-"))}">${esc(me.review)}</span> ${help("outcome")}</div>` : ""}`;
+      ${me.missing.length ? `<div class="small bad"><b>Still to answer before you submit</b><ul class="missing">${me.missing.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+      ${me.complete ? `<div class="outcome">${tip("Your review says", "outcome")} the tagging of this text is <span class="rv rv-${esc(me.review.replace(/ /g, "-"))}">${esc(OUT_PLAIN[me.review] || me.review)}</span></div>` : ""}`;
   }
 
   // question 3, one area: the purpose (Rule 7), then the verdict and the rule that decides (Rule 8)
   function renderArea(ax) {
-    const res = S.cur, R = S.rev, ai = res[ax] || {}, r = R.areas[ax], me = reviewResult(res, R);
-    let h = `<div class="ah"><span class="ax">${AX[ax]}</span> <span class="small muted">Rule 7: the purpose. Rule 8: the verdict</span></div>`;
-    // Rule 7: is a purpose shown, in which way, with which words
+    const res = S.cur, R = S.rev, ai = res[ax] || {}, r = R.areas[ax], me = reviewResult(res, R), an = ax === "adaptation" ? "an adaptation" : "a mitigation";
+    const up = x => x.charAt(0).toUpperCase() + x.slice(1);
+    let h = `<div class="ah"><span class="ax">${AX[ax]}</span></div>`;
+    // the purpose: is one shown, in which way, with which words
     const wq = ai.way_quotes || {}, ways = (ai.ways || []).map(String);
-    const how = ways.map(k => `<div class="small">${esc(WAY_WORDS[k] || "way " + k)}: “${esc(cut(wq["way" + k] || "", 220))}”</div>`).join("")
-      || (ai.policy_quote ? `<div class="small">for P2: “${esc(cut(ai.policy_quote, 220))}”</div>` : "");
-    const pShown = (ai.purpose === "shown" ? `<b>${ax} purpose shown</b>${how}` : ai.purpose === "not assessed" ? `<span class="muted">not assessed: the reading was not done</span>` : `<b>no ${ax} purpose shown</b>`)
+    const how = ways.map(k => `<div class="small">${esc(up(WAY_WORDS[k] || "way " + k))}: “${esc(cut(wq["way" + k] || "", 220))}”</div>`).join("")
+      || (ai.policy_quote ? `<div class="small">“${esc(cut(ai.policy_quote, 220))}”</div>` : "");
+    const pShown = `<span class="muted">The tagging says:</span> `
+      + (ai.purpose === "shown" ? `<b>yes</b>${how}` : ai.purpose === "not assessed" ? `<span class="muted">not checked: the text was not read for its purpose</span>` : `<b>no</b>`)
       + (ai.rationale_quote ? `<div class="small muted">Climate rationale: “${esc(cut(ai.rationale_quote, 200))}”</div>` : "");
-    h += question("pu-" + ax, `Does the text have ${ax === "adaptation" ? "an adaptation" : "a mitigation"} purpose?`, "purpose", pShown, r.pu, PURPOSE_OPTS);
-    // Rule 9 records the way that showed the purpose: asked when the reviewer's answer is that a purpose is shown
-    if (me.P[ax] === "shown") h += `<div class="q1"><div class="small">Way or ways that show the ${ax} purpose (Rule 7, ways 1 to 4; several can apply)</div>
-      ${Object.keys(WAY_WORDS).map(k => `<div><label class="small"><input type="checkbox" data-k="way-${k}" data-ax="${ax}" ${r.wy.includes(k) ? "checked" : ""}> ${esc(WAY_WORDS[k])}</label></div>`).join("")}</div>`;
-    // Rule 8: the verdict and the rule that decides, with the words it rests on
+    h += question("pu-" + ax, `Does the text show ${an} ${tip("purpose", "purpose")}?`, null, pShown, r.pu, PURPOSE_OPTS);
+    // the way that shows the purpose, asked when the reviewer's answer is that a purpose is shown
+    if (me.P[ax] === "shown") h += `<div class="q1"><div class="small">How does the text show it? Tick all that apply.</div>
+      ${Object.keys(WAY_WORDS).map(k => `<div><label class="small"><input type="checkbox" data-k="way-${k}" data-ax="${ax}" ${r.wy.includes(k) ? "checked" : ""}> ${esc(up(WAY_WORDS[k]))}</label></div>`).join("")}</div>`;
+    // the verdict, with the words it rests on
     const diff = readingsDiffer(res, ax);
-    const vShown = (ai.verdict ? `${verdictCell(ai.verdict, ai.rule)}` : `<span class="muted">not assessed</span>`)
-      + (ai.rule && RULE_WORDS[ai.rule] && ai.rule !== CANNOT ? `<div class="small">${esc(RULE_WORDS[ai.rule])}</div>` : "")
+    const vShown = `<span class="muted">The tagging says:</span> ` + (ai.verdict ? verdictCell(ai.verdict, ai.rule) : `<span class="muted">no verdict</span>`)
       + (ai.rule_quote ? `<div class="small">“${esc(cut(ai.rule_quote, 240))}”</div>` : "")
       + (ai.verdict_reason ? `<div class="small muted">${esc(ai.verdict_reason)}</div>` : "")
-      + (diff ? `<div class="small muted">The two readings of the text differ, so the verdict is Cannot be determined. Choose the rule that decides if the text is clear to you.</div>` : "")
-      + (me.V[ax].label !== (ai.verdict || "") ? `<div class="small you">With your answers: ${esc(me.V[ax].label)}${me.V[ax].rule && me.V[ax].rule !== me.V[ax].label ? " by " + esc(me.V[ax].rule) : ""}</div>` : "");
-    h += question("vd-" + ax, "Verdict, and the rule that decides", "rule", vShown, r.vd, RULE_OPTS(ax));
+      + (diff ? `<div class="small muted">The text was read twice and the two readings do not agree, so the verdict is Cannot be determined. If the text is clear to you, choose Disagree and pick the right answer.</div>` : "")
+      + (me.V[ax].label !== (ai.verdict || "") ? `<div class="small you">With your answers: ${esc(me.V[ax].label)}${RULE_PLAIN[me.V[ax].rule] ? ", " + esc(RULE_PLAIN[me.V[ax].rule]) : ""}</div>` : "");
+    h += question("vd-" + ax, `Which marker does the text support for ${ax}? This is the ${tip("verdict", "verdict")}.`, null, vShown, r.vd, RULE_OPTS(ax));
     $("#v6-area-" + ax).innerHTML = h;
   }
-  function renderPath() { $("#v6-path").innerHTML = pathwayHtml(S.cur) + question("path", "", null, "", S.rev.path, null); }
+  function renderPath() { $("#v6-path").innerHTML = pathwayHtml(S.cur, S.rev.path.parts); }
 
-  function pathwayHtml(res) {
+  // the climate pathway; with P (the reviewer's answers by part) each part has Agree / Disagree and, on Disagree, a free note
+  function pathwayHtml(res, P) {
     const A = res.adaptation || {}, M = res.mitigation || {};
     const L = x => (x || []).length ? (x || []).map(esc).join("; ") : `<span class="muted">not described</span>`;
     const links = ax => (res.links || []).filter(l => l.area === ax).map(l => `<div>${esc(l.from_name)} → ${esc(l.to_name)} <span class="muted">(${esc(w(l.kind))}, ${esc(w(l.how))})</span>${l.quote ? `<div class="q">“${esc(cut(l.quote, 200))}”</div>` : ""}</div>`).join("") || `<span class="muted">none</span>`;
     const geo = res.geography ? `${esc(res.geography)} <span class="muted">(${esc(res.geography_source || "")})</span>` : `<span class="muted">not described</span>`;
     const cit = res.countries_in_text && res.countries_in_text !== res.geography ? `<div class="small muted">Countries named in the text: ${esc(res.countries_in_text)}</div>` : "";
     const type = a => (a.intervention_type || []).length ? `<div class="small muted">Type: ${(a.intervention_type || []).map(esc).join("; ")}</div>` : "";
-    return `<h3>Climate pathway ${help("pathway")}</h3>
-      <table class="pway small"><thead><tr><th></th><th>Adaptation</th><th>Mitigation</th></tr></thead><tbody>
-      <tr><th>Climate rationale</th><td>${L(A.rationale)}</td><td>${L(M.rationale)}</td></tr>
-      <tr><th>Geography</th><td colspan="2">${geo}${cit}</td></tr>
-      <tr><th>System or population</th><td>${L(A.system_or_population)}</td><td>${L(M.system_or_population)}</td></tr>
-      <tr><th>Intervention</th><td>${L(A.intervention)}${type(A)}</td><td>${L(M.intervention)}${type(M)}</td></tr>
-      <tr><th>Result</th><td>${L(A.result)}</td><td>${L(M.result)}</td></tr>
-      <tr><th>Links</th><td>${links("adaptation")}</td><td>${links("mitigation")}</td></tr>
+    const ask = k => { if (!P) return ""; const q = P[k] || { d: "agree" }, dis = q.d === "disagree";
+      return `<td class="nowrap"><span class="segs sm">${segD("pp-" + k, "agree", "Agree", !dis, "ok")}${segD("pp-" + k, "disagree", "Disagree", dis, "ko")}</span></td>`; };
+    const note = k => { const q = P && P[k]; return q && q.d === "disagree"
+      ? `<tr class="sub"><td colspan="4"><input class="wide" data-pp="${esc(k)}" placeholder="What is wrong? Write it in your own words" value="${esc(q.note || "")}"></td></tr>` : ""; };
+    const row = (k, th, a, m) => `<tr><th>${th}</th>${m == null ? `<td colspan="2">${a}</td>` : `<td>${a}</td><td>${m}</td>`}${ask(k)}</tr>${note(k)}`;
+    return `<h3>${tip("Climate pathway", "pathway")}</h3>
+      ${P ? `<div class="hint small">Agree with each part, or disagree and say what is wrong.</div>` : ""}
+      <table class="pway small"><thead><tr><th></th><th>Adaptation</th><th>Mitigation</th>${P ? "<th></th>" : ""}</tr></thead><tbody>
+      ${row("rationale", tip("Climate rationale", "climate-rationale"), L(A.rationale), L(M.rationale))}
+      ${row("geography", "Geography", geo + cit, null)}
+      ${row("system", "System or population", L(A.system_or_population), L(M.system_or_population))}
+      ${row("intervention", "Intervention", L(A.intervention) + type(A), L(M.intervention) + type(M))}
+      ${row("result", "Result", L(A.result), L(M.result))}
+      ${row("links", "Relationships", links("adaptation"), links("mitigation"))}
+      ${P && P.whole ? row("whole", "Whole pathway", `<span class="muted">your earlier answer on the pathway as a whole</span>`, null) : ""}
       </tbody></table>`;
   }
 
@@ -461,93 +490,87 @@ const V7 = (() => {
     const tip = v === "anchored" ? (byText ? `anchored by the text: the text holds climate-related information for ${ax}${q ? `: “${q}”` : ""}` : q ? `anchor: “${q}”` : "") : "";
     return `<span class="cv cv-${esc(v)}"${tip ? ` title="${esc(tip)}"` : ""}>${esc(w(v))}${tip ? " ⓘ" : ""}</span>${mine ? ` → <span class="you">${esc(w(mine))}</span>` : ""}`;
   }
-  function tagRow(t, d, extra = "") {
-    const id = t.concept_id, cls = [d.d === "refuse" ? "disagree" : "", d.d === "change" ? "changed" : ""].join(" ");
+  // one tag. compact: a tag that does not count, in the table "Terms that do not count" (term, found as, why, answer)
+  function tagRow(t, d, extra = "", compact = false) {
+    const id = t.concept_id, cls = [d.d === "refuse" ? "disagree" : "", d.d === "change" ? "changed" : ""].join(" "), n = compact ? 4 : 7;
     const shown = (f, v) => { const mine = d.d === "change" && d[f] != null && d[f] !== v ? d[f] : null; return esc(w(v)) + (mine ? ` → <span class="you">${esc(w(mine))}</span>` : ""); };
     const sel = (f, opts) => `<select data-k="tag-${f}" data-id="${esc(id)}">${[...new Set([t[f], ...opts])].filter(x => x != null && x !== "").map(o => opt(o, w(o), (d[f] != null ? d[f] : t[f]) === o)).join("")}</select>`;
     // Disagree: correct a value, or remove the tag (with the reason), and a note
     const dis = d.d === "change" || d.d === "refuse", bothSA = t.role_adaptation === "stand-alone" && t.role_mitigation === "stand-alone";
     const rm = `<label><input type="checkbox" data-k="tag-remove" data-id="${esc(id)}" ${d.d === "refuse" ? "checked" : ""}> Remove this tag</label>`;
-    const sub = !dis ? "" : `<tr class="sub"><td colspan="7"><div class="subf">${rm}
-        ${d.d === "refuse" ? `<label>Reason (optional) <select data-k="tag-reason" data-id="${esc(id)}"><option value="">choose…</option>${[...REFUSE, ...REFUSE_OLD.filter(x => x[0] === d.reason)].map(([v, l]) => opt(v, l, d.reason === v)).join("")}</select></label>`
+    const sub = !dis ? "" : `<tr class="sub"><td colspan="${n}"><div class="subf">${rm}
+        ${d.d === "refuse" ? `<label>Why (optional) <select data-k="tag-reason" data-id="${esc(id)}"><option value="">choose…</option>${[...REFUSE, ...REFUSE_OLD.filter(x => x[0] === d.reason)].map(([v, l]) => opt(v, l, d.reason === v)).join("")}</select></label>`
           : `<label>Adaptation ${sel("adaptation", AREA_OPTS(t.role_adaptation, bothSA))}</label><label>Mitigation ${sel("mitigation", AREA_OPTS(t.role_mitigation, bothSA))}</label>
              <label>Pathway role ${sel("pathway_role", ROLE_OPTS)}</label><label>Intended or realized ${sel("status", STATUS_OPTS)}</label>`}
-        <input data-k="tag-note" data-id="${esc(id)}" placeholder="note (optional)" value="${esc(d.note || "")}"></div></td></tr>`;
-    return `<tr id="t-${esc(id)}" class="${cls}"><td><a href="#" class="jump" data-id="${esc(id)}">${esc(t.concept_name)}</a><div class="mono muted">${esc(id)} · ${esc(t.facet)}</div></td>
+        <input data-k="tag-note" data-id="${esc(id)}" placeholder="What is wrong? (optional)" value="${esc(d.note || "")}"></div></td></tr>`;
+    const def = (S.terms[id] || {}).definition || "";
+    const name = `<td><a href="#" class="jump" data-id="${esc(id)}"${def ? ` title="${esc("Taxonomy definition: " + def)}"` : ""}>${esc(t.concept_name)}</a><div class="mono muted">${esc(id)} · ${esc(t.facet)}</div></td>`;
+    const act = `<td class="nowrap"><span class="segs sm">${segD("d-" + id, "agree", "Agree", !dis, "ok")}${segD("d-" + id, "disagree", "Disagree", dis, "ko")}</span></td>`;
+    if (compact) return `<tr id="t-${esc(id)}" class="${cls}">${name}<td class="small">${foundAs(t)}</td>
+      <td class="small">${esc(whyPhrase(S.rev, t))}${tagChanged(t, d) ? `<div class="you">${esc(youText(t, d).replace(/^y/, "Y"))}</div>` : ""}</td>${act}</tr>${sub}`;
+    return `<tr id="t-${esc(id)}" class="${cls}">${name}
       <td class="small">${foundAs(t)}</td><td class="small">${areaCell(t, "adaptation", d)}</td><td class="small">${areaCell(t, "mitigation", d)}</td>
       <td class="small">${shown("pathway_role", t.pathway_role)}</td>
       <td class="small">${t.status === "not_applicable" && !(d.d === "change" && d.status && d.status !== t.status) ? `<span class="muted">not applicable</span>` : shown("status", t.status)}${t.status_quote ? `<div class="q" title="${esc(t.status_quote)}">“${esc(cut(t.status_quote, 80))}”</div>` : ""}</td>
-      <td class="nowrap"><span class="segs sm">${segD("d-" + id, "agree", "Agree", !dis, "ok")}${segD("d-" + id, "disagree", "Disagree", dis, "ko")}</span></td></tr>${extra}${sub}`;
+      ${act}</tr>${extra}${sub}`;
   }
-  // why a tag does not count, in plain words, from its values (the reviewer's when changed)
-  // one short sentence (decision of 19 Nov 2026): first what the taxonomy rules out, then what the text does not link to climate
-  const whyNot = (t, ax, v) => v === "unclear" ? { k: 0, s: `stand-alone for both areas, and the text does not show which area it concerns` }
-    : v === "no_anchor" ? { k: 2, s: `for ${ax}, the text gives no climate anchor` }
-    : v === "not_relevant" ? (!t["role_" + ax] || t["role_" + ax] === "n/a" ? { k: 1, s: `not a ${ax} term` } : { k: 1, s: `not used for ${ax} here` })
-    : { k: 3, s: `${ax}: ${w(v)}` };
-  const whyPhrase = (R, t) => [...new Set(AREAS.map(ax => whyNot(t, ax, val(R, t, ax))).sort((a, b) => a.k - b.k).map(x => x.s))].join("; ");
-  // two groups: tags that count (an area is stand-alone or anchored) and tags that do not; a tag moves when a value changes
+  // why a tag does not count, in short sentences, from its values (the reviewer's when changed)
+  const whyNot = (t, ax, v) => v === "unclear" ? { k: 0, s: "The text does not say if it is about adaptation or mitigation." }
+    : v === "no_anchor" ? { k: 1, s: `No climate anchor for ${ax}.` }
+    : v === "not_relevant" ? (!t["role_" + ax] || t["role_" + ax] === "n/a" ? { k: 3, s: `Not a ${ax} term.` } : { k: 2, s: `Not about ${ax} in this text.` })
+    : { k: 4, s: `${AX[ax]}: ${w(v)}.` };
+  const whyPhrase = (R, t) => [...new Set(AREAS.map(ax => whyNot(t, ax, val(R, t, ax))).sort((a, b) => a.k - b.k).map(x => x.s))].join(" ");
+  // two tables: the terms that count (an area is stand-alone or anchored), and the terms that do not count, which are the
+  // tags with no climate anchor and the words found by the term search and not tagged (same end, another reason)
   function renderTags() {
-    const res = S.cur, R = S.rev, all = res.tags || [];
+    const res = S.cur, R = S.rev, all = res.tags || [], left = res.dropped || [];
     const counting = t => counts(val(R, t, "adaptation")) || counts(val(R, t, "mitigation"));
     const yes = all.filter(counting), no = all.filter(t => !counting(t));
+    const none = n => `<tr><td colspan="${n}"><strong>None.</strong></td></tr>`;
     const head = `<thead><tr><th>Term</th><th>Found as</th><th>Adaptation</th><th>Mitigation</th><th>Pathway role</th><th>Intended or realized</th><th></th></tr></thead>`;
-    // the reason once above the group when every tag shares it; otherwise one short line under each tag
-    const phrases = no.map(t => whyPhrase(R, t)), same = no.length > 1 && phrases.every(p => p === phrases[0]);
-    const why = t => same ? "" : `<tr class="why"><td colspan="7">Not counted: ${esc(whyPhrase(R, t))}.</td></tr>`;
-    const groupWhy = same ? `<div class="hint small pad">Not counted, for all of them: ${esc(phrases[0])}.</div>` : "";
-    $("#v6-tags").innerHTML = `<h3 class="pad">Tags <span class="muted">${all.length}</span></h3>
-      <div class="hint small pad">A tag counts only when an area says stand-alone or anchored ${help("anchors")}. No anchor, not relevant or unclear: the term is tagged but does not count as climate-related information for an area. ${help("tags")}</div>
-      <h4 class="pad grp">Tags that count as climate-related information <span class="muted">${yes.length}</span></h4>
-      <div class="hint small pad">Stand-alone terms (Rule 2), and context-dependent terms with a climate anchor in the text (Rule 3).</div>
-      <table class="tags v6t">${head}<tbody>${yes.map(t => tagRow(t, dec(R, t))).join("") || `<tr><td colspan="7" class="muted">None.</td></tr>`}</tbody></table>
-      <h4 class="pad grp">Tags that do not count <span class="muted">${no.length}</span></h4>
-      <div class="hint small pad">These terms are in the text with their taxonomy meaning (maize is maize), so they are tags. A context-dependent term with no climate anchor is kept as a general tag and is not counted as climate-related information (Rule 3). A term that is stand-alone for both areas, in a text that does not show which area it concerns, has the area unclear (Rule 2).</div>${groupWhy}
-      <table class="tags v6t nocount">${head}<tbody>${no.map(t => tagRow(t, dec(R, t), why(t))).join("") || `<tr><td colspan="7" class="muted">None.</td></tr>`}</tbody></table>
-      <div class="hint small pad">Agree, or Disagree to correct a value, remove the tag (with the reason) or write a note.</div>`;
+    const ctx = x => { if (!x.context) return `<span class="muted">not found in the text</span>`;
+      const c = x.context, f = x.found_as || "", i = f ? c.toLowerCase().indexOf(f.toLowerCase()) : -1;
+      return i < 0 ? esc(c) : esc(c.slice(0, i)) + `<b class="hl-g">${esc(c.slice(i, i + f.length))}</b>` + esc(c.slice(i + f.length)); };
+    const leftRow = x => { const kept = R.added_terms.includes(x.concept_id), T = S.terms[x.concept_id] || {}, b = x.better;
+      return `<tr class="left"><td><strong${T.definition ? ` title="${esc("Taxonomy definition: " + T.definition)}"` : ""}>${esc(x.concept_name)}</strong><div class="mono muted">${esc(x.concept_id)}${T.facet ? " · " + esc(T.facet) : ""}</div></td>
+        <td class="small">${ctx(x)}</td>
+        <td class="small">Not tagged. ${(x.reasons || []).map(whyNotTagged).join(" ")}
+          ${b ? `<div class="better">A closer term for “${esc(b.phrase)}”: <strong>${esc(b.term)}</strong>
+            ${R.added_terms.includes(b.id) ? ` <span class="c-yes">added by you</span>` : ` <button class="add" data-keep="${esc(b.id)}">+ add ${esc(b.term)}</button>`}</div>` : ""}</td>
+        <td class="nowrap">${kept ? `<span class="small c-yes">kept by you</span>` : `<button class="add" data-keep="${esc(x.concept_id)}">+ keep</button>`}</td></tr>`; };
+    $("#v6-tags").innerHTML = `<h3 class="pad">Terms found in the text <span class="muted">${all.length + left.length}</span></h3>
+      <h4 class="pad grp">Terms that count <span class="muted">${yes.length}</span></h4>
+      <div class="hint small pad">These terms say that the text holds climate-related information. A term counts when it is a ${tip("stand-alone", "stand-alone")} term, or when it is ${tip("anchored", "anchored")}.</div>
+      <table class="tags v6t">${head}<tbody>${yes.map(t => tagRow(t, dec(R, t))).join("") || none(7)}</tbody></table>
+      <h4 class="pad grp">Terms that do not count <span class="muted">${no.length + left.length}</span></h4>
+      <div class="hint small pad">These terms are in the text, but they do not say that it is about climate. Most often the text gives no ${tip("climate anchor", "climate-anchor")} for them. The reason is on each line. Point at a term to read its definition. If a term should count, choose Disagree, or + keep for a word that was not tagged.</div>
+      <table class="tags v6t nocount"><thead><tr><th>Term</th><th>Found as</th><th>Why it does not count</th><th></th></tr></thead>
+        <tbody>${no.map(t => tagRow(t, dec(R, t), "", true)).join("")}${left.map(leftRow).join("")}${no.length + left.length ? "" : none(4)}</tbody></table>`;
   }
 
   // why a word found by the term search is not a tag, as a full sentence (reason codes of prms_drops.jsonl)
   function whyNotTagged(z) {
-    const d = String(z.detail || ""), q = d ? `“${esc(cut(d, 120))}”` : "";
+    const d = String(z.detail || "");
     const given = z.why ? ` <span class="muted">Reason given: “${esc(cut(z.why, 220))}”</span>` : "";
-    if (z.narrower) return `A narrower term on the same words is tagged: <b>${esc(z.narrower)}</b>. Only the narrower term is kept, so this broader term is left out (it is not a different meaning).`;
-    return whyText(z, d, q) + given;
+    if (z.narrower) return `A more precise term is already tagged on the same words: <strong>${esc(z.narrower)}</strong>.`;
+    return whyText(z, d) + given;
   }
-  function whyText(z, d, q) {
+  function whyText(z, d) {
     switch (z.reason) {
-      case "not_kept:other": return z.why ? "Left out for the reason below." : "Left out with no reason given (the tagging only answered \"other\"). Compare the text with the definition: if the term applies, click + keep.";
-      case "not_kept:narrower_term_tagged": return "A narrower term on the same words is tagged. Only the narrower term is kept.";
-      case "not_kept:different_meaning": return "The words mean something else in this text than the definition, or they are part of a longer expression that means something else.";
-      case "not_kept:part_of_a_name": return "The words are part of a name. Since 26 November 2026 a term inside a name counts like any other match: if this term applies, click + keep.";
-      case "not_kept:too_generic": return "The word is too general to say anything about this work.";
-      case "no_ai_call": return "Not compared with its definition: the text was not sent to the AI. A context-dependent term with no climate anchor does not count (Rule 3).";
-      case "broader_term_of_a_kept_tag": return `A narrower term on the same words is already tagged${d ? `: ${esc(d)}` : ""}. Only the narrower term is kept.`;
-      case "excerpt_not_in_text": return `The words given for this term, ${q}, are not in the text word for word, so the tag was refused.`;
-      case "area_not_addressed_by_the_text": return `The term belongs to ${esc(d || "an area")} in the taxonomy, and the text does not talk about that area.`;
+      case "not_kept:other": return z.why ? "" : "No reason was given. Look at the definition: if the term fits, click + keep.";
+      case "not_kept:narrower_term_tagged": return "A more precise term is already tagged on the same words.";
+      case "not_kept:different_meaning": return "The words mean something else here.";
+      case "not_kept:part_of_a_name": return "The words are part of a name. If the term still fits, click + keep.";
+      case "not_kept:too_generic": return "The word is too general here.";
+      case "no_ai_call": return "It was not checked against its definition.";
+      case "broader_term_of_a_kept_tag": return `A more precise term is already tagged on the same words${d ? `: ${esc(d)}` : ""}.`;
+      case "excerpt_not_in_text": return "The words given for this term are not in the text.";
+      case "area_not_addressed_by_the_text": return `The text does not talk about ${esc(d || "this area")}.`;
       default: return esc(dropWord(z.reason)) + (d ? `: ${esc(cut(d, 140))}` : "");
     }
   }
-  function renderDropped() {
-    const res = S.cur, R = S.rev, l = res.dropped || [];
-    const ctx = x => { if (!x.context) return `<span class="muted">not found in the text as a taxonomy term</span>`;
-      const c = x.context, w = x.found_as || "", i = w ? c.toLowerCase().indexOf(w.toLowerCase()) : -1;
-      return i < 0 ? esc(c) : esc(c.slice(0, i)) + `<b class="hl-g">${esc(c.slice(i, i + w.length))}</b>` + esc(c.slice(i + w.length)); };
-    $("#v6-dropped").innerHTML = `<h3>Words found in the text but not tagged <span class="muted">${l.length}</span> ${help("terms-not-kept")}</h3>
-      ${l.length && l.every(x => (x.reasons || []).every(z => z.reason === "no_ai_call"))
-        ? `<p class="hint small">A search marks every word of the text that matches a taxonomy term or synonym, by its words only. This text has no stand-alone term and no climate wording that could be a climate anchor, so it was not sent to the AI: the words below were <b>not compared with the taxonomy definition</b>, and some may mean something else here or be part of a name. They are context-dependent terms with no climate anchor, so they are <b>not tags</b> and play no part in the answers (Rule 3). The taxonomy definition is shown so that you can compare. If one should be a tag, click + keep.</p>`
-        : `<p class="hint small">A search marks every word of the text that matches a taxonomy term or synonym, by its words only. Each word was then compared with the taxonomy definition and left out: it is not that concept here (random forest is an algorithm, not a forest), or a narrower term on the same words is already tagged. These words are <b>not tags</b> and play no part in the answers. The taxonomy definition is shown so that you can compare. If one should be a tag, click + keep; when a closer term exists for the same words, it is proposed with + add.</p>`}` + (l.length
-      ? `<table class="tags drops"><thead><tr><th>Term</th><th>Where in the text</th><th>Why it is not a tag</th><th></th></tr></thead><tbody>${l.map(x => { const kept = R.added_terms.includes(x.concept_id), def = (S.terms[x.concept_id] || {}).definition || "", b = x.better;
-          return `<tr><td><b>${esc(x.concept_name)}</b><div class="mono muted">${esc(x.concept_id)}${(S.terms[x.concept_id] || {}).facet ? " · " + esc(S.terms[x.concept_id].facet) : ""}</div></td>
-            <td class="small">${ctx(x)}</td>
-            <td class="small">${(x.reasons || []).map(whyNotTagged).join("<br>")}
-              ${def ? `<div class="muted">Taxonomy definition of ${esc(x.concept_name)}: “${esc(cut(def, 260))}”</div>` : ""}
-              ${b ? `<div class="better">A closer term for “${esc(b.phrase)}”: <b>${esc(b.term)}</b>${(S.terms[b.id] || {}).definition ? ` <span class="muted">(“${esc(cut(S.terms[b.id].definition, 160))}”)</span>` : ""}
-                ${R.added_terms.includes(b.id) ? ` <span class="c-yes">added by you</span>` : ` <button class="add" data-keep="${esc(b.id)}">+ add ${esc(b.term)}</button>`}</div>` : ""}</td>
-            <td class="nowrap">${kept ? `<span class="small c-yes">kept by you</span>` : `<button class="add" data-keep="${esc(x.concept_id)}">+ keep</button>`}</td></tr>`; }).join("")}</tbody></table>
-         <div class="hint small">A word you keep appears under Add a term; tick there the area for which it counts.</div>`
-      : `<p class="muted small">None.</p>`);
-  }
+  // the words found and not tagged are in the table "Terms that do not count" (27 Nov 2026): this draws the tables again
+  function renderDropped() { renderTags(); }
 
   // a proposal found in the text, in one line: what would be added or changed in the taxonomy
   function findingLine(f) {
@@ -565,12 +588,12 @@ const V7 = (() => {
   }
   function renderFindings() {
     const res = S.cur, R = S.rev, l = res.findings || [];
-    $("#v6-found").innerHTML = l.length ? `<div class="small muted">Found in the text: accept or reject each one (point at a line to see the passage)</div>` + l.map((f, i) => {
+    $("#v6-found").innerHTML = l.length ? `<div class="small muted">Found in the text. Point at a line to see the passage.</div>` + l.map((f, i) => {
       const d = R.findings[fkey(f)] || "", tip = [f.excerpt ? `“${f.excerpt}”` : "", f.reason || ""].filter(Boolean).join(". ");
       const syn = f.closest ? "synonym:" + f.closest.id : "";
       return `<div class="finding small" title="${esc(tip)}"><span>${findingLine(f)}</span>
         <span class="segs sm">${segD("f-" + i, "accept", f.closest ? "Accept as new term" : "Accept", d === "accept", "ok")}${syn ? segD("f-" + i, syn, "Synonym of " + esc(f.closest.term), d === syn, "ok") : ""}${segD("f-" + i, "reject", "Reject", d === "reject", "ko")}</span></div>`; }).join("")
-      : `<div class="small muted">Found in the text: none.</div>`;
+      : `<div class="small"><strong>None found in the text.</strong></div>`;
   }
 
   function addedHtml() {
@@ -607,7 +630,8 @@ const V7 = (() => {
     const R = S.rev, res = S.cur, side = $(".side.v6");
     side.addEventListener("change", e => {
       const el = e.target, n = el.name || "", k = el.dataset.k || "";
-      if (n.startsWith("q-")) { const key = n.slice(2), q = qref(R, key); q.d = el.value; if (el.value === "agree") q.value = "";
+      if (n.startsWith("pp-")) { const q = R.path.parts[n.slice(3)]; q.d = el.value; if (el.value === "agree") q.note = ""; syncPath(R.path); renderPath(); refreshAll(); }
+      else if (n.startsWith("q-")) { const key = n.slice(2), q = qref(R, key); q.d = el.value; if (el.value === "agree") q.value = "";
         if (key === "path") renderPath(); refreshAll(); }
       else if (el.dataset.q && el.dataset.f === "value") { qref(R, el.dataset.q).value = el.value; refreshAll(); }
       else if (n.startsWith("d-")) { const id = n.slice(2), old = R.tags[id] || {};
@@ -621,7 +645,8 @@ const V7 = (() => {
     });
     side.addEventListener("input", e => {
       const el = e.target, k = el.dataset.k || "";
-      if (el.dataset.q && el.dataset.f === "note") { qref(R, el.dataset.q).note = el.value; renderGives(); }
+      if (el.dataset.pp) { R.path.parts[el.dataset.pp].note = el.value; renderGives(); }
+      else if (el.dataset.q && el.dataset.f === "note") { qref(R, el.dataset.q).note = el.value; renderGives(); }
       else if (k === "tag-note") { R.tags[el.dataset.id].note = el.value; renderGives(); }
     });
     side.addEventListener("click", e => {
@@ -705,7 +730,7 @@ const V7 = (() => {
   const purposeText = (res, a, ax) => { const r = a.areas[ax], ext = extPurpose(res, ax);
     return qText(r.pu, ext, r.pu.value || (ext === "shown" ? "not shown" : "shown")); };
   const ruleText = (res, a, ax) => { const r = a.areas[ax]; return qText(r.vd, extRule(res, ax) || "not assessed", r.vd.value); };
-  const pathText = a => qText(a.path, "", "");
+  const pathText = a => { const dis = pathDisputes(a); return dis.length ? "disagree: " + dis.map(([l, q]) => l.toLowerCase() + (q.note ? ` (${q.note})` : "")).join("; ") : "agree"; };
   // a reviewer's answer on a proposal found in the text: accept, reject, "synonym of <term>" or no answer
   const fdecText = (a, z) => { const v = String((a.findings || {})[fkey(z)] || "");
     return v === "accept" || v === "reject" ? v : v.startsWith("synonym:") ? "synonym of " + ((S.terms[v.slice(8)] || {}).term || (z.closest || {}).term || v.slice(8)) : "no answer"; };
@@ -734,9 +759,9 @@ const V7 = (() => {
     $("#main").innerHTML = navBar(res) + `<div class="notice ${ag ? "good" : ""}">${ag ? "The two reviewers agree on the verdicts and on the comparison with the assigned marker." : "The two reviewers differ on a verdict or on the comparison with the assigned marker. Differences are marked in red."}</div>
     <div class="cols">${textBlock(res, addedAll)}<div class="side"><section class="card flush">
       <table class="cmp"><thead><tr><th></th><th>Extracted</th><th>${esc(v[0].reviewer)}</th><th>${esc(v[1].reviewer)}</th></tr></thead><tbody>
-      ${AREAS.map(ax => row(AX[ax] + " verdict" + (ax === "adaptation" ? " " + help("verdict") : ""), verdictCell(ai[ax], extRule(res, ax)), C.map(c => verdictCell(c[ax], c.V[ax].rule)), C.map(c => c[ax]))).join("")}
-      ${row("Comparison with the assigned marker " + help("comparison"), cmpCell(ai.result), C.map(c => cmpCell(c.result)), C.map(c => c.result))}
-      ${row("Outcome of the review " + help("outcome"), "", C.map(c => esc(c.review || "incomplete")))}
+      ${AREAS.map(ax => row(AX[ax] + " " + (ax === "adaptation" ? tip("verdict", "verdict") : "verdict"), verdictCell(ai[ax], extRule(res, ax)), C.map(c => verdictCell(c[ax], c.V[ax].rule)), C.map(c => c[ax]))).join("")}
+      ${row(tip("Comparison with the assigned marker", "comparison"), cmpCell(ai.result), C.map(c => cmpCell(c.result)), C.map(c => c.result))}
+      ${row(tip("What the review says", "outcome"), "", C.map(c => esc(c.review || "incomplete")))}
       ${AREAS.map(ax => sec(AX[ax]) + row("Purpose (Rule 7)", esc(aiPurpose(res, ax)), A.map(a => esc(purposeText(res, a, ax))))
         + row("Rule that decides (Rule 8)", esc(aiRule(res, ax)), A.map(a => esc(ruleText(res, a, ax))))).join("")}
       ${sec("Tags")}
@@ -750,7 +775,7 @@ const V7 = (() => {
       ${row("Proposals", "", A.map(a => (a.proposals || []).map(p => esc(proposalText(p))).join("<br>") || "none"))}
       ${row("Comment", "", A.map(a => esc(a.comment || "none")))}
       </tbody></table></section></div></div>`;
-    const mk = $(".nav .meta span"); if (mk) mk.insertAdjacentHTML("beforeend", " " + help("marker"));
+    const mk = $(".nav .meta span"); if (mk) mk.insertAdjacentHTML("beforeend", " " + tip("what is this?", "marker"));
     wireMarks();
   }
 

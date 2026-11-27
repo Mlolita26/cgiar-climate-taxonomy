@@ -191,6 +191,7 @@ lives in `worker/.wrangler/` (ignored by git; delete it after the test, with `.d
 - `docs/review/rules7.html` holds, in this order: how to review a text, the definitions, the twelve rules with the numbers
   and titles of the standard, and the guide to the page. The header shows "Definitions" and "Rules" for a v7 batch.
 - `build_data.py` reads the form from the records (`comparison_result` in a record means v7) or takes `--form v7`.
+- `scripts/v7_plain.py` (27 Nov 2026) is applied by `make_v7.py` as its last step: the plain form. Short sentences; no `?` buttons, a word of the standard is pink and underlined and its explanation opens when you point at it; no introduction card; one table "Terms that do not count" for the tags that do not count and the words found and not tagged; the answer to question 1 in a pink box; Agree / Disagree for each part of the climate pathway (saved as `path.parts`); the verdict in words instead of the rule code. `v7.js` is still generated: change `v7_plain.py` or `make_v7.py`, never `v7.js`.
 - The forms v6 and v7 share the review store (`reviews_v6`, keyed by text, batch and reviewer), so the worker is unchanged.
 - Published on 26 Nov 2026: the batch `pilot-2025-v7` (the 200 pilot results under the rules of 25 November 2026; tagging
   of the evening run, purpose and verdict from the second set of readings of that night). It is listed before the earlier

@@ -309,3 +309,16 @@ table.drops td { font-size: 12.5px; }
 .lvrow .small { display: inline-block; min-width: 68px; }
 table.list td .oc { white-space: nowrap; }
 .lv-cannot { background: var(--amber-lt); color: #7A5A00; }
+/* plain form (27 Nov 2026): a word of the standard to point at, pink and underlined, in place of the "?" */
+details.hlp.term { margin-left: 0; font-weight: inherit; }
+details.hlp.term > summary { display: inline; width: auto; height: auto; padding: 0 1px; border: 0; border-radius: 3px; background: none; color: #B4236A;
+  font-size: inherit; font-weight: inherit; line-height: inherit; vertical-align: baseline; text-decoration: underline; text-underline-offset: 2px; cursor: help; user-select: text; }
+details.hlp.term > summary:hover, details.hlp.term[open] > summary { background: #FCE4EF; border: 0; color: #8E1B55; }
+h3 details.hlp.term > summary { text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
+details.hlp.term .hlp-b { font-weight: 400; color: var(--ink); }
+/* the answer to question 1 */
+.card.answer { background: rgba(214, 51, 132, .08); border-color: rgba(214, 51, 132, .35); }
+.card.flags { margin-top: 0; padding: 8px 14px; }
+table.lvl .vwhy { display: block; margin-top: 2px; }
+table.pway td.nowrap { width: 1%; }
+table.v6t.nocount tr.left td:first-child strong { color: var(--muted); font-weight: 600; cursor: help; }
