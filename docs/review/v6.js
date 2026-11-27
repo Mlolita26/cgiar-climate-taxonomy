@@ -367,7 +367,6 @@ const V6 = (() => {
         <div class="flags small" id="v6-flags"><b>Flags</b> ${help("flags")} ${(res.review_flags || []).length ? res.review_flags.map(f => `<span class="flag">${esc(f)}</span>`).join("") : `<span class="muted">none</span>`}</div></section>
       ${qHead(1, "What climate-related information does the text contain?", "Section 3, Rules 1 to 3: the taxonomy terms in the text, and whether they concern adaptation, mitigation, both or neither")}
       <section class="card flush" id="v6-tags"></section>
-      <section class="card" id="v6-info"></section>
       <section class="card" id="v6-dropped"></section>
       <section class="card" id="v6-add"><h3>Add a term</h3>
         <div class="small muted">For a taxonomy term that is in the text and was not tagged. Search the taxonomy, click + add, then tick the area for which the term counts.</div>
@@ -376,6 +375,7 @@ const V6 = (() => {
         <div id="added" class="chips"></div>
         <a href="#" id="brw" class="small">Browse the taxonomy</a>
         <div id="tree" class="tree" hidden></div></section>
+      <section class="card" id="v6-info"></section>
       ${qHead(2, "What climate pathway does the text describe?", "Section 4, Rules 4 to 6: climate rationale, geography, system or population, intervention and result, and the links between them")}
       <section class="card" id="v6-path"></section>
       ${qHead(3, "Is the information consistent with the PRMS climate marker?", `Section 5, Rules 7 to 9: the climate objective, measure and purpose described, compared with the PRMS marker <b>${esc(res.marker || "not provided")}</b>. The answer is in the yellow box at the end.`)}

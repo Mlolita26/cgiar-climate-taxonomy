@@ -260,7 +260,6 @@ between('''      <section class="card intro" id="v6-intro">''', '''    const mk 
         <div class="flags small" id="v6-flags"><b>Flags</b> ${help("flags")} ${(res.review_flags || []).length ? res.review_flags.map(f => `<span class="flag">${esc(f)}</span>`).join("") : `<span class="muted">none</span>`}</div></section>
       ${qHead(1, "What climate-related information does the text contain?", "Rules 1 to 3: the taxonomy terms in the text, and whether they concern adaptation, mitigation, both or neither. The table also gives the pathway role of each term (Rule 4) and, for an intervention or a result, whether it is intended or realized (Rule 6).")}
       <section class="card flush" id="v6-tags"></section>
-      <section class="card" id="v6-info"></section>
       <section class="card" id="v6-dropped"></section>
       <section class="card" id="v6-add"><h3>Add a term ${help("add-term")}</h3>
         <div class="small muted">For a taxonomy term that is in the text and was not tagged. Search the taxonomy, click + add, then tick the area for which the term counts.</div>
@@ -269,6 +268,7 @@ between('''      <section class="card intro" id="v6-intro">''', '''    const mk 
         <div id="added" class="chips"></div>
         <a href="#" id="brw" class="small">Browse the taxonomy</a>
         <div id="tree" class="tree" hidden></div></section>
+      <section class="card" id="v6-info"></section>
       ${qHead(2, "What climate pathway does the text describe?", "Rules 4 and 5: climate rationale, geography, system or population, intervention and result, and the relationships between them")}
       <section class="card" id="v6-path"></section>
       ${qHead(3, "Is the information consistent with the assigned climate marker?", `Rules 7 to 9, for adaptation and for mitigation: whether the text shows a purpose (Rule 7), the verdict and the rule that decides (Rule 8), then the comparison of the verdict with the assigned marker <b>${esc(res.marker || (res.part ? "none: a plan carries no marker" : "not provided"))}</b> (Rule 9). The comparison is in the yellow box at the end.`)}
